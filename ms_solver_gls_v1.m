@@ -40,7 +40,7 @@ function [outputArray, outputMakespan] = ms_solver_gls_v1(inputArray)
     else
             
     % Otherwise, we need an initialise function for an initial solution
-    initialisedArray = initialise_simple(inputArray);
+    initialisedArray = initialise_simple(inputArray, number_of_machines);
     
     makespan = evaluate_makespan(initialisedArray);
    
