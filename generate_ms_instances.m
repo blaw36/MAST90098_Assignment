@@ -14,7 +14,7 @@
 % of our randomly generated p_i's?
 
 function inputArray=generate_ms_instances(n,m)
-
+    
     if (n < 2)     % n >= 2
         error('n must be greater than or equal to 2')
     end
