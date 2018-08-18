@@ -11,18 +11,11 @@
 % Output:
 % outputArray:
     % rows - a job allocated to a position in a machine
-    % columns - job_cost, machine_no, unique job_id
+    % columns - job_cost, machine_no, mach_job_id
 % outputMakespan:
     % max, across all machines, of sum of jobs for a given machine
-% num_exchanges:
-    % number of (k-)exchanges performed
-% time_taken:
-    % in seconds, for execution (not CPU time)
 
-function [outputArray, outputMakespan, num_exchanges, time_taken] = ms_solver_gls_v1(inputArray)
-
-    % Start time
-    startTime = tic;
+function [outputArray, outputMakespan] = ms_solver_gls_v1(inputArray)
 
     length_of_input = length(inputArray);
     number_of_jobs = length_of_input - 1;
@@ -33,7 +26,8 @@ function [outputArray, outputMakespan, num_exchanges, time_taken] = ms_solver_gl
     
     fprintf("input_length: %d \n", length_of_input);
     fprintf("num_jobs: %d \n", number_of_jobs);
-    fprintf("number_of_machines: %d \n", number_of_machines);
+    fprintf("num_machines: %d \n", number_of_machines);
+    fprintf("jobs: %s \n", strjoin(cellstr(num2str(jobs_to_sort))));
     
     % If we happen to get less jobs than machines, makespan
     % is just time of most expensive job
@@ -47,22 +41,18 @@ function [outputArray, outputMakespan, num_exchanges, time_taken] = ms_solver_gl
             
     % Otherwise, we need an initialise function for an initial solution
     outputArray = initialise_simple(inputArray, number_of_machines);
-    % Assign unique job_id to each job
-    outputArray = [outputArray (1:length(outputArray))'];
     [cost, outputMakespan] = evaluate_makespan(outputArray, number_of_machines);
     update = true;
-    
-    num_exchanges = 0;
     
     while update == true
     
         % A function to encode all the neighbours to a soln (a function of k,
         % the exchange, and perhaps some parameter to describe the 
         % exchange operation)
-
-        % Structure of 'possible_neighbours':
-        % Job ID | Machine_from | Machine_to | n/bour_combo_id
         
+        % Assign unique ID to each job
+        outputArray = [outputArray (1:length(outputArray))'];
+
         %%%%% Must be equal to k exchanges
         possible_neighbours = generate_exchange_combinations(outputArray,...
             1, number_of_machines);
@@ -71,25 +61,22 @@ function [outputArray, outputMakespan, num_exchanges, time_taken] = ms_solver_gl
         % (recursion?)
 
         % Evaluate the n/bours generated above, pick the best, and change
-        nbour_results = evaluate_neighbours(outputArray, possible_neighbours, 1, number_of_machines);
-        [new_makespan, best_nbour] = min(nbour_results(:,2));
+        nbour_results = evaluate_neighbours(outputArray, possible_neighbours, 1, num_machines);
+        [new_makespan, best_neigh = min(nbour_results(:,2));
 
         % Evaluate termination flag, only if new is better
         if outputMakespan <= new_makespan
             update = false;
         else
-            outputArray(possible_neighbours(best_nbour,1),2) = possible_neighbours(best_nbour,3);
+            outputArray(possible_neighbours(i,1),2) = possible_neighbours(i,3);
              
             % Update old_makespan
             outputMakespan = new_makespan;
-            num_exchanges = num_exchanges + 1;
         end
         
     end
+    
+    outputArray = job_alloc;
 
     end
-    
-    % Finish
-    time_taken = toc(startTime);
-    
 end
