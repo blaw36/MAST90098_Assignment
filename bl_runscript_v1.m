@@ -7,19 +7,20 @@
 clear;
 clc;
 
-n = 100; % # jobs
-m = 30; % # machines
-k = 1; % # of exchanges (k-exch)
-% Initialisation algorithm:
-% 'simple' = Costliest job allocated to machine with most 'capacity'
-% relative to most utilised machine at the time
-% 'random' = Random allocation (random number generated for machine)
-% 'naive' = All jobs placed into machine 1
-init_method = "simple";
-
+n = 1000; % # jobs
+m = 5; % # machines
 a = generate_ms_instances(n, m);
+
+% Initialisation algorithm:
+    % 'simple' = Costliest job allocated to machine with most 'capacity'
+        % relative to most utilised machine at the time
+    % 'random' = Random allocation (random number generated for machine)
+    % 'naive' = All jobs placed into machine 1
+init_method = "naive";
+k = 1; % # of exchanges (k-exch)
+
 [outputArray, outputMakespan, num_exchanges, ...
-    time_taken] = ms_solver_gls_v1(a, k, init_method);
+    time_taken, nbour_taken] = ms_solver_gls_v1(a, k, init_method);
 
 % Sort the output for presentation
 [sorted_col, sorting_idx] = sort(outputArray(:,2));
@@ -28,7 +29,9 @@ sorted_output = outputArray(sorting_idx,:);
 cost_pm = [(1:m)' accumarray(outputArray(:,2),outputArray(:,1))];
 % Bar plot
 bar_plot = draw_bar_plot(sorted_output, m);
-
+title(['Makespan: ' num2str(outputMakespan)])
+xlabel('Machine #') % x-axis label
+ylabel('Job cost') % y-axis label
 
 % % Stress testing
 % results = [];

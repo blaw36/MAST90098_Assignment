@@ -7,28 +7,28 @@
 % ie. the total time of longest running machine
 
 % Input:
-% inputArray: n+1 length vector of job costs, and n+1th element is # of
-% machines
-% k_exch: k-value for # of exchanges
-% init_algo: initialisation algorithm:
-% 'simple' = Costliest job allocated to machine with most 'capacity'
-% relative to most utilised machine at the time
-% 'random' = Random allocation (random number generated for machine)
-% 'naive' = All jobs placed into machine 1
+    % inputArray: n+1 length vector of job costs, and n+1th element is # of
+        % machines
+    % k_exch: k-value for # of exchanges
+    % init_algo: initialisation algorithm:
+        % 'simple' = Costliest job allocated to machine with most 'capacity'
+        % relative to most utilised machine at the time
+        % 'random' = Random allocation (random number generated for machine)
+        % 'naive' = All jobs placed into machine 1
 
 % Output:
-% outputArray:
-% rows - a job allocated to a position in a machine
-% columns - job_cost, machine_no, unique job_id
-% outputMakespan:
-% max, across all machines, of sum of jobs for a given machine
-% num_exchanges:
-% number of (k-)exchanges performed
-% time_taken:
-% in seconds, for execution (not CPU time)
+    % outputArray:
+        % rows - a job allocated to a position in a machine
+        % columns - job_cost, machine_no, unique job_id
+    % outputMakespan:
+        % max, across all machines, of sum of jobs for a given machine
+    % num_exchanges:
+        % number of (k-)exchanges performed
+    % time_taken:
+        % in seconds, for execution (not CPU time)
 
 function [outputArray, outputMakespan, num_exchanges,...
-    time_taken] = ms_solver_gls_v1(inputArray, k_exch, init_algo)
+    time_taken, nbour_time] = ms_solver_gls_v1(inputArray, k_exch, init_algo)
 
 % Start time
 startTime = tic;
@@ -64,7 +64,7 @@ elseif (number_of_machines == 1)
     % Makespan is just the max
     outputArray(:,1:2) = initialise_naive(inputArray, number_of_jobs);
     outputArray(:,3) = (1:length(outputArray))';
-    outputMakespan = max(outputArray(:,1));
+    outputMakespan = sum(outputArray(:,1));
     num_exchanges = 0;
     
 else
@@ -85,6 +85,7 @@ else
     
     num_exchanges = 0;
     
+    nbour_start = tic;
     while update == true
         
         % A function to encode all the neighbours to a soln (a function of k,
@@ -117,10 +118,12 @@ else
         end
         
     end
+    nbour_time = toc(nbour_start);
     
 end
 
 % Finish
 time_taken = toc(startTime);
+sprintf("Finished")
 
 end
