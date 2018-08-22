@@ -35,7 +35,7 @@ function inputArray=generate_ms_instances(n,m)
     inputArray = zeros(1,n+1);
     
     for i = 1:n
-        inputArray(i) = randi(100);
+        inputArray(i) = randi(n*10);
     end
 
     inputArray(n+1) = m;

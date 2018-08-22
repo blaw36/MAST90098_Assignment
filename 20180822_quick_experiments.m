@@ -42,9 +42,9 @@ for i = 10:10:100
     end
 end
 
-simple_res_2 = [unique(simple_res(:,1)), grpstats(simple_res(:,2:5),simple_res(:,1))]
-random_res_2 = [unique(random_res(:,1)), grpstats(random_res(:,2:5),random_res(:,1))]
-naive_res_2 = [unique(naive_res(:,1)), grpstats(naive_res(:,2:5),naive_res(:,1))]
+simple_res_2 = [unique(simple_res(:,1)), grpstats(simple_res(:,2:5),simple_res(:,1))];
+random_res_2 = [unique(random_res(:,1)), grpstats(random_res(:,2:5),random_res(:,1))];
+naive_res_2 = [unique(naive_res(:,1)), grpstats(naive_res(:,2:5),naive_res(:,1))];
 
 linspace(1,1000,100)
 plot(simple_res_2(:,1),simple_res_2(:,2),...
