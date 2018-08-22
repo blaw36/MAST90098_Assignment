@@ -28,7 +28,7 @@ for four machines of sizes M=(2,3,1,2) with k=2
 Paths
 [(1,2), (1)]
 [(1,2), (2)]
-[(2,1), (1)]                                  (has to include 2 so doesnt move to (1,3))
+[(2,1), (1)]       (has to include 2 so doesnt move to (1,3))
 [(2,1), (2)]
 [(2,1), (3)]
 [(2,3), (1)]
@@ -41,7 +41,7 @@ Paths
 [(4,2), (1)]
 [(4,2), (2)]
 Cycles
-[(1,2), (1,1)]       (pair 1 ... probs a way to prune identical cycles... could leave in for now)
+[(1,2), (1,1)]       (pair 1 ... see below)
 [(1,2), (1,2)]
 [(1,2), (1,3)]
 [(1,2), (2,1)]
@@ -72,9 +72,14 @@ Cycles
 [(4,2), (2,2)]
 [(4,2), (2,3)]
 
+Cycle Problem:
 
-When moving to VDS set M' = [ Mi-moved_programs: Mi elem M, Mi-moved_programsi>0 ]
-then you can use the exact same generating function, just need to 're-index' outputed move
+    c1c2...ck == c2...ckc1 == ...
+    
+    Can leave in initially, but will inflates size of space by k until fixed.
+    
+    How can we avoid this while iterating through?
+
 '''
 
 def generate(k, I, M):
