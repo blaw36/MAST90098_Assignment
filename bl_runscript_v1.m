@@ -8,7 +8,7 @@ clear;
 clc;
 
 n = 1000; % # jobs
-m = 5; % # machines
+m = 500; % # machines
 a = generate_ms_instances(n, m);
 
 % Initialisation algorithm:
@@ -16,11 +16,11 @@ a = generate_ms_instances(n, m);
         % relative to most utilised machine at the time
     % 'random' = Random allocation (random number generated for machine)
     % 'naive' = All jobs placed into machine 1
-init_method = "naive";
+init_method = "random";
 k = 1; % # of exchanges (k-exch)
 
 [outputArray, outputMakespan, num_exchanges, ...
-    time_taken, nbour_taken] = ms_solver_gls_v1(a, k, init_method);
+    time_taken, time_gen_nbours, time_eval_nbours] = ms_solver_gls_v1(a, k, init_method);
 
 % Sort the output for presentation
 [sorted_col, sorting_idx] = sort(outputArray(:,2));

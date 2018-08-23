@@ -28,7 +28,7 @@
         % in seconds, for execution (not CPU time)
 
 function [outputArray, outputMakespan, num_exchanges,...
-    time_taken, nbour_time] = ms_solver_gls_v1(inputArray, k_exch, init_algo)
+    time_taken, time_gen_nbours, time_eval_nbours] = ms_solver_gls_v1(inputArray, k_exch, init_algo)
 
 % Start time
 startTime = tic;
@@ -80,13 +80,20 @@ else
     
     % Assign unique job_id to each job
     outputArray(:,3) = (1:length(outputArray))';
-    [cost, outputMakespan] = evaluate_makespan(outputArray, number_of_machines);
     update = true;
-    
     num_exchanges = 0;
     
-    nbour_start = tic;
+    % Start timing nbour process
+    time_gen_nbours = 0;
+    time_eval_nbours = 0;
     while update == true
+        
+        [cost, outputMakespan] = evaluate_makespan(outputArray, number_of_machines);
+        
+        clc
+        fprintf("Exchanges: %d\n", num_exchanges);
+        fprintf("Machines used: %d\n", sum(cost(:,2) > 0));
+        fprintf("Makespan: %d\n", outputMakespan);
         
         % A function to encode all the neighbours to a soln (a function of k,
         % the exchange, and perhaps some parameter to describe the
@@ -96,21 +103,26 @@ else
         % Job ID | Machine_from | Machine_to | n/bour_combo_id
         
         %%%%% Must be equal to k exchanges
-        possible_neighbours = generate_exchange_combinations(outputArray,...
-            1, number_of_machines);
+        [possible_neighbours, time_taken_gen] = generate_exchange_combinations(outputArray,...
+            1, number_of_machines, cost);
+        time_gen_nbours = time_gen_nbours + time_taken_gen;
         
         %%%%% Slightly different arrangement if up to k exchanges allowed
         % (recursion?)
         
         % Evaluate the n/bours generated above, pick the best, and change
-        nbour_results = evaluate_neighbours(outputArray, possible_neighbours, 1, number_of_machines);
+        [nbour_results, time_taken_eval] = evaluate_neighbours(outputArray, ...
+            possible_neighbours, 1, number_of_machines, cost);
+        time_eval_nbours = time_eval_nbours + time_taken_eval;
         [new_makespan, best_nbour] = min(nbour_results(:,2));
+        best_nbour_id = nbour_results(best_nbour, 1);
         
         % Evaluate termination flag, only if new is better
         if outputMakespan <= new_makespan
             update = false;
         else
-            outputArray(possible_neighbours(best_nbour,1),2) = possible_neighbours(best_nbour,3);
+            outputArray(possible_neighbours(best_nbour_id, 1),2) = ...
+                possible_neighbours(best_nbour_id ,3);
             
             % Update old_makespan
             outputMakespan = new_makespan;
@@ -118,7 +130,6 @@ else
         end
         
     end
-    nbour_time = toc(nbour_start);
     
 end
 
