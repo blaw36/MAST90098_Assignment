@@ -40,6 +40,7 @@ Paths
 [(3,2), (1)]
 [(4,2), (1)]
 [(4,2), (2)]
+
 Cycles
 [(1,2), (1,1)]       (pair 1 ... see below)
 [(1,2), (1,2)]
@@ -47,7 +48,7 @@ Cycles
 [(1,2), (2,1)]
 [(1,2), (2,3)]
 [(1,2), (2,3)]
-[(2,1), (1,1)]       (pair 1)                  (has to include 2 so doesnt move to (1,3))
+[(2,1), (1,1)]       (pair 1)  (has to include 2 so doesnt move to (1,3))
 [(2,1), (1,2)]
 [(2,1), (2,1)]
 [(2,1), (2,2)]
@@ -71,6 +72,23 @@ Cycles
 [(4,2), (2,1)]
 [(4,2), (2,2)]
 [(4,2), (2,3)]
+
+Cycles without equivs
+[(1,2), (1,1)]       
+[(1,2), (1,2)]
+[(1,2), (1,3)]
+[(1,2), (2,1)]
+[(1,2), (2,3)]
+[(1,2), (2,3)]
+[(2,3), (1,1)]
+[(2,3), (2,1)]
+[(2,3), (3,1)]
+[(2,4), (1,1)]
+[(2,4), (1,2)]
+[(2,4), (2,1)]
+[(2,4), (2,2)]
+[(2,4), (3,1)]
+[(2,4), (3,2)]
 
 Cycle Problem:
 
@@ -105,6 +123,37 @@ def generate(k, I, M):
 
         Note: never explictly includes n, ( max(|Mi|) could approach it though)
             -> should be able to avoid n based iteration
+
+    Possible Algs:
+
+    If you treat the programs as numbers from a 'base Mi' number then it
+    is pretty easy to iterate from one to another.
+
+    Have the order of the programs as the inner most order so once you reach,
+    biggest program iteration, move to next cycle/path iteration and reset
+    program iteration.
+
+    This means problem of generation is largely iterating from one cycle/path
+    to the next.
+
+    Simple/Bad alg 1:
+
+        Treat all cycles and paths as just simple perms
+        Treat these perms as words.
+        Order these words alphabetically.
+
+        Alg: Move to next word in the alphabet
+            If word contains loaded machine return word
+            else move to next word in the alphabet.
+
+    Better Permutation Alg?
+
+        Way to use slot loaded machine into (m-1)_(k-1) info?
+        
+    Better Cycle Alg?
+        
+        Way to use slot loaded machine into (m-1)_(k-1) info?
+        Way to use cycle info?
 
     parameters:
         k: as above
