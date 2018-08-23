@@ -17,7 +17,7 @@ Can be reduced to the problem of establishing a total order amongst the elements
 Then just list the next element.
 
 need function 
-    next = gen(k, loaded_machine_index, M, curr)
+    next = gen(k, loaded_machine_indices, M, curr)
 
         where M = [num_programs_in_machine_i]
 

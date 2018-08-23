@@ -4,10 +4,12 @@ A group project, exploring heuristics for solving the Minimum Makespan Schedulin
 
 # TODO
 
+* Affect of multiple loaded machines on everything
+
 * Generation
     * Don't have to use iterators
     * Could have some function 
-        next = gen(k, loaded_machine_index, M, curr)
+        next = gen(k, loaded_machine_indices, M, curr)
         * If curr == None, then init, otherwise iterate from previous
 * Changes to data structures
     * Need O(1) for 
