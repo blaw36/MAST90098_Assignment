@@ -10,6 +10,94 @@ Feels pretty intuitive to use a generator for the neighborhood,
 Central Code of GLS:
     1. Generate
     2. Test/Compute Cost
+
+Problem of generating,
+
+Can be reduced to the problem of establishing a total order amongst the elements.
+Then just list the next element.
+
+need function 
+    next = gen(k, loaded_machine_indices, M, curr)
+
+        where M = [num_programs_in_machine_i]
+
+Can use a nested lexicographic order on perms, then on programs
+
+for four machines of sizes M=(2,3,1,2) with k=2
+
+Paths
+[(1,2), (1)]
+[(1,2), (2)]
+[(2,1), (1)]       (has to include 2 so doesnt move to (1,3))
+[(2,1), (2)]
+[(2,1), (3)]
+[(2,3), (1)]
+[(2,3), (2)]
+[(2,3), (3)]
+[(2,4), (1)]
+[(2,4), (2)]
+[(2,4), (3)]
+[(3,2), (1)]
+[(4,2), (1)]
+[(4,2), (2)]
+
+Cycles
+[(1,2), (1,1)]       (pair 1 ... see below)
+[(1,2), (1,2)]
+[(1,2), (1,3)]
+[(1,2), (2,1)]
+[(1,2), (2,3)]
+[(1,2), (2,3)]
+[(2,1), (1,1)]       (pair 1)  (has to include 2 so doesnt move to (1,3))
+[(2,1), (1,2)]
+[(2,1), (2,1)]
+[(2,1), (2,2)]
+[(2,1), (3,1)]
+[(2,1), (3,2)]
+[(2,3), (1,1)]
+[(2,3), (2,1)]
+[(2,3), (3,1)]
+[(2,4), (1,1)]
+[(2,4), (1,2)]
+[(2,4), (2,1)]
+[(2,4), (2,2)]
+[(2,4), (3,1)]
+[(2,4), (3,2)]
+[(3,2), (1,1)]
+[(3,2), (1,2)]
+[(3,2), (1,3)]
+[(4,2), (1,1)]
+[(4,2), (1,2)]
+[(4,2), (1,3)]
+[(4,2), (2,1)]
+[(4,2), (2,2)]
+[(4,2), (2,3)]
+
+Cycles without equivs
+[(1,2), (1,1)]       
+[(1,2), (1,2)]
+[(1,2), (1,3)]
+[(1,2), (2,1)]
+[(1,2), (2,3)]
+[(1,2), (2,3)]
+[(2,3), (1,1)]
+[(2,3), (2,1)]
+[(2,3), (3,1)]
+[(2,4), (1,1)]
+[(2,4), (1,2)]
+[(2,4), (2,1)]
+[(2,4), (2,2)]
+[(2,4), (3,1)]
+[(2,4), (3,2)]
+
+Cycle Problem:
+
+    c1c2...ck == c2...ckc1 == ...
+    
+    Can leave in initially, but will inflates size of space by k until fixed.
+    
+    How can we avoid this while iterating through?
+
 '''
 
 def generate(k, I, M):
@@ -35,6 +123,11 @@ def generate(k, I, M):
 
         Note: never explictly includes n, ( max(|Mi|) could approach it though)
             -> should be able to avoid n based iteration
+
+    Better Cycle Alg?
+        
+        Way to use slot loaded machine into (m-1)_(k-1) info?
+        Way to use cycle info?
 
     parameters:
         k: as above
@@ -89,7 +182,10 @@ def gls_step(curr_state):
     '''
     Number of neighbours  -> number of iterations
         - O( k*(m^k)*max(|Mi|)^k )
-
+    
+    Cost Per Generation
+        - TODO: What? Will depend on algs
+    
     Cost Per iteration
         - O(k)
 
