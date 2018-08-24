@@ -5,12 +5,19 @@ A group project, exploring heuristics for solving the Minimum Makespan Schedulin
 # TODO
 
 * Affect of multiple loaded machines on everything
+    * Two possible views
+        * Include one of the most loaded machines
+        * Include all of the most loaded machines
+    * Have to pick 1
+        * Doesn't break connectivity
+        * Will have some changes to big oh and implementation
 
 * Generation
-    * Don't have to use iterators
-    * Could have some function 
-        next = gen(k, loaded_machine_indices, M, curr)
-        * If curr == None, then init, otherwise iterate from previous
+    * Didn't have to use iterators, however many fast sub algs needed 
+    'book-keeping' info, didn't really want to repeatedly pass bundles between
+    * Need to check further
+    * Switch GLS to using generator
+    * Optimize + Tidy/Refactor
 * Changes to data structures
     * Need O(1) for 
         * Retrieve cost of program by index in machine

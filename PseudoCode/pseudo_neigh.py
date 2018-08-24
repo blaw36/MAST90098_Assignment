@@ -124,32 +124,6 @@ def generate(k, I, M):
         Note: never explictly includes n, ( max(|Mi|) could approach it though)
             -> should be able to avoid n based iteration
 
-    Possible Algs:
-
-    If you treat the programs as numbers from a 'base Mi' number then it
-    is pretty easy to iterate from one to another.
-
-    Have the order of the programs as the inner most order so once you reach,
-    biggest program iteration, move to next cycle/path iteration and reset
-    program iteration.
-
-    This means problem of generation is largely iterating from one cycle/path
-    to the next.
-
-    Simple/Bad alg 1:
-
-        Treat all cycles and paths as just simple perms
-        Treat these perms as words.
-        Order these words alphabetically.
-
-        Alg: Move to next word in the alphabet
-            If word contains loaded machine return word
-            else move to next word in the alphabet.
-
-    Better Permutation Alg?
-
-        Way to use slot loaded machine into (m-1)_(k-1) info?
-        
     Better Cycle Alg?
         
         Way to use slot loaded machine into (m-1)_(k-1) info?
@@ -208,7 +182,10 @@ def gls_step(curr_state):
     '''
     Number of neighbours  -> number of iterations
         - O( k*(m^k)*max(|Mi|)^k )
-
+    
+    Cost Per Generation
+        - TODO: What? Will depend on algs
+    
     Cost Per iteration
         - O(k)
 
