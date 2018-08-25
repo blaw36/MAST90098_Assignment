@@ -19,6 +19,11 @@ classdef CombinationGenerator < Generator
             %val = [a1, a2, ..., ak] where ai elem [1,..n] ai distinct.
             val = obj.curr;
             
+            if obj.k<=0
+                obj.done = true;
+                return;
+            end
+            
             %increment the last num if lower than n
             if obj.curr(obj.k) < obj.n
                 obj.curr(obj.k) = obj.curr(obj.k) + 1;

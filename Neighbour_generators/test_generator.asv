@@ -38,13 +38,11 @@ for M_max = M_max_range(1):M_max_range(2)/M_max_steps:M_max_range(2)
             end
             t = toc(startTime);
             n = sum(M);
-            mem_int = 8; % if just use int8, in bits bits
-            mem_per_neigh = 2*k*mem_int;
-            required_memory_bytes = neighbourhood_size*mem_per_neigh/8;
-            fprintf("For M_max = %d, n = %d, m = %d, k = %d, len(I)=%d:",...
-                    [M_max, n, m, k, length(I)])
-            fprintf(" |Neigh| = %.2e, req_non_it_mem =%.2e  time=%f\n", ...
-               [neighbourhood_size,required_memory_bytes, t])
+            mem_int = 8; % if just use int8
+            mem_per_neighbour = 2*k*mem_int;
+            required_memory = neighbourhood_size * mem_per_neighbour 
+            fprintf("For M_max = %d, n = %d, m = %d, k = %d, len(I)=%d: |Neigh| = %d, time=%f\n",...
+                    [M_max, n, m, k, length(I), neighbourhood_size, t])
                 
             total_time = total_time + t;
             total_neighbours = total_neighbours + neighbourhood_size;
