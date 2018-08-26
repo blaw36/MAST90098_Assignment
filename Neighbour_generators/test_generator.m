@@ -55,20 +55,20 @@ for M_max = M_max_range(1):M_max_range(2)/M_max_steps:M_max_range(2)
 %             fprintf(" |Neigh| = %d, time=%f\n", ...
 %                [neighbourhood_size, t])
 %                 
-%             disp("NeighbourhoodGenerator2")
-%             startTime = tic;
-%             neighbourhood_size = 0;
-%             g = NeighbourhoodGenerator2Opt(k, L, M);
-%             while g.done == false
-%                 g.next();
-%                 neighbourhood_size = neighbourhood_size +1;
-%             end
-%             t = toc(startTime);
-%             n = sum(M);
-%             fprintf("For M_max = %d, n = %d, m = %d, k = %d, len(L)=%d:",...
-%                     [M_max, n, m, k, length(L)])
-%             fprintf(" |Neigh| = %d, time=%f\n", ...
-%                [neighbourhood_size, t])
+            disp("NeighbourhoodGenerator2")
+            startTime = tic;
+            neighbourhood_size = 0;
+            g = NeighbourhoodGenerator2Opt(k, L, M);
+            while g.done == false
+                g.next();
+                neighbourhood_size = neighbourhood_size +1;
+            end
+            t = toc(startTime);
+            n = sum(M);
+            fprintf("For M_max = %d, n = %d, m = %d, k = %d, len(L)=%d:",...
+                    [M_max, n, m, k, length(L)])
+            fprintf(" |Neigh| = %d, time=%f\n", ...
+               [neighbourhood_size, t])
            
             disp("NeighbourhoodGenerator3")
             startTime = tic;
@@ -93,7 +93,7 @@ for M_max = M_max_range(1):M_max_range(2)/M_max_steps:M_max_range(2)
             
             table_programs_size_bytes = k*M_max;
             other_mem_est_bytes = k*nchoosek(m,k);
-            fprintf("Mem required Generator2 method est: %.2e bytes\n\n",...
+            fprintf("Mem required Generator(2+3) methods est: %.2e bytes\n\n",...
                 table_programs_size_bytes+other_mem_est_bytes)
         end
     end
