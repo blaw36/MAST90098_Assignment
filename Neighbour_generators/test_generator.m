@@ -1,20 +1,20 @@
 rng(0)
 
 k = 2;
-L = [2];
-M =  [2,3,1,2];
+L = [2,4];
+M =  [2,3,1,3];
 
 g = NeighbourhoodGenerator3(k, L, M);
 
 %3 Version use
-% while g.done == false
-%     order = g.order;
-%     programs = g.programs;
-%     disp(order)
-%     disp(programs)
-%     disp(" ")
-%     g.next();
-% end
+while g.done == false
+    order = g.order;
+    programs = g.programs;
+    disp(order)
+    disp(programs)
+    disp(" ")
+    g.next();
+end
 
 % < 3 version use
 % while g.done == false
@@ -26,19 +26,22 @@ g = NeighbourhoodGenerator3(k, L, M);
 %     disp(" ")
 % end
 
+return
+
 %Performance testing
 k_range = [2, 2];
 
-m_range = [50,500];
-m_steps = 10;
+m_range = [5, 100];
+m_steps = 20;
 
-M_max_range = [100,2000];%Max number of programs in a machine
-M_max_steps = 10;
+M_max_range = [10,200];%Max number of programs in a machine
+M_max_steps = 20;
 
 for M_max = M_max_range(1):M_max_range(2)/M_max_steps:M_max_range(2)
     for m = m_range(1):m_range(2)/m_steps:m_range(2)
         M = randi(M_max,1,m);
-        [max_,L] = max(M);
+        max_ = max(M);
+        L = find(M==max_);
         for k = k_range(1):min(m, k_range(2))
 %             disp("NeighbourhoodGenerator")
 %             startTime = tic;
@@ -54,21 +57,21 @@ for M_max = M_max_range(1):M_max_range(2)/M_max_steps:M_max_range(2)
 %                     [M_max, n, m, k, length(L)])
 %             fprintf(" |Neigh| = %d, time=%f\n", ...
 %                [neighbourhood_size, t])
-%                 
-            disp("NeighbourhoodGenerator2")
-            startTime = tic;
-            neighbourhood_size = 0;
-            g = NeighbourhoodGenerator2Opt(k, L, M);
-            while g.done == false
-                g.next();
-                neighbourhood_size = neighbourhood_size +1;
-            end
-            t = toc(startTime);
-            n = sum(M);
-            fprintf("For M_max = %d, n = %d, m = %d, k = %d, len(L)=%d:",...
-                    [M_max, n, m, k, length(L)])
-            fprintf(" |Neigh| = %d, time=%f\n", ...
-               [neighbourhood_size, t])
+% %                 
+%             disp("NeighbourhoodGenerator2")
+%             startTime = tic;
+%             neighbourhood_size = 0;
+%             g = NeighbourhoodGenerator2Opt(k, L, M);
+%             while g.done == false
+%                 g.next();
+%                 neighbourhood_size = neighbourhood_size +1;
+%             end
+%             t = toc(startTime);
+%             n = sum(M);
+%             fprintf("For M_max = %d, n = %d, m = %d, k = %d, len(L)=%d:",...
+%                     [M_max, n, m, k, length(L)])
+%             fprintf(" |Neigh| = %d, time=%f\n", ...
+%                [neighbourhood_size, t])
            
             disp("NeighbourhoodGenerator3")
             startTime = tic;

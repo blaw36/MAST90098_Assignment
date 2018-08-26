@@ -81,7 +81,11 @@ classdef NeighbourhoodGenerator3 < handle
             obj.loaded_end = length(obj.loaded);
             
             %Choose k-1 other machines from the m-1 remaining
-            obj.other_m = combnk(1:(obj.num_machines-1),obj.k-1);
+            choice = [1];%need to pass vector to combnk, handles edge case
+            if obj.num_machines > 1
+                choice = 1:(obj.num_machines-1);
+            end
+            obj.other_m = combnk(choice,obj.k-1);
             obj.other_m_end = length(obj.other_m);
             
             %Order those k machines
