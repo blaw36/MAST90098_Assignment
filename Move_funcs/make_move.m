@@ -1,9 +1,7 @@
 function [new_array] = make_move(outputArray, machine_start_indices, move)
-    order_indices = move{1}
-    program_indices = move{2}
+    order_indices = move{1};
+    program_indices = move{2};
     new_array = outputArray;
-    
-    outputArray
     
     %Relies on outputArray being sorted
     num_moves = length(program_indices);
@@ -20,6 +18,5 @@ function [new_array] = make_move(outputArray, machine_start_indices, move)
                     ,2) = order_indices(target_index);
     end
     %Note this new_array is now unsorted.
-    new_array
 end
 

@@ -188,7 +188,12 @@ classdef NeighbourhoodGenerator3 < handle
             end
             %Updates the order and the programs,
             obj.order_selected()
-            obj.construct_programs();        
+            obj.construct_programs();
+            
+            %If no shuffle exists, generate next.
+            if isempty(obj.programs)&& obj.done == false
+                obj.next()
+            end
         end
     end
 end

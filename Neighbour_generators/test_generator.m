@@ -7,16 +7,14 @@ M =  [2,3,1,2];
 g = NeighbourhoodGenerator3(k, L, M);
 
 %3 Version use
-while g.done == false
-    order = g.order;
-    programs = g.programs;
-    disp(order)
-    disp(programs)
-    disp(" ")
-    g.next();
-end
-
-return
+% while g.done == false
+%     order = g.order;
+%     programs = g.programs;
+%     disp(order)
+%     disp(programs)
+%     disp(" ")
+%     g.next();
+% end
 
 % < 3 version use
 % while g.done == false
@@ -28,10 +26,8 @@ return
 %     disp(" ")
 % end
 
-return
-
 %Performance testing
-k_range = [2, 2];
+k_range = [2, 3];
 
 m_range = [5, 100];
 m_steps = 20;

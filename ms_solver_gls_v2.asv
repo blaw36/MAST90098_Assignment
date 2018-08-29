@@ -24,8 +24,14 @@
         % max, across all machines, of sum of jobs for a given machine
     % num_exchanges:
         % number of (k-)exchanges performed
-function [outputArray, outputMakespan, num_exchanges] = ...
-                            ms_solver_gls_v2(inputArray, k_exch, init_algo)
+    % time_taken:
+        % in seconds, for execution (not CPU time)
+
+function [outputArray, outputMakespan, num_exchanges,...
+    time_taken] = ms_solver_gls_v2(inputArray, k_exch, init_algo)
+
+% Start time
+startTime = tic;
 
 % Variable checking
 allowed_init_algos = ["simple", "random", "naive"];
@@ -37,6 +43,7 @@ end
 length_of_input = length(inputArray);
 number_of_jobs = length_of_input - 1;
 number_of_machines = inputArray(length_of_input);
+jobs_to_sort = inputArray(1:(length_of_input-1));
 outputArray = zeros(number_of_jobs,3);
 
 % Print some stuff to screen
@@ -101,9 +108,8 @@ else
 
     while update == true
         
-%         clc
-%         fprintf("Exchanges: %d\n", num_exchanges);
-%         fprintf("Makespan: %d\n", outputMakespan);
+        fprintf("Exchanges: %d\n", num_exchanges);
+        fprintf("Makespan: %d\n", outputMakespan);
         
         %Generate neighbours
         g = NeighbourhoodGenerator3(k_exch, L, M);
@@ -113,12 +119,11 @@ else
         while g.done == false            
             [min_neigh_makespan, prog_index] = find_min_neighbour( ...
                                     g.order, g.programs, ...
-                                    machine_costs, outputArray,...
-                                    machine_start_indices);
+                                    machine_costs, outputArray);
                                 
             if min_neigh_makespan < best_neighbour_makespan
-                best_neighbour_makespan = min_neigh_makespan;
-                best_neighbour = {g.order, g.programs(prog_index,:)};
+                best_neighbour_makespan = min_neigh_makespan
+                best_neighbour = {g.order, g.programs(prog_index,:)}
             end
             %Retrieve next
             g.next();
@@ -130,7 +135,7 @@ else
         else
             % Update to new instance
             % TODO Move should respect order than no need to sort
-            outputMakespan = best_neighbour_makespan;
+            outputMakespan = best_neighbour_makespan
             outputArray = make_move(outputArray, machine_start_indices,...
                                                 best_neighbour);
                                             
@@ -160,8 +165,8 @@ else
                 if slice(1)>0 && slice(2)>0
                     machine_costs(i) = sum(outputArray(slice(1):slice(2),1));
                 elseif slice(1)>0
-                    machine_costs(i) = sum(...
-                        outputArray(slice(1):number_of_jobs,1));
+                     machine_costs(i) = sum(outputArray(...
+                machine_start_indices(slic):number_of_jobs,1));
                 else
                     machine_costs(i) = 0;
                 end
@@ -174,18 +179,12 @@ else
                 machine_start_indices(number_of_machines):number_of_jobs,1));
             end
             
-            
-%             machine_start_indices
-%             outputArray
-%             machine_costs
-%             
-%             outputMakespan
-%             max(machine_costs)
-%             
-            if outputMakespan ~= max(machine_costs)
-                disp("Error: Expected Cost of Move was not achieved")
-                return
-            end
+            machine_start_indices
+            outputArray
+            outputMakespan
+            machine_costs
+            outputMakespan = max(machine_costs)
+            return
             
             L = find(machine_costs==outputMakespan);
             
@@ -194,4 +193,9 @@ else
         end
     end
 end
+
+% Finish
+time_taken = toc(startTime);
+sprintf("Finished")
+
 end

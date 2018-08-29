@@ -9,7 +9,7 @@ clc;
 
 %rng(10)
 
-n = 10; % # jobs
+n = 20; % # jobs
 m = 3; % # machines
 a = generate_ms_instances(n, m);
 
@@ -21,8 +21,8 @@ a = generate_ms_instances(n, m);
 init_method = "naive";
 k = 2; % # of exchanges (k-exch)
 
-[outputArray, outputMakespan, num_exchanges, ...
-    time_taken] = ms_solver_gls_v2(a, k, init_method);
+[outputArray, outputMakespan, num_exchanges] = ...
+    ms_solver_gls_v2(a, k, init_method)
 
 % Sort the output for presentation
 [sorted_col, sorting_idx] = sort(outputArray(:,2));
@@ -35,12 +35,24 @@ title(['Makespan: ' num2str(outputMakespan)])
 xlabel('Machine #') % x-axis label
 ylabel('Job cost') % y-axis label
 
+outputMakespan
+lower_bound = lower_bound_makespan(a)
+return
+
 % % Stress testing
-% results = [];
-% for i = 2:400
-%     fprintf("Machines: %d \n", i);
-%     a = generate_ms_instances(10*i,i);
-%     [outputArray, outputMakespan, num_exchanges, time_taken] = ms_solver_gls_v1(a);
-%     results = [results ; [i 10*i time_taken]];
-% end
+results = [];
+for i = 10:400
+    fprintf("Machines: %d  : ", i);
+    a = generate_ms_instances(10*i,i)
+    startTime = tic;
+    [outputArray, outputMakespan, num_exchanges] = ...
+        ms_solver_gls_v2(a, k, init_method);
+    t = toc(startTime);
+    lower_bound = lower_bound_makespan(a);
+    fprintf("Relative Error to LB of %f, %d num_exchanges, %f time\n", ...
+        outputMakespan/lower_bound, num_exchanges, t);
+    return
+    
+    
+end
 
