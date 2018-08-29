@@ -76,11 +76,6 @@ else
     update = true;
     num_exchanges = 0;
     
-    [machine_costs, outputMakespan, L] = evaluate_makespan(outputArray, number_of_machines);
-    
-    %More succint way to store costs if first col is 1:m anyway
-    machine_costs = machine_costs(:,2)';
-    
     %Sorts outputArray by machine, then cost        
     outputArray = sortrows(outputArray,1);
     outputArray = sortrows(outputArray,2);
@@ -97,7 +92,33 @@ else
     for i = 1:number_of_machines
         M(i) = sum(outputArray(:,2)==i);
     end
-
+    
+    %TODO: Better Compute/Update new Costs
+    %Todo: Better Compute/Update new L
+    %for now
+    machine_costs = zeros(1,number_of_machines);
+    for i = 1:(length(machine_start_indices)-1)
+        slice = [machine_start_indices(i), ...
+                machine_start_indices(i+1)-1];
+        if slice(1)>0 && slice(2)>0
+            machine_costs(i) = sum(outputArray(slice(1):slice(2),1));
+        elseif slice(1)>0
+            machine_costs(i) = sum(...
+                outputArray(slice(1):number_of_jobs,1));
+        else
+            machine_costs(i) = 0;
+        end
+    end
+    %last
+    if machine_start_indices(number_of_machines) == 0
+        machine_costs(number_of_machines) = 0;
+    else
+        machine_costs(number_of_machines) = sum(outputArray(...
+        machine_start_indices(number_of_machines):number_of_jobs,1));
+    end
+     
+    outputMakespan = max(machine_costs);
+    L = find(machine_costs==outputMakespan);
 
     while update == true
         
