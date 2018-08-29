@@ -93,12 +93,7 @@ else
         fprintf("Exchanges: %d\n", num_exchanges);
         fprintf("Makespan: %d\n", outputMakespan);
         
-        %Sorts outputArray by machine, then cost
-        %TODO: Update this faster instead of resorting...
-        if all(outputArray) == 0
-            return
-        end
-        
+        %Sorts outputArray by machine, then cost        
         outputArray = sortrows(outputArray,1);
         outputArray = sortrows(outputArray,2);
         
@@ -124,6 +119,12 @@ else
         best_L = [];
         while g.done == false
             for i = 1:g.programs_end
+                %TODO: Want to be able to process all of the program
+                %neighbour instances in one 'batch' for speed
+                % => need best_neigh = f(g.order, g.programs, ...
+                %                        information about cost of progs)
+                % i.e. instead of iterative operate on matrix.
+                
                 p = g.programs(i,:);
                 %Evaluate the neighbour
                 [new_costs, new_makespan, new_L] = evaluate_neighbour( ...
