@@ -89,13 +89,6 @@ classdef NeighbourhoodGenerator3 < handle
             obj.other_m_end = length(obj.other_m);
             
             %Order those k machines
-            obj.construct_order();
-            
-            obj.order_selected()
-            obj.construct_programs()
-        end
-        
-        function construct_order(obj)
             if obj.cycle
                 %Can be viewed as selecting a neclace, see Wikipedia
                 %Fix the first element and then perm the remainder.
@@ -104,12 +97,17 @@ classdef NeighbourhoodGenerator3 < handle
                         ones(factorial(obj.k-1),1), perms(2:obj.k)
                 ];                
             else
-                obj.machine_order_end = factorial(obj.k);
+                obj.machine_order_end = factorial(obj.k)
                 obj.machine_order = perms(1:obj.k);
             end
+            
+            obj.machine_order_end = length(obj.machine_order);
+            
+            obj.construct_order()
+            obj.construct_programs()
         end
         
-        function order_selected(obj)
+        function construct_order(obj)
             %Combines the information in the machine related generators to
             %display the selected machines in their selected order.
             
@@ -172,8 +170,7 @@ classdef NeighbourhoodGenerator3 < handle
                         if obj.cycle
                             %Move on to paths
                             obj.cycle = false;
-                            %Switch to using paths
-                            obj.construct_order();
+                            obj.machine_order = perms(1:obj.k);
                         else
                             obj.done = true;
                         end
@@ -187,7 +184,7 @@ classdef NeighbourhoodGenerator3 < handle
                 obj.machine_order_i = 1;                    
             end
             %Updates the order and the programs,
-            obj.order_selected()
+            obj.construct_order();
             obj.construct_programs();        
         end
     end

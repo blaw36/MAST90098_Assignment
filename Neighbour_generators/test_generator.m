@@ -1,8 +1,8 @@
 rng(0)
 
 k = 2;
-L = [2,4];
-M =  [2,3,1,3];
+L = [2];
+M =  [2,3,1,2];
 
 g = NeighbourhoodGenerator3(k, L, M);
 
@@ -15,6 +15,8 @@ while g.done == false
     disp(" ")
     g.next();
 end
+
+return
 
 % < 3 version use
 % while g.done == false

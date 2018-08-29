@@ -18,7 +18,7 @@ a = generate_ms_instances(n, m);
         % relative to most utilised machine at the time
     % 'random' = Random allocation (random number generated for machine)
     % 'naive' = All jobs placed into machine 1
-init_method = "simple";
+init_method = "naive";
 k = 2; % # of exchanges (k-exch)
 
 [outputArray, outputMakespan, num_exchanges, ...
