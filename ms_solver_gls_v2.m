@@ -64,7 +64,8 @@ else
     
     % Otherwise, we need an initialise function for an initial solution
     if init_algo == "simple"
-        outputArray(:,1:2) = initialise_simple(inputArray, number_of_jobs, number_of_machines);
+        outputArray(:,1:2) = initialise_simple2(inputArray, number_of_jobs, number_of_machines);
+
     elseif init_algo == "random"
         outputArray(:,1:2) = initialise_random(inputArray, number_of_jobs, number_of_machines);
     elseif init_algo == "naive"
