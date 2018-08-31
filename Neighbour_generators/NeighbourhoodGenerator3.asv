@@ -33,11 +33,7 @@ classdef NeighbourhoodGenerator3 < handle
     %through them, to iterate through our neighbourhood.
     
     %TODO: Further Tidy/Refactor
-    %TODO: Optimize -
-    %
-    % Could maybe optimized by switching to using largely column vectors
-    % (as matlab uses column major order)
-            
+    %TODO: Optimize - Especially on cycle duplicates issue.
     
     properties
         k %the exchange number
@@ -122,7 +118,9 @@ classdef NeighbourhoodGenerator3 < handle
         function order_selected(obj)
             %Combines the information in the machine related generators to
             %display the selected machines in their selected order.
-
+            % Could maybe be made faster if alot of transposes of variables
+            % were used as the actual variables 
+            
             %loaded has been incremented, as other_m_i reset
             if obj.other_m_i == 1
                 obj.selected_loaded = obj.loaded(obj.loaded_i);
