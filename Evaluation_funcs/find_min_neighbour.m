@@ -43,12 +43,10 @@ function [min_neigh_makespan, program_index] = find_min_neighbour(...
     [min_neigh_makespan, program_index] = min(max_costs);
     
     %Checks the unchanged machines and finds their max cost
-    %TODO: This currently is the speed bottleneck 
-    %---
-    non_selected_machines = 1:length(machine_start_indices);
-    non_selected_machines(order) = [];
-    max_other_cost = max(machine_costs(non_selected_machines));
-    %---
+    non_selected_machines = ones(1,length(machine_start_indices));
+    non_selected_machines(order) = -1;
+    %-1 prevents the altered machines from being chosen
+    max_other_cost = max(machine_costs.*non_selected_machines);
     
     min_neigh_makespan = max([min_neigh_makespan,max_other_cost]);
 end
