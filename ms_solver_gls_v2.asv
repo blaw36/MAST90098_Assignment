@@ -65,6 +65,7 @@ else
     % Otherwise, we need an initialise function for an initial solution
     if init_algo == "simple"
         outputArray(:,1:2) = initialise_simple2(inputArray, number_of_jobs, number_of_machines);
+
     elseif init_algo == "random"
         outputArray(:,1:2) = initialise_random(inputArray, number_of_jobs, number_of_machines);
     elseif init_algo == "naive"
@@ -120,21 +121,23 @@ else
     outputMakespan = max(machine_costs);
     L = find(machine_costs==outputMakespan);
 
-    while update == true  
-        %Generate for instance
+    while update == true
+        
+%         clc
+%         fprintf("Exchanges: %d\n", num_exchanges);
+%         fprintf("Makespan: %d\n", outputMakespan);
+        
+        %Generate neighbours
+        
         g = NeighbourhoodGenerator3(k_exch, L, M);
         
         best_neighbour = {};
         best_neighbour_makespan = outputMakespan;
         
-        %Cost of each program
         program_costs = outputArray(:,1);
-        
-        %While still neighbours
-        while g.done == false
-            %Find the best neighbour in this batch of neighbours
-            [min_neigh_makespan, prog_index] = find_min_neighbour(...
-                                g.order, g.programs, ...
+        while g.done == false            
+            [min_neigh_makespan, prog_index] = ...
+                find_min_neighbour( g.order, g.programs, ...
                                 machine_costs, machine_start_indices, ...
                                 program_costs);
                                 

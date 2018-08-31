@@ -10,7 +10,7 @@ clc;
 rng(10)
 
 n = 10; % # jobs
-m = 3; % # machines
+m = 5; % # machines
 a = generate_ms_instances(n, m);
 
 % Initialisation algorithm:
@@ -18,7 +18,7 @@ a = generate_ms_instances(n, m);
         % relative to most utilised machine at the time
     % 'random' = Random allocation (random number generated for machine)
     % 'naive' = All jobs placed into machine 1
-init_method = "random";
+init_method = "simple";
 k = 2; % # of exchanges (k-exch)
 
 [outputArray, outputMakespan, num_exchanges] = ...
@@ -44,7 +44,7 @@ ylabel('Job cost') % y-axis label
 
 % % Stress testing
 results = [];
-machine_range = [250,1000];
+machine_range = [2500,10000];
 machine_steps = 3;
 for i = machine_range(1):diff(machine_range)/machine_steps:machine_range(2)
     fprintf("Machines: %d  : ", i);

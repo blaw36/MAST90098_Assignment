@@ -1,59 +1,48 @@
-function [min_neigh_makespan, program_index] = find_min_neighbour(...
-                        order, programs, ...
-                        machine_costs, output_Array, machine_start_indices)
+%For a given order specifying the target machines, and a matrix of possible
+%ways to move the programs between the machines. Computes the lowest cost
+%movement of programs.
+
+function [min_neigh_makespan, program_index] = ...
+                find_min_neighbour(order, programs, ...
+                        machine_costs, machine_start_indices, ...
+                        program_costs)
                     
     [num_shuffles,length_shuffle] = size(programs);
     num_selected_machines = size(order,2);
+    if num_
+    
     %The indices of the programs to be moved in each shuffle
     %Slicing order by length_shuffle allows for cycles and paths
     index_matrix = repmat(machine_start_indices(order(1:length_shuffle))...
                         ,num_shuffles,1) ...
-                        +programs-1;
-                    
-    %TODO: Indexing temp work around
-    costs_all_programs = output_Array(:,1);
-    %Table to store inflow and outflow of costs padded with zeros
+                        +programs-1
+    
+    %Table to store inflow and outflow of costs padded with zeros for diff
     in_out_costs = [zeros(num_shuffles,1), ...
-                    costs_all_programs(index_matrix),...
+                    program_costs(index_matrix),...
                     ...%This last column isn't there for cycles
                     zeros(num_shuffles,num_selected_machines-length_shuffle)...
                     ];
+
     if length_shuffle == num_selected_machines
         %cycle, so last will move into first
         in_out_costs(:,1) = ...
-                costs_all_programs(index_matrix(:,length_shuffle));
+                program_costs(index_matrix(:,length_shuffle));
     end
     %Per column diff
     changes = - diff(in_out_costs,1,2);
-%     
-%     output_Array
-%     order
-%     programs
-%     
-%     in_out_costs
-%     changes
-%     machine_costs(order)
     
-%     %Cost of all machines
-%     costs = repmat(machine_costs,num_shuffles,1);
-%     %Update the cost of machines with inflow and outflow
-%     costs(:,order) = costs(:,order) + changes;
-    
-    %Faster
-    non_selected_machines = 1:length(machine_start_indices),order);
-    max_other_cost = max(machine_costs(non_selected_machines));
+    %Finds the shuffle with the lowest cost
     changes = machine_costs(order) + changes;
     max_costs = max(changes,[],2);
-    max_costs = max([max_costs,repmat(max_other_cost,num_shuffles,1)],[],2);
-    
-    
-    %Finds the most loaded machine for each
-%     %max_costs = max(costs,[],2)
-%     
-%     if max_costs ~= max(costs,[],2)
-%         return
-%     end
-    
-    %Finds the best neighbour
     [min_neigh_makespan, program_index] = min(max_costs);
+    
+    %Checks the unchanged machines and finds their max cost
+    %TODO: This currently is the speed bottleneck ---
+    non_selected_machines = 1:length(machine_start_indices);
+    non_selected_machines(order) = [];
+    max_other_cost = max(machine_costs(non_selected_machines));
+    %---
+    
+    min_neigh_makespan = max([min_neigh_makespan,max_other_cost]);
 end
