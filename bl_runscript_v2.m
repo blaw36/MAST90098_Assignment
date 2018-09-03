@@ -4,21 +4,21 @@ clc;
 %% Set seed
 rng(10)
 %% Parameters
-n = 500; % # jobs
+n = 100; % # jobs
 m = 20; % # machines
 a = generate_ms_instances(n, m);
-k = 3; % # of exchanges (k-exch)
+k = 2; % # of exchanges (k-exch)
 
 %% Initialisation algorithm:
     % 'simple' = Costliest job allocated to machine with most 'capacity'
         % relative to most utilised machine at the time
     % 'random' = Random allocation (random number generated for machine)
     % 'naive' = All jobs placed into machine 1
-init_method = "simple";
+init_method = "random";
 
 %% Makespan solver
 [outputArray, outputMakespan, num_exchanges] = ...
-    ms_solver_gls_v2(a, k, init_method)
+    ms_solver_gls_v2(a, k, init_method);
 
 %% Graphing and analysis
 % Sort the output for presentation
@@ -45,7 +45,7 @@ ratio_vs_lb = outputMakespan/lower_bound
 
 %% Stress tests
 results = [];
-machine_range = [250,1000];
+machine_range = [200,800];
 machine_steps = 3;
 for i = machine_range(1):diff(machine_range)/machine_steps:machine_range(2)
     fprintf("Machines: %d  : ", i);

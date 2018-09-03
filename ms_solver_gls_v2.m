@@ -17,14 +17,14 @@
         % 'naive' = All jobs placed into machine 1
 
 % Output:
-    % outputArray:
+    % state_array:
         % rows - a job allocated to a position in a machine
         % columns - job_cost, machine_no, unique job_id
-    % outputMakespan:
+    % makespan:
         % max, across all machines, of sum of jobs for a given machine
     % num_exchanges:
         % number of (k-)exchanges performed
-function [outputArray, outputMakespan, num_exchanges] = ...
+function [state_array, makespan, num_exchanges] = ...
                             ms_solver_gls_v2(inputArray, k_exch, init_algo)
 
 % Variable checking
@@ -35,100 +35,56 @@ end
 
 % Initialisation
 length_of_input = length(inputArray);
-number_of_jobs = length_of_input - 1;
-number_of_machines = inputArray(length_of_input);
-outputArray = zeros(number_of_jobs,3);
+num_jobs = length_of_input - 1;
+num_machines = inputArray(length_of_input);
+state_array = zeros(num_jobs,3);
 
 % Print some stuff to screen
 fprintf("input_length: %d \n", length_of_input);
-fprintf("num_jobs: %d \n", number_of_jobs);
-fprintf("number_of_machines: %d \n", number_of_machines);
+fprintf("num_jobs: %d \n", num_jobs);
+fprintf("number_of_machines: %d \n", num_machines);
 
-if (number_of_jobs <= number_of_machines)
+if (num_jobs <= num_machines)
     % If we happen to get less jobs than machines, makespan
     % is just time of most expensive job
-    outputArray = [inputArray(1:number_of_jobs)', (1:number_of_jobs)', ...
-        (1:number_of_jobs)'];
-    outputMakespan = max(outputArray(:,1));
+    state_array = [inputArray(1:num_jobs)', (1:num_jobs)', (1:num_jobs)'];
+    makespan = max(state_array(:,1));
     num_exchanges = 0;
     
-elseif (number_of_machines == 1)
+elseif (num_machines == 1)
     % If one machine, everything allocated to that machine
     % Makespan is just the max
-    outputArray(:,1:2) = initialise_naive(inputArray, number_of_jobs);
-    outputArray(:,3) = (1:length(outputArray))';
-    outputMakespan = sum(outputArray(:,1));
+    state_array(:,1:2) = initialise_naive(inputArray, num_jobs);
+    state_array(:,3) = (1:length(state_array))';
+    makespan = sum(state_array(:,1));
     num_exchanges = 0;
-    
+
 else
-    
     % Otherwise, we need an initialise function for an initial solution
     if init_algo == "simple"
-        outputArray(:,1:2) = initialise_simple2(inputArray, number_of_jobs, number_of_machines);
+        state_array(:,1:2) = initialise_simple2(inputArray, num_jobs, num_machines);
     elseif init_algo == "random"
-        outputArray(:,1:2) = initialise_random(inputArray, number_of_jobs, number_of_machines);
+        state_array(:,1:2) = initialise_random(inputArray, num_jobs, num_machines);
     elseif init_algo == "naive"
-        outputArray(:,1:2) = initialise_naive(inputArray, number_of_jobs);
+        state_array(:,1:2) = initialise_naive(inputArray, num_jobs);
     end
     
     % Assign unique job_id to each job
-    outputArray(:,3) = (1:length(outputArray))';
+    state_array(:,3) = (1:length(state_array))';
     update = true;
     num_exchanges = 0;
     
-    %Sorts outputArray by machine, then cost        
-    outputArray = sortrows(outputArray,1);
-    outputArray = sortrows(outputArray,2);
-    
-    %Find where the machine first appears in table (if at all)
-    %Todo: Better way
-    machine_start_indices = zeros(1,number_of_machines);
-    for i = 1:number_of_jobs
-        machine_start_indices(outputArray(number_of_jobs+1-i,2)) = number_of_jobs-i+1;
-    end
-    %Find M
-    %Todo: Better way
-    M = zeros(1,number_of_machines);
-    for i = 1:number_of_machines
-        M(i) = sum(outputArray(:,2)==i);
-    end
-    
-    %TODO: Better Compute/Update new Costs
-    %Todo: Better Compute/Update new L
-    %for now
-    machine_costs = zeros(1,number_of_machines);
-    for i = 1:(length(machine_start_indices)-1)
-        slice = [machine_start_indices(i), ...
-                machine_start_indices(i+1)-1];
-        if slice(1)>0 && slice(2)>0
-            machine_costs(i) = sum(outputArray(slice(1):slice(2),1));
-        elseif slice(1)>0
-            machine_costs(i) = sum(...
-                outputArray(slice(1):number_of_jobs,1));
-        else
-            machine_costs(i) = 0;
-        end
-    end
-    %last
-    if machine_start_indices(number_of_machines) == 0
-        machine_costs(number_of_machines) = 0;
-    else
-        machine_costs(number_of_machines) = sum(outputArray(...
-        machine_start_indices(number_of_machines):number_of_jobs,1));
-    end
-     
-    outputMakespan = max(machine_costs);
-    L = find(machine_costs==outputMakespan);
+    [state_array, machine_start_indices, M, machine_costs, makespan, L] ...
+        = update_supporting_structs(state_array, num_machines, num_jobs);
 
     while update == true  
         %Generate for instance
         g = NeighbourhoodGenerator3(k_exch, L, M);
-        
         best_neighbour = {};
-        best_neighbour_makespan = outputMakespan;
+        best_neighbour_makespan = makespan;
         
         %Cost of each program
-        program_costs = outputArray(:,1);
+        program_costs = state_array(:,1);
         
         %While still neighbours
         while g.done == false
@@ -147,69 +103,17 @@ else
         end
         
         % Evaluate termination flag, only if new is better
-        if outputMakespan <= best_neighbour_makespan
+        if makespan <= best_neighbour_makespan
             update = false;
         else
             % Update to new instance
-            % TODO Move should respect order than no need to sort
-            outputMakespan = best_neighbour_makespan;
-            outputArray = make_move(outputArray, machine_start_indices,...
+            makespan = best_neighbour_makespan;
+            state_array = make_move(state_array, machine_start_indices,...
                                                 best_neighbour);
                                             
-            %Sorts outputArray by machine, then cost        
-            outputArray = sortrows(outputArray,1);
-            outputArray = sortrows(outputArray,2);
-            
-            %Find where the machine first appears in table (if at all)
-            %Todo: Better way
-            machine_start_indices = zeros(1,number_of_machines);
-            for i = 1:number_of_jobs
-                machine_start_indices(outputArray(number_of_jobs+1-i,2)) = number_of_jobs-i+1;
-            end
-            %Find M
-            %Todo: Better way
-            M = zeros(1,number_of_machines);
-            for i = 1:number_of_machines
-                M(i) = sum(outputArray(:,2)==i);
-            end
-            
-            %TODO: Better Compute/Update new Costs
-            %Todo: Better Compute/Update new L
-            %for now
-            for i = 1:(length(machine_start_indices)-1)
-                slice = [machine_start_indices(i), ...
-                        machine_start_indices(i+1)-1];
-                if slice(1)>0 && slice(2)>0
-                    machine_costs(i) = sum(outputArray(slice(1):slice(2),1));
-                elseif slice(1)>0
-                    machine_costs(i) = sum(...
-                        outputArray(slice(1):number_of_jobs,1));
-                else
-                    machine_costs(i) = 0;
-                end
-            end
-            %last
-            if machine_start_indices(number_of_machines) == 0
-                machine_costs(number_of_machines) = 0;
-            else
-                machine_costs(number_of_machines) = sum(outputArray(...
-                machine_start_indices(number_of_machines):number_of_jobs,1));
-            end
-            
-            
-%             machine_start_indices
-%             outputArray
-%             machine_costs
-%             
-%             outputMakespan
-%             max(machine_costs)
-%             
-            if outputMakespan ~= max(machine_costs)
-                disp("Error: Expected Cost of Move was not achieved")
-                return
-            end
-            
-            L = find(machine_costs==outputMakespan);
+            [state_array, machine_start_indices, M, machine_costs, ...
+                makespan, L] ...
+            = update_supporting_structs(state_array, num_machines, num_jobs);
             
             %Update Bookkeeping values
             num_exchanges = num_exchanges + 1;
