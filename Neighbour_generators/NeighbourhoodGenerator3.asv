@@ -33,7 +33,11 @@ classdef NeighbourhoodGenerator3 < handle
     %through them, to iterate through our neighbourhood.
     
     %TODO: Further Tidy/Refactor
-    %TODO: Optimize - Especially on cycle duplicates issue.
+    %TODO: Optimize -
+    %
+    % Could maybe optimized by switching to using largely column vectors
+    % (as matlab uses column major order)
+            
     
     properties
         k %the exchange number
@@ -118,9 +122,7 @@ classdef NeighbourhoodGenerator3 < handle
         function order_selected(obj)
             %Combines the information in the machine related generators to
             %display the selected machines in their selected order.
-            % Could maybe be made faster if alot of transposes of variables
-            % were used as the actual variables 
-            
+
             %loaded has been incremented, as other_m_i reset
             if obj.other_m_i == 1
                 obj.selected_loaded = obj.loaded(obj.loaded_i);
@@ -159,7 +161,28 @@ classdef NeighbourhoodGenerator3 < handle
             %   where   mi = progs_per_machine(i), 
             %           j = length(progs_per_machine)
             
-            %This is the bottle neck performance wise.
+            % This is still a bottleneck, but not so much anymore.
+            % Also now considers all the permutations of programs
+            
+            % Idea here is the go 1,...,n_m, f
+            divisors2 = zeros(1,cols);
+            % Number of repeats (repelem) required for each program, for 
+            % each machine except the last one
+            for k = 1:cols
+                divisors2(:,k) = rows/prod(progs_per_machine(1:k));
+            end
+            % Number of times the sequence of repeated programs, for each
+            % machine, gets repeated
+            divisors3 = zeros(1,cols);
+            for k = cols:-1:1
+                divisors3(:,k) = rows/prod(progs_per_machine(k:cols));
+            end
+            test3_intermed = zeros(rows,cols);
+            test3_intermed(:,cols) = (repmat(1:progs_per_machine(cols), 1, rows/progs_per_machine(cols)))';
+            for l = (cols-1):-1:1
+                test3_intermed(:,l) = (repmat(repelem(1:progs_per_machine(l),divisors2(l)), 1, divisors3(l)))';
+            end
+            test3 = [test3_intermed(2:rows,:); test3_intermed(1,:)];
             obj.programs = mod(...
                            repmat((1:rows)', 1, cols), ...
                            progs_per_machine)+1;
