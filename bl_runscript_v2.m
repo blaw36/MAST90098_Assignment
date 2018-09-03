@@ -1,48 +1,49 @@
-%% ISSUES:
-%%% Put in some case for when # machines = 1;
-    % should be done with 'naive' initialisation method
-    % there are some issues with this at the moment (# of machines looks
-    % like 1)
 %% SCRIPT
 clear;
 clc;
-
+%% Set seed
 rng(10)
-
-n = 10; % # jobs
-m = 5; % # machines
+%% Parameters
+n = 500; % # jobs
+m = 20; % # machines
 a = generate_ms_instances(n, m);
+k = 3; % # of exchanges (k-exch)
 
-% Initialisation algorithm:
+%% Initialisation algorithm:
     % 'simple' = Costliest job allocated to machine with most 'capacity'
         % relative to most utilised machine at the time
     % 'random' = Random allocation (random number generated for machine)
     % 'naive' = All jobs placed into machine 1
-init_method = "random";
-k = 2; % # of exchanges (k-exch)
+init_method = "simple";
 
+%% Makespan solver
 [outputArray, outputMakespan, num_exchanges] = ...
     ms_solver_gls_v2(a, k, init_method)
 
+%% Graphing and analysis
 % Sort the output for presentation
 [sorted_col, sorting_idx] = sort(outputArray(:,2));
 sorted_output = outputArray(sorting_idx,:);
+
 % Cost per machine
 %NOTE: This will throw errors if a machine hasn't been assigned anything
 %this can occur if 2 equal max cost machines and only way to improve is to
 % to move a prog to the empty (which doesn't max cost)
 cost_pm = [(1:m)' accumarray(outputArray(:,2),outputArray(:,1))];
+
 % Bar plot
 bar_plot = draw_bar_plot(sorted_output, m);
 title(['Makespan: ' num2str(outputMakespan)])
 xlabel('Machine #') % x-axis label
 ylabel('Job cost') % y-axis label
 
+% Ratio vs Lower bound Makespan
 % outputMakespan
-% lower_bound = lower_bound_makespan(a)
+lower_bound = lower_bound_makespan(a);
+ratio_vs_lb = outputMakespan/lower_bound
 % return
 
-% % Stress testing
+%% Stress tests
 results = [];
 machine_range = [250,1000];
 machine_steps = 3;
