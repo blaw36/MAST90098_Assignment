@@ -19,7 +19,7 @@
 % Output:
     % state_array:
         % rows - a job allocated to a position in a machine
-        % columns - job_cost, machine_no, unique job_id
+        % columns - job_cost, machine_no, unique job_id, movable
     % makespan:
         % max, across all machines, of sum of jobs for a given machine
     % num_exchanges:
@@ -74,7 +74,6 @@ else
     update = true;
     num_exchanges = 0;
     
-    state_array = sortrows(state_array, 2);
     [state_array, machine_start_indices, M, machine_costs, makespan, L] ...
         = update_supporting_structs(state_array, num_machines, num_jobs);
 
