@@ -24,7 +24,7 @@
         % max, across all machines, of sum of jobs for a given machine
     % num_exchanges:
         % number of (k-)exchanges performed
-function [state_array, makespan, num_exchanges] = ...
+function [output_array, makespan, num_exchanges] = ...
                             ms_solver_gls_v2(inputArray, k_exch, init_algo)
 
 % Variable checking
@@ -37,7 +37,7 @@ end
 length_of_input = length(inputArray);
 num_jobs = length_of_input - 1;
 num_machines = inputArray(length_of_input);
-state_array = zeros(num_jobs,3);
+output_array = zeros(num_jobs,3);
 
 % Print some stuff to screen
 fprintf("input_length: %d \n", length_of_input);
@@ -47,36 +47,36 @@ fprintf("number_of_machines: %d \n", num_machines);
 if (num_jobs <= num_machines)
     % If we happen to get less jobs than machines, makespan
     % is just time of most expensive job
-    state_array = [inputArray(1:num_jobs)', (1:num_jobs)', (1:num_jobs)'];
-    makespan = max(state_array(:,1));
+    output_array = [inputArray(1:num_jobs)', (1:num_jobs)', (1:num_jobs)'];
+    makespan = max(output_array(:,1));
     num_exchanges = 0;
     
 elseif (num_machines == 1)
     % If one machine, everything allocated to that machine
     % Makespan is just the max
-    state_array(:,1:2) = initialise_naive(inputArray, num_jobs);
-    state_array(:,3) = (1:length(state_array))';
-    makespan = sum(state_array(:,1));
+    output_array(:,1:2) = initialise_naive(inputArray, num_jobs);
+    output_array(:,3) = (1:length(output_array))';
+    makespan = sum(output_array(:,1));
     num_exchanges = 0;
 
 else
     % Otherwise, we need an initialise function for an initial solution
     if init_algo == "simple"
-        state_array(:,1:2) = initialise_simple2(inputArray, num_jobs, num_machines);
+        output_array(:,1:2) = initialise_simple2(inputArray, num_jobs, num_machines);
     elseif init_algo == "random"
-        state_array(:,1:2) = initialise_random(inputArray, num_jobs, num_machines);
+        output_array(:,1:2) = initialise_random(inputArray, num_jobs, num_machines);
     elseif init_algo == "naive"
-        state_array(:,1:2) = initialise_naive(inputArray, num_jobs);
+        output_array(:,1:2) = initialise_naive(inputArray, num_jobs);
     end
     
     % Assign unique job_id to each job
-    state_array(:,3) = (1:length(state_array))';
+    output_array(:,3) = (1:length(output_array))';
     update = true;
     num_exchanges = 0;
     
-    state_array = sortrows(state_array, 2);
-    [state_array, machine_start_indices, M, machine_costs, makespan, L] ...
-        = update_supporting_structs(state_array, num_machines, num_jobs);
+    output_array = sortrows(output_array, 2);
+    [output_array, machine_start_indices, M, machine_costs, makespan, L] ...
+        = update_supporting_structs(output_array, num_machines, num_jobs);
 
     while update == true  
         %Generate for instance
@@ -85,7 +85,7 @@ else
         best_neighbour_makespan = makespan;
         
         %Cost of each program
-        program_costs = state_array(:,1);
+        program_costs = output_array(:,1);
         
         %While still neighbours
         while g.done == false
@@ -109,12 +109,12 @@ else
         else
             % Update to new instance
             makespan = best_neighbour_makespan;
-            state_array = make_move(state_array, machine_start_indices,...
+            output_array = make_move(output_array, machine_start_indices,...
                                                 best_neighbour);
                                             
-            [state_array, machine_start_indices, M, machine_costs, ...
+            [output_array, machine_start_indices, M, machine_costs, ...
                 makespan, L] ...
-            = update_supporting_structs(state_array, num_machines, num_jobs);
+            = update_supporting_structs(output_array, num_machines, num_jobs);
             
             %Update Bookkeeping values
             num_exchanges = num_exchanges + 1;

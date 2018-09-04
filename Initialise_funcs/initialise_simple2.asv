@@ -1,13 +1,10 @@
 % Places the biggest program into the emptiest machine until done
 %
 % Uses a binary heap for large num_machines, as better theoretical runtime,
-%   ( O(n*logm) vs O(n*m*logm) where n is num_programs, m num_machines )
 % however matlab is optimized for vector based actions, so isn't worth it
 % for smaller numbers of machines.
 %
-% TODO: If could use an underlying priority queue c imp like
-%       https://au.mathworks.com/matlabcentral/fileexchange/24238-ataiya-pq
-%       then that would be ideal but probs 'cheating'
+% TODO: If could use an
 %% Input:
 %   %inputData:
 %   %num_jobs: the number of jobs
@@ -38,7 +35,6 @@ function init_alloc = initialise_simple2(inputData, num_jobs, num_machines)
             [sorted_job_costs(1:num_machines)',(1:num_machines)'];
     machine_costs(1:num_machines, 1) = sorted_job_costs(1:num_machines);
     
-    %Use heap as priority queue
     if use_heap
         h = MaxHeap(num_machines,-1*machine_costs(:,1)',machine_costs(:,2)');
         i = num_machines+1;
@@ -51,7 +47,6 @@ function init_alloc = initialise_simple2(inputData, num_jobs, num_machines)
             h.Insert(-1*cost, index);
             i = i+1;
         end
-    %Just keep machine_costs sorted instead    
     else
         %Keeps assigning the rest of the jobs until done
         for i = num_machines+1:num_jobs
