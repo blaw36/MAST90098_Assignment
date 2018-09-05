@@ -1,4 +1,4 @@
-function [cost_pm,makespan] = evaluate_makespan(allocation, num_machines)
+function [cost_pm, makespan, L] = evaluate_makespan(allocation, num_machines)
 
     % Sort the allocation vector by machine for this to work
     [sort_order, sort_indx] = sort(allocation(:,2));
@@ -10,6 +10,6 @@ function [cost_pm,makespan] = evaluate_makespan(allocation, num_machines)
     cost_pm(:,2) = [accumarray(allocation(:,2),allocation(:,1)); ...
             zeros(num_machines - max(allocation(:,2)), 1)];
     
-    makespan = max(cost_pm(:,2));
+    [makespan, L] = max(cost_pm(:,2));
 
 end
