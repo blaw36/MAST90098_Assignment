@@ -1,6 +1,8 @@
 %% SCRIPT
 clear;
 clc;
+addpath(genpath('.\')); % add everything in the runscript.m directory
+rmpath('Not_in_use'); % remove not_in_use
 %% Set seed
 rng(10)
 %% Parameters
