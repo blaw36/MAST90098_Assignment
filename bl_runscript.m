@@ -17,8 +17,7 @@ k = 2; % # of exchanges (k-exch)
 init_method = "simple";
 
 %% Makespan solver
-[outputArray, outputMakespan, num_exchanges] = ...
-    ms_solver_gls_v2(a, k, init_method);
+[outputArray, outputMakespan, num_exchanges] = gls(a, k, init_method);
 
 %% Graphing and analysis
 % Sort the output for presentation
@@ -51,8 +50,7 @@ for i = machine_range(1):diff(machine_range)/machine_steps:machine_range(2)
     fprintf("Machines: %d  : ", i);
     a = generate_ms_instances(10*i,i);
     startTime = tic;
-    [outputArray, outputMakespan, num_exchanges] = ...
-        ms_solver_gls_v2(a, k, init_method);
+    [outputArray, outputMakespan, num_exchanges] = gls(a, k, init_method);
     t = toc(startTime);
     lower_bound = lower_bound_makespan(a);
     fprintf("Relative Error to LB of %f, %d exchanges, %f time\n", ...
