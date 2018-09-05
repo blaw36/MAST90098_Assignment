@@ -25,7 +25,7 @@
     % num_exchanges:
         % number of (k-)exchanges performed
 function [output_array, makespan, num_exchanges] = ...
-                            ms_solver_gls_v2(inputArray, k_exch, init_algo)
+                            gls(inputArray, k_exch, init_algo)
                         
 % Initialisation
 length_of_input = length(inputArray);
