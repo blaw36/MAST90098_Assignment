@@ -96,7 +96,7 @@ classdef NeighbourhoodGenerator < handle
                 choice = 1:(obj.num_machines-1);
             end
             obj.other_m = combnk(choice,obj.k-1);
-            obj.other_m_end = length(obj.other_m);
+            obj.other_m_end = size(obj.other_m,1);
             
             %Order those k machines
             obj.construct_order();
@@ -168,29 +168,36 @@ classdef NeighbourhoodGenerator < handle
             % 1,1,...,2,2,...,n_{m-1},n_{m-1}
             % etc, cumulatively 'telescoping' outwards in the repetitions
             % from right to left
+            
             divisors_repelem = zeros(1,cols);
             % Number of repeats (repelem) required for each program, for 
             % each machine except the last one
-            for k = 1:cols
-                divisors_repelem(:,k) = rows/prod(progs_per_machine(1:k));
+            divisors_repelem(:,cols) = 1;
+            for k = (cols-1):-1:1
+                divisors_repelem(:,k) = divisors_repelem(:,k+1).*progs_per_machine(k+1);
             end
+            
             % Number of times the sequence of repeated programs, for each
             % machine, gets repeated
             divisors_repmat = zeros(1,cols);
-            for k = cols:-1:1
-                divisors_repmat(:,k) = rows/prod(progs_per_machine(k:cols));
+            divisors_repmat(:,1) = 1;
+            for k = 2:cols
+                divisors_repmat(:,k) = divisors_repmat(:,(k-1)).*progs_per_machine(k-1);
             end
+            
             % Put it all together
             intermed_programs = zeros(rows,cols);
             % Last column has no repeated elements, just repeated sequences
             intermed_programs(:,cols) = (repmat(1:progs_per_machine(cols), ...
                 1, rows/progs_per_machine(cols)))';
+            
             % The rest have repeated elements, and those sequences are then
             % repeated
-            for l = (cols-1):-1:1
-                intermed_programs(:,l) = (repmat(repelem(...
-                    1:progs_per_machine(l),divisors_repelem(l)), 1, divisors_repmat(l)))';
+            for k = (cols-1):-1:1
+                intermed_programs(:,k) = (repmat(repelem(...
+                    1:progs_per_machine(k),divisors_repelem(k)), 1, divisors_repmat(k)))';
             end
+            
             % Put the first row last (first row = itself as part of n/hood)
             obj.programs = [intermed_programs(2:rows,:); ...
                 intermed_programs(1,:)];

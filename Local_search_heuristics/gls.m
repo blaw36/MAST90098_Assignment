@@ -26,6 +26,12 @@
         % number of (k-)exchanges performed
 function [output_array, makespan, num_exchanges] = ...
                             ms_solver_gls_v2(inputArray, k_exch, init_algo)
+                        
+% Initialisation
+length_of_input = length(inputArray);
+num_jobs = length_of_input - 1;
+num_machines = inputArray(length_of_input);
+output_array = zeros(num_jobs,3);
 
 % Variable checking
 allowed_init_algos = ["simple", "random", "naive"];
@@ -33,11 +39,9 @@ if sum(strcmp(allowed_init_algos,init_algo)) == 0
     error("'Init_algo' parameter must be one of: '%s' \n", strjoin(allowed_init_algos,"', '"))
 end
 
-% Initialisation
-length_of_input = length(inputArray);
-num_jobs = length_of_input - 1;
-num_machines = inputArray(length_of_input);
-output_array = zeros(num_jobs,3);
+if k_exch > inputArray(length_of_input)
+    error("Number of exchanges cannot exceed number of machines")
+end
 
 % Print some stuff to screen
 fprintf("input_length: %d \n", length_of_input);

@@ -6,10 +6,10 @@ rmpath('Not_in_use'); % remove not_in_use
 %% Set seed
 rng(10)
 %% Parameters
-n = 10; % # jobs
-m = 3; % # machines
+n = 200; % # jobs
+m = 100; % # machines
 a = generate_ms_instances(n, m);
-k = 2; % # of exchanges (k-exch)
+k = 3; % # of exchanges (k-exch)
 
 %% Initialisation algorithm:
     % 'simple' = Costliest job allocated to machine with most 'capacity'
@@ -20,6 +20,8 @@ init_method = "simple";
 
 %% Makespan solver
 [outputArray, outputMakespan, num_exchanges] = gls(a, k, init_method);
+outputMakespan
+num_exchanges
 
 %% Graphing and analysis
 % Sort the output for presentation
