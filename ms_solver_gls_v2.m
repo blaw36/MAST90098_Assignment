@@ -62,7 +62,7 @@ elseif (num_machines == 1)
 else
     % Otherwise, we need an initialise function for an initial solution
     if init_algo == "simple"
-        output_array(:,1:2) = initialise_simple2(inputArray, num_jobs, num_machines);
+        output_array(:,1:2) = initialise_simple(inputArray, num_jobs, num_machines);
     elseif init_algo == "random"
         output_array(:,1:2) = initialise_random(inputArray, num_jobs, num_machines);
     elseif init_algo == "naive"
@@ -78,6 +78,10 @@ else
     [output_array, machine_start_indices, M, machine_costs, makespan, L] ...
         = update_supporting_structs(output_array, num_machines, num_jobs);
 
+    %fprintf("Relative Error to LB after init %f\n",...
+    %    makespan/lower_bound_makespan(inputArray)...
+    %    );
+    
     while update == true  
         %Generate for instance
         g = NeighbourhoodGenerator(k_exch, L, M);
