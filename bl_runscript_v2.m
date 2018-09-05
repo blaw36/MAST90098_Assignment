@@ -45,7 +45,7 @@ ratio_vs_lb = outputMakespan/lower_bound
 
 %% Stress tests
 results = [];
-machine_range = [8000,10000];
+machine_range = [2000,4000];
 machine_steps = 2;
 for i = machine_range(1):diff(machine_range)/machine_steps:machine_range(2)
     fprintf("Machines: %d  : ", i);

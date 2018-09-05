@@ -1,4 +1,4 @@
-classdef NeighbourhoodGenerator3 < handle
+classdef NeighbourhoodGenerator < handle
     % You only call next when you want the next order, and the accompanying
     % set of all possible ways to move programs between them.
     
@@ -75,7 +75,7 @@ classdef NeighbourhoodGenerator3 < handle
     end
 
     methods
-        function obj = NeighbourhoodGenerator3(k, L, M)
+        function obj = NeighbourhoodGenerator(k, L, M)
             obj.k = k;
             obj.L = L;
             obj.M = M;

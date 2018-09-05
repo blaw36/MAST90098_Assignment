@@ -4,7 +4,7 @@ k = 2;
 L = [2];
 M =  [2,3,1,2];
 
-g = NeighbourhoodGenerator3(k, L, M);
+g = NeighbourhoodGenerator(k, L, M);
 
 %3 Version use
 % while g.done == false
@@ -14,16 +14,6 @@ g = NeighbourhoodGenerator3(k, L, M);
 %     disp(programs)
 %     disp(" ")
 %     g.next();
-% end
-
-% < 3 version use
-% while g.done == false
-%     g.next();
-%     order = g.order;
-%     programs = g.programs;
-%     disp(order)
-%     disp(programs)
-%     disp(" ")
 % end
 
 %Performance testing
@@ -41,40 +31,10 @@ for M_max = M_max_range(1):M_max_range(2)/M_max_steps:M_max_range(2)
         max_ = max(M);
         L = find(M==max_);
         for k = k_range(1):min(m, k_range(2))
-%             disp("NeighbourhoodGenerator")
-%             startTime = tic;
-%             neighbourhood_size = 0;
-%             g = NeighbourhoodGenerator(k, L, M);
-%             while g.done == false
-%                 g.next();
-%                 neighbourhood_size = neighbourhood_size +1;
-%             end
-%             t = toc(startTime);
-%             n = sum(M);
-%             fprintf("For M_max = %d, n = %d, m = %d, k = %d, len(L)=%d:",...
-%                     [M_max, n, m, k, length(L)])
-%             fprintf(" |Neigh| = %d, time=%f\n", ...
-%                [neighbourhood_size, t])
-% %                 
-%             disp("NeighbourhoodGenerator2")
-%             startTime = tic;
-%             neighbourhood_size = 0;
-%             g = NeighbourhoodGenerator2Opt(k, L, M);
-%             while g.done == false
-%                 g.next();
-%                 neighbourhood_size = neighbourhood_size +1;
-%             end
-%             t = toc(startTime);
-%             n = sum(M);
-%             fprintf("For M_max = %d, n = %d, m = %d, k = %d, len(L)=%d:",...
-%                     [M_max, n, m, k, length(L)])
-%             fprintf(" |Neigh| = %d, time=%f\n", ...
-%                [neighbourhood_size, t])
-           
-            disp("NeighbourhoodGenerator3")
+            disp("NeighbourhoodGenerator")
             startTime = tic;
             neighbourhood_size = 0;
-            g = NeighbourhoodGenerator3(k, L, M);
+            g = NeighbourhoodGenerator(k, L, M);
             while g.done == false
                 neighbourhood_size = neighbourhood_size + g.programs_end;
                 g.next();

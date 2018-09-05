@@ -80,7 +80,7 @@ else
 
     while update == true  
         %Generate for instance
-        g = NeighbourhoodGenerator3(k_exch, L, M);
+        g = NeighbourhoodGenerator(k_exch, L, M);
         best_neighbour = {};
         best_neighbour_makespan = makespan;
         
