@@ -16,7 +16,7 @@
 %   %init_alloc:
 %%
 
-function init_alloc = initialise_simple2(inputData, num_jobs, num_machines)
+function init_alloc = initialise_simple(inputData, num_jobs, num_machines)
     
     %Uses a binary heap for large num_machines
     use_heap = false;
