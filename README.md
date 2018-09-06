@@ -51,4 +51,8 @@ A group project, exploring heuristics for solving the Minimum Makespan Schedulin
         * Progs are in batches of fixed cost (3,7,15,...,k, 2 * k + 1)
             with 3 times more of each prog cost as cost increases
         * some other engineeered case?
-    * Existing instance libraries?
+    * Existing instance libraries?\
+* Finding min neighbour
+   * Currently has to look through complete list of programs to compute cost of switch
+   * Given we only switch between k machines, the number of programs we consider the cost of is significantly smaller than the size of          population of programs
+   * Can we get away with reducing our data that passes through this function only to the programs relevant to the k machines, and              reduce the size/time of computations in this section?
