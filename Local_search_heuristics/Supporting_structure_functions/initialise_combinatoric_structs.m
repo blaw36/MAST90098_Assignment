@@ -3,6 +3,10 @@
 %   %num_machines: the number of machines
 %   %k: the k-exchange
 %% Ouput:
+%   TODO: Structs incurr overhead
+%       Other way?, not sure if possible variable shape arrays
+%       Fine tune for particular values of k
+%
 %   %selected_machines: Encodes all the way to select k machines
 %        Selected_machines has 3 dims , (d=[2,..,k], combs=matrix())
 %   %machine_orders: Encodes all the ways to order those machine
