@@ -22,8 +22,9 @@ function ...
                             program_costs, ...
                             machine_start_indices, M, machine_costs, ...
                             makespan, fix_moved)
-    if nargin == 8
-        fix_moved = false;
+    
+    if ~exist('fix_moved','var')
+        fix_moved=false;
     end
     
     order = move{1};

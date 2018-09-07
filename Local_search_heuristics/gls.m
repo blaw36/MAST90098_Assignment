@@ -1,96 +1,55 @@
-% Author: Brendan Law
-% Date: 15th August 2018
-
-% Output array should have, for each m machine
-% The optimal order of the jobs
-% As well as the (m+1)th cell containing the makespan of the problem
-% ie. the total time of longest running machine
-
-% Input:
-    % inputArray: n+1 length vector of job costs, and n+1th element is # of
+%% Input:
+    % input_array: n+1 length vector of job costs, and n+1th element is # of
         % machines
-    % k_exch: k-value for # of exchanges
+    % k_exch: specifies which exchange is being used
     % init_algo: initialisation algorithm:
         % 'simple' = Costliest job allocated to machine with most 'capacity'
         % relative to most utilised machine at the time
         % 'random' = Random allocation (random number generated for machine)
         % 'naive' = All jobs placed into machine 1
-
-% Output:
-    % state_array:
+%% Output:
+    % output_array:
         % rows - a job allocated to a position in a machine
         % columns - job_cost, machine_no, unique job_id
     % makespan:
         % max, across all machines, of sum of jobs for a given machine
     % num_exchanges:
-        % number of (k-)exchanges performed
+        % number of exchanges performed
+%%
 function [output_array, makespan, num_exchanges] = ...
-                            gls(inputArray, k_exch, init_algo)                   
+                            gls(input_array, k_exch, init_algo)                   
 
-% Initialisation
-length_of_input = length(inputArray);
-num_jobs = length_of_input - 1;
-num_machines = inputArray(length_of_input);
-output_array = zeros(num_jobs,3);
-
-% Variable checking
-allowed_init_algos = ["simple", "random", "naive"];
-if sum(strcmp(allowed_init_algos,init_algo)) == 0
-    error("'Init_algo' parameter must be one of: '%s' \n", strjoin(allowed_init_algos,"', '"))
-end
-
-if k_exch > inputArray(length_of_input)
-    error("Number of exchanges cannot exceed number of machines")
-end
-
-% Print some stuff to screen
-fprintf("input_length: %d \n", length_of_input);
-fprintf("num_jobs: %d \n", num_jobs);
-fprintf("number_of_machines: %d \n", num_machines);
-
-if (num_jobs <= num_machines)
-    % If we happen to get less jobs than machines, makespan
-    % is just time of most expensive job
-    output_array = [inputArray(1:num_jobs)', (1:num_jobs)', (1:num_jobs)'];
-    makespan = max(output_array(:,1));
-    num_exchanges = 0;
-    
-elseif (num_machines == 1)
-    % If one machine, everything allocated to that machine
-    % Makespan is just the max
-    output_array(:,1:2) = initialise_naive(inputArray, num_jobs);
-    output_array(:,3) = (1:length(output_array))';
-    makespan = sum(output_array(:,1));
+    % Initialisation
+    length_of_input = length(input_array);
+    num_jobs = length_of_input - 1;
+    num_machines = input_array(length_of_input);
     num_exchanges = 0;
 
-else
-    % Otherwise, we need an initialise function for an initial solution
-    if init_algo == "simple"
-        output_array(:,1:2) = initialise_simple(inputArray, num_jobs, num_machines);
-    elseif init_algo == "random"
-        output_array(:,1:2) = initialise_random(inputArray, num_jobs, num_machines);
-    elseif init_algo == "naive"
-        output_array(:,1:2) = initialise_naive(inputArray, num_jobs);
+    % Variable checking
+    if k_exch > input_array(length_of_input)
+        error("Number of exchanges cannot exceed number of machines")
     end
-    
-    % Assign unique job_id to each job
-    output_array(:,3) = (1:length(output_array))';
-    update = true;
-    num_exchanges = 0;
-    
-    output_array = sortrows(output_array, 2);
-    [output_array, program_costs, ...
-            machine_start_indices, M, machine_costs, makespan, L] ...
+
+    % Print some stuff to screen
+    fprintf("num_jobs: %d \n", num_jobs);
+    fprintf("number_of_machines: %d \n", num_machines);
+
+    [output_array, done] = initialise_ouput_array(...
+                        init_algo, input_array, num_jobs, num_machines);
+                                        
+    %TODO: Switch to using ss, and cs structs to tidy things up
+    [program_costs, ...
+    machine_start_indices, M, machine_costs, makespan, L] ...
     = initialise_supporting_structs(output_array, num_machines, num_jobs);
 
     [selected_machines, machine_orders, machine_orders_end] = ...
                     initialise_combinatoric_structs(num_machines, k_exch);
                 
     fprintf("Relative Error to LB after init %f\n",...
-       makespan/lower_bound_makespan(inputArray)...
+       makespan/lower_bound_makespan(input_array)...
        );
     
-    while update == true  
+    while done == false  
         %Generate and test neighbourhood
         [best_neighbour, best_neighbour_makespan] = generate_and_test(...
                  k_exch, L, M, ...
@@ -99,7 +58,7 @@ else
         
         % Evaluate termination flag, only if new is better
         if makespan <= best_neighbour_makespan
-            update = false;
+            done = true;
         else
             % Update to new instance
             makespan = best_neighbour_makespan;
@@ -107,15 +66,18 @@ else
                                                 best_neighbour);
                                             
             [program_costs, machine_start_indices, M, machine_costs, L] ...
-            = update_supporting_structs(best_neighbour, output_array, ...
-                        num_machines,...
-                        program_costs, machine_start_indices, ...
-                        M, machine_costs, ...
-                        makespan);
+                    = update_supporting_structs(...
+                                                best_neighbour, ...
+                                                output_array, ...
+                                                num_machines,...
+                                                program_costs, ...
+                                                machine_start_indices, ...
+                                                M, ...
+                                                machine_costs, ...
+                                                makespan);
             
             %Update Bookkeeping values
             num_exchanges = num_exchanges + 1;
         end
     end
-end
 end

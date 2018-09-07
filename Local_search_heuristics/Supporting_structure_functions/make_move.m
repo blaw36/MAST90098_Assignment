@@ -15,8 +15,8 @@
 function [output_array] = ...
             make_move(output_array, machine_start_indices, move, fix_moved)
         
-    if nargin == 3
-        fix_moved = false;
+    if ~exist('fix_moved','var')
+        fix_moved=false;
     end
                              
     order_indices = move{1};

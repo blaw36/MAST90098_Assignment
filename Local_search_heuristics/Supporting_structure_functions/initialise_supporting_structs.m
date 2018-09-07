@@ -8,7 +8,6 @@
 %   %fix_moved: Indicates whether the 4th col of output_array exists and
 %       whether moved programs should be flagged as being moved.
 %% Ouput:
-%   %output_array: The altered output_array
 %   %machine_start_indices: The ith value indicates which row of the
 %       output_array the ith machine first appears
 %   %M: The number of (movable) programs in each machine
@@ -16,7 +15,7 @@
 %   %makespan: The cost of the most loaded machine(s)
 %   %L: The machine numbers of all the loaded machines
 %%
-function [output_array, program_costs, ...
+function [program_costs, ...
     machine_start_indices, M, machine_costs, makespan, L] ...
     = initialise_supporting_structs(output_array, num_machines, num_jobs)
                                 
