@@ -48,26 +48,20 @@ classdef NeighbourhoodGenerator < handle
         num_loaded %Size L
         num_machines %Size M
         
-        loaded %L
-        loaded_i = 1 %The current index of L which is selected
-        loaded_end %The size of L
+        selected_machines % The m selected machines
+        selected_machines_i = 1 %The current row of the matrix
+        selected_machines_end = 0 %The number of rows of the matrix
         
-        other_m %Ncr(m-1,k-1)x(k-1) matrix encoding the chosen non-loaded
-        other_m_i = 1 %The current row of the matrix
-        other_m_end %The number of rows of the matrix
-        
-        machine_order %perm(k)xk matrix encoding the order
+        machine_order %a matrix encoding the order of the selected machines
         machine_order_i = 1 %The current row of the matrix
-        machine_order_end %The number of rows of the matrix
+        machine_order_end = 0 %The number of rows of the matrix
+        
+        valid_order %The valid orderings of the selected_machines
+        valid_order_i = 1 %The current row of the matrix
+        valid_order_end = 0 %The number of rows of the matrix
         
         programs % Prod_i(|M_i|)x(k or k-1) matrix encoding progs to move
-        programs_end %The number of rows of the matrix
-        
-        %Variables used to construct order
-        selected_loaded
-        other_machines
-        selected_other_machines
-        selected_machines
+        programs_end = 0 %The number of rows of the matrix
         
         order %The order specifying a cycle or path
         curr %{order_specifying_path/cycles, target_programs}
@@ -86,29 +80,23 @@ classdef NeighbourhoodGenerator < handle
             obj.num_machines = length(M);
             
             %Create initial Values
-            %Choose one loaded
-            obj.loaded = combnk(L,1); 
-            obj.loaded_end = length(obj.loaded);
             
-            %Choose k-1 other machines from the m-1 remaining
-            choice = [1];%need to pass vector to combnk, handles edge case
-            if obj.num_machines > 1
-                choice = 1:(obj.num_machines-1);
-            end
-            obj.other_m = combnk(choice,obj.k-1);
-            obj.other_m_end = size(obj.other_m,1);
+            %Choose k machines from m            
+            obj.selected_machines = combnk(1:obj.num_machines,obj.k);
+            obj.selected_machines_end = size(obj.selected_machines,1);
             
             %Order those k machines
             obj.construct_order();
             
-            obj.order_selected()
-            obj.construct_programs()
+            %Calls the first next
+            obj.next()
         end
         
         function construct_order(obj)
             if obj.cycle
                 %Can be viewed as selecting a neclace, see Wikipedia
                 %Fix the first element and then perm the remainder.
+                %TODO: Product
                 obj.machine_order_end = factorial(obj.k-1);
                 obj.machine_order = [
                         ones(factorial(obj.k-1),1), perms(2:obj.k)
@@ -122,30 +110,51 @@ classdef NeighbourhoodGenerator < handle
         function order_selected(obj)
             %Combines the information in the machine related generators to
             %display the selected machines in their selected order.
-
-            %loaded has been incremented, as other_m_i reset
-            if obj.other_m_i == 1
-                obj.selected_loaded = obj.loaded(obj.loaded_i);
-                %Removes the loaded machine then selects from the others.
-                obj.other_machines = [1:(obj.selected_loaded-1), ...
-                            (obj.selected_loaded+1):obj.num_machines];
-            end
-            %other_machines has been incremented,as machine_order_i reset
-            if obj.machine_order_i == 1
-                obj.selected_other_machines = ...
-                        obj.other_machines(obj.other_m(obj.other_m_i,:));
-                %Combines selected loaded and unloaded
-                obj.selected_machines = ...
-                    [obj.selected_other_machines, obj.selected_loaded];
-            end
+%             M = obj.M
+%             select = obj.selected_machines
+%             order = obj.machine_order
+%             selected_order = obj.machine_order(obj.machine_order_i,:)
             %Orders the selected using the machine_order permutation
-            obj.order = obj.selected_machines( ...
+            obj.valid_order = obj.selected_machines(:, ...
                                 obj.machine_order(obj.machine_order_i,:));
+            a = obj.valid_order;
+            %Prune elements of the order that are between empty machines
+            if obj.cycle
+                %Drop all with a single empty machine in the order
+                obj.valid_order = obj.valid_order(...
+                                    min(obj.M(obj.valid_order),[],2)~=0,:);
+            else
+                %Drop all with a single empty machine in the order
+                %which isn't the last
+                drawn_from = obj.valid_order(:,1:obj.k-1);
+                %if only one machine check non-empty
+                if size(drawn_from,2) == 1
+                    obj.valid_order = obj.valid_order(obj.M(drawn_from)~=0,:);
+                %otherwise check all machines_non_empty
+                else
+                    obj.valid_order = obj.valid_order(...
+                        min(obj.M(drawn_from),[],2)~=0,:);
+                end
+            end
+            b = obj.valid_order;  
+            %Prune elements of the order that don't have a loaded machine
+            obj.valid_order = obj.valid_order(...
+                                any(ismember(obj.valid_order,obj.L),2),:);
+            c = obj.valid_order;  
+            
+            %TODO: Could shuffle valid_order for greater diversity
+            
+            obj.valid_order_end = size(obj.valid_order, 1);
+            obj.valid_order_i = 1;
         end
         
         function construct_programs(obj)
             %Using the current order of machines constructs all ways to
             %move programs between these machines.
+%             v = obj.valid_order
+%             o = obj.order
+%             cycle = obj.cycle
+            obj.order = obj.valid_order(obj.valid_order_i,:);
             progs_per_machine = obj.M(obj.order);
             
             if obj.cycle == false
@@ -213,15 +222,12 @@ classdef NeighbourhoodGenerator < handle
             %current order, call this to get generate next order and 
             %programs.
             
-            %Gets new permutation
-            obj.machine_order_i = obj.machine_order_i+1;
-            if obj.machine_order_i > obj.machine_order_end
-                %Selects different set of un-loaded machines
-                obj.other_m_i = obj.other_m_i+1;
-                if obj.other_m_i > obj.other_m_end
-                    %Selects different loaded machine
-                    obj.loaded_i = obj.loaded_i+1;
-                    if obj.loaded_i > obj.loaded_end
+            while obj.done==false && obj.valid_order_i > obj.valid_order_end
+                obj.machine_order_i = obj.machine_order_i+1;
+                if obj.machine_order_i > obj.machine_order_end
+                    %Selects different set of un-loaded machines
+                    obj.selected_machines_i = obj.selected_machines_i+1;
+                    if obj.selected_machines_i > obj.selected_machines_end
                         if obj.cycle
                             %Move on to paths
                             obj.cycle = false;
@@ -231,21 +237,19 @@ classdef NeighbourhoodGenerator < handle
                             obj.done = true;
                         end
                         %Reset the selected loaded machine to first
-                        obj.loaded_i = 1;
+                        obj.selected_machines_i = 1;
                     end
-                    %Reset the selected other machines to first
-                    obj.other_m_i = 1;                        
+                    %Reset the selected permutation to first
+                    obj.machine_order_i = 1;                    
                 end
-                %Reset the selected permutation to first
-                obj.machine_order_i = 1;                    
+                %Updates the order
+                obj.order_selected();
             end
-            %Updates the order and the programs,
-            obj.order_selected()
-            obj.construct_programs();
-            
-            %If no shuffle exists, generate next.
-            if isempty(obj.programs)&& obj.done == false
-                obj.next()
+            if obj.done == false
+                %Updates the programs,
+                obj.construct_programs();
+                %Gets next valid_order
+                obj.valid_order_i = obj.valid_order_i+1;
             end
         end
     end

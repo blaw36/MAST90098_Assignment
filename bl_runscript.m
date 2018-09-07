@@ -4,24 +4,25 @@ clc;
 addpath(genpath('.\')); % add everything in the runscript.m directory
 rmpath('Not_in_use'); % remove not_in_use
 %% Set seed
-rng(10)
+rng(2)
 %% Parameters
-n = 200; % # jobs
-m = 100; % # machines
+n = 10; % # jobs
+m = 3; % # machines
 a = generate_ms_instances(n, m);
-k = 3; % # of exchanges (k-exch)
+k = 2; % # of exchanges (k-exch)
 
 %% Initialisation algorithm:
     % 'simple' = Costliest job allocated to machine with most 'capacity'
         % relative to most utilised machine at the time
     % 'random' = Random allocation (random number generated for machine)
     % 'naive' = All jobs placed into machine 1
-init_method = "simple";
+init_method = "random";
 
 %% Makespan solver
 [outputArray, outputMakespan, num_exchanges] = gls(a, k, init_method);
 outputMakespan
 num_exchanges
+
 
 %% Graphing and analysis
 % Sort the output for presentation
@@ -44,11 +45,11 @@ ylabel('Job cost') % y-axis label
 % outputMakespan
 lower_bound = lower_bound_makespan(a);
 ratio_vs_lb = outputMakespan/lower_bound
-% return
+return
 
 %% Stress tests
 results = [];
-machine_range = [2000,4000];
+machine_range = [500,1000];
 machine_steps = 2;
 for i = machine_range(1):diff(machine_range)/machine_steps:machine_range(2)
     fprintf("Machines: %d  : ", i);
