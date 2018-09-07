@@ -88,26 +88,10 @@ else
        );
     
     while update == true  
-        %Generate for instance
-        g = NeighbourhoodGenerator(k_exch, L, M);
-        best_neighbour = {};
-        best_neighbour_makespan = makespan;
-        
-        %While still neighbours
-        while g.done == false
-            %Find the best neighbour in this batch of neighbours
-            [min_neigh_makespan, prog_index] = find_min_neighbour(...
-                                g.order, g.programs, ...
-                                machine_costs, machine_start_indices, ...
-                                program_costs);
-                                
-            if min_neigh_makespan < best_neighbour_makespan
-                best_neighbour_makespan = min_neigh_makespan;
-                best_neighbour = {g.order, g.programs(prog_index,:)};
-            end
-            %Retrieve next
-            g.next();
-        end
+        %Generate and test neighbourhood
+        [best_neighbour, best_neighbour_makespan] = generate_and_test(...
+                     num_machines, k_exch, L, M, ...
+                     machine_costs, machine_start_indices, program_costs);
         
         % Evaluate termination flag, only if new is better
         if makespan <= best_neighbour_makespan
