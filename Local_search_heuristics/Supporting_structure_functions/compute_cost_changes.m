@@ -1,3 +1,14 @@
+%Computes the change in machine costs for a batch of programs on an order
+%% Input:
+%   %order: Encodes the cycle/path that the movement takes place on.
+%   %programs: A batch of ways to move across the order.
+%   %machine_start_indices: The ith value indicates which row of the
+%       output_array the ith machine first appears
+%   %program_costs: The cost of the programs ordered as in output_array
+%% Ouput:
+%   %changes: A matrix encoding how each machine in the order changes cost
+%                when movement specified by the paird program is done to it
+%%
 function changes = compute_cost_changes(order, programs, ...
                     machine_start_indices, program_costs)
 
@@ -30,3 +41,4 @@ function changes = compute_cost_changes(order, programs, ...
     end
     %Per column diff
     changes = - diff(in_out_costs,1,2);
+end

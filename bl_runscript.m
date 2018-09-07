@@ -16,7 +16,7 @@ k = 4; % # of exchanges (k-exch)
         % relative to most utilised machine at the time
     % 'random' = Random allocation (random number generated for machine)
     % 'naive' = All jobs placed into machine 1
-init_method = "naive";
+init_method = "random";
 
 %% Makespan solver
 [outputArray, outputMakespan, num_exchanges] = gls(a, k, init_method);
