@@ -3,21 +3,18 @@
 %   %L: The machine numbers of all the loaded machines
 %   %M: The number of (movable) programs in each machine
 %   %cycle: Whether the order is encoding a cycle or not
-%   %selected_machines: the subset of all machines to use
-%   %machine_order: how to order that selected subset
+%   %orders: All possible orders without considering restrictions
 %% Ouput:
 %   %valid_orders: A matrix encoding the valid ways to order the machine.
 %   %num_valid: The number of rows of the matrix
 %%
 
 function [valid_orders, num_valid] = generate_valid_orders(k, L, M, cycle,...
-                                        selected_machines, machine_order)
+                                        orders)
                                     
-    valid_orders = selected_machines(:, machine_order);
-    
     %Prune elements of the order that don't include a loaded machine
     %Note this order of pruning is faster
-    valid_orders = valid_orders(any(ismember(valid_orders,L),2),:);
+    valid_orders = orders(any(ismember(orders,L),2),:);
     
     %Prune elements of the order that try to move from empty machines
     if cycle

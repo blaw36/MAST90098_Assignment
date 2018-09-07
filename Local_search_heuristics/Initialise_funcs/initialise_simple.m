@@ -1,7 +1,7 @@
 % Places the biggest program into the emptiest machine until done
 %
 % Uses a binary heap for large num_machines, as better theoretical runtime,
-%   ( O(n*logm) vs O(n*m*logm) where n is num_programs, m num_machines )
+%   ( O(n*logm) vs O(n*m) where n is num_programs, m num_machines )
 % however matlab is optimized for vector based actions, so isn't worth it
 % for smaller numbers of machines.
 %
@@ -19,8 +19,11 @@
 function init_alloc = initialise_simple(inputData, num_jobs, num_machines)
     
     %Uses a binary heap for large num_machines
+    %TODO: work out an approx cutoff, 50000 just a random large guess
+    %TODO: remove heap?, not going to be working on anything that big
+    %anyway
     use_heap = false;
-    if num_machines >= 500
+    if num_machines >= 50000
         use_heap = true;
     end
 
@@ -51,16 +54,12 @@ function init_alloc = initialise_simple(inputData, num_jobs, num_machines)
             h.Insert(-1*cost, index);
             i = i+1;
         end
-    %Just keep machine_costs sorted instead    
     else
         %Keeps assigning the rest of the jobs until done
         for i = num_machines+1:num_jobs
-            %Resort
-            machine_costs = sortrows(machine_costs,1,'ascend');
-            %Place the next smallest job into the emptiest machine.
-            init_alloc(i,:) = [sorted_job_costs(i), machine_costs(1,2)]; 
-            %Place the cost of the next job into the emptiest machine
-            machine_costs(1,1) = machine_costs(1,1) + sorted_job_costs(i);
+            [cost, loc] = min(machine_costs(:,1));
+            init_alloc(i,:) = [sorted_job_costs(i), loc];
+            machine_costs(loc,1) = cost + sorted_job_costs(i);
         end
     end
 end
