@@ -12,8 +12,13 @@
 
 function [valid_orders, num_valid] = generate_valid_orders(k, L, M, cycle,...
                                         selected_machines, machine_order)
-    
+                                    
     valid_orders = selected_machines(:, machine_order);
+    
+    %Prune elements of the order that don't include a loaded machine
+    %Note this order of pruning is faster
+    valid_orders = valid_orders(any(ismember(valid_orders,L),2),:);
+    
     %Prune elements of the order that try to move from empty machines
     if cycle
         %Drop all with a single empty machine
@@ -30,8 +35,6 @@ function [valid_orders, num_valid] = generate_valid_orders(k, L, M, cycle,...
             valid_orders = valid_orders(min(M(not_last),[],2)~=0,:);
         end
     end
-    %Prune elements of the order that don't include a loaded machine
-    valid_orders = valid_orders(any(ismember(valid_orders,L),2),:);
     
     num_valid = size(valid_orders, 1);
 end

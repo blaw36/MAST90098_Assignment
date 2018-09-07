@@ -25,8 +25,8 @@
     % num_exchanges:
         % number of (k-)exchanges performed
 function [output_array, makespan, num_exchanges] = ...
-                            gls(inputArray, k_exch, init_algo)
-                        
+                            gls(inputArray, k_exch, init_algo)                   
+
 % Initialisation
 length_of_input = length(inputArray);
 num_jobs = length_of_input - 1;
@@ -83,6 +83,9 @@ else
             machine_start_indices, M, machine_costs, makespan, L] ...
     = initialise_supporting_structs(output_array, num_machines, num_jobs);
 
+    [selected_machines, machine_orders, machine_orders_end] = ...
+                    initialise_combinatoric_structs(num_machines, k_exch);
+                
     fprintf("Relative Error to LB after init %f\n",...
        makespan/lower_bound_makespan(inputArray)...
        );
@@ -90,8 +93,9 @@ else
     while update == true  
         %Generate and test neighbourhood
         [best_neighbour, best_neighbour_makespan] = generate_and_test(...
-                     num_machines, k_exch, L, M, ...
-                     machine_costs, machine_start_indices, program_costs);
+                 k_exch, L, M, ...
+                 machine_costs, machine_start_indices, program_costs,...
+                 selected_machines, machine_orders, machine_orders_end);
         
         % Evaluate termination flag, only if new is better
         if makespan <= best_neighbour_makespan

@@ -14,31 +14,22 @@
 %   %best_makespan
 %%
 function [best_neighbour, best_makespan] = generate_and_test(...
-                     num_machines, k, L, M, ...
-                     machine_costs, machine_start_indices, program_costs)
+                 k, L, M, ...
+                 machine_costs, machine_start_indices, program_costs,...
+                 selected_machines, machine_orders, machine_orders_end)
     
     best_makespan = inf;
     best_neighbour = {};
     
     %Take the union of all cycles and paths involving <= k machines
     for d = 2:k
-        %TODO: Selected_machines and machine_orders static between
-        %when this func is called could be saved in mem to save time.
-        selected_machines = combnk(1:num_machines, d);
-        for cycle = [true, false]
-            if cycle
-                %Fix the first element and then perm the remainder.
-                machine_orders = [ones(factorial(d-1),1), perms(2:d)];
-                machine_order_end = prod(1:(d-1));
-            else
-                machine_orders = perms(1:d);
-                machine_order_end = prod(1:d);
-            end
-
-            for i  = 1:machine_order_end
+        for cycle = [true, false]             
+            for i  = 1:machine_orders_end(d-1,cycle+1)
                 [valid_orders, num_valid] = generate_valid_orders(...
-                                d, L, M, cycle,...
-                                selected_machines, machine_orders(i,:));
+                    d, L, M, cycle,...
+                    selected_machines(d-1).data,...
+                    machine_orders(d-1, cycle+1).data(i,:));
+                
                 if num_valid == 0
                     continue
                 end
