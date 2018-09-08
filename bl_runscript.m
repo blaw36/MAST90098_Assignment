@@ -6,7 +6,7 @@ rmpath('Not_in_use'); % remove not_in_use
 %% Set seed
 rng(2)
 %% Parameters
-n = 10; % # jobs
+n = 20; % # jobs
 m = 5; % # machines
 a = generate_ms_instances(n, m);
 k = 2; % # of exchanges (k-exch)
@@ -19,7 +19,7 @@ k = 2; % # of exchanges (k-exch)
 init_method = "simple";
 
 %% Makespan solver
-[outputArray, outputMakespan, num_exchanges] = gls(a, k, init_method);
+[outputArray, outputMakespan, num_exchanges] = vds(a, k, init_method);
 outputMakespan
 num_exchanges
 
@@ -46,9 +46,10 @@ ylabel('Job cost') % y-axis label
 lower_bound = lower_bound_makespan(a);
 ratio_vs_lb = outputMakespan/lower_bound
 
+
 %% Stress tests
 results = [];
-machine_range = [1000,2000];
+machine_range = [25,50];
 machine_steps = 2;
 for i = machine_range(1):diff(machine_range)/(machine_steps-1):machine_range(2)
     fprintf("Machines: %d  : ", i);
