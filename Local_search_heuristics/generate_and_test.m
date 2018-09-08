@@ -1,4 +1,7 @@
 % Generates and tests the neighbourhood of the current instance
+
+%NOTE: Changing to largely columns had almost no effect on
+%       speed
 %% Input:
 %   %num_machines: The number of machines
 %   %k: The size of the k-exchange
@@ -23,23 +26,24 @@ function [best_neighbour, best_makespan] = generate_and_test(...
     
     %Take the union of all cycles and paths involving <= k machines
     for d = 2:k
-        for cycle = [true, false]
-            %TODO: Want orders in columns for speed
+        %Prune selections of machines without a loaded machine
+        valid_machines = selected_machines(d-1).data(...
+            any(ismember(selected_machines(d-1).data,L),2),:);
+        for cycle = [true, false]            
             %TODO: Want to pass batches of orders in parallel loops
             %       for valid->programs->min_neigh
             %Note: Distributed arrays for sharing of data in matlab
             
             %TODO: Think here is the best point to parallelise
             %   for different slice of machine_orders_end
-            %   
+            
             for i  = 1:machine_orders_end(d-1,cycle+1)
-                
-                orders =  selected_machines(d-1).data(:, ...
+                orders =  valid_machines(:, ...
                                 machine_orders(d-1, cycle+1).data(i,:));
                 
                             
                 [valid_orders, num_valid] = generate_valid_orders(...
-                    d, L, M, cycle, orders);
+                    d, M, cycle, orders);
                 
                 if num_valid == 0
                     continue

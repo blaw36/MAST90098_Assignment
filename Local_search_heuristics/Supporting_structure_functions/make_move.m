@@ -14,7 +14,8 @@
 
 function [output_array] = ...
             make_move(output_array, machine_start_indices, move, fix_moved)
-        
+    
+    %TODO: Nargin, probably faster    
     if ~exist('fix_moved','var')
         fix_moved=false;
     end
