@@ -16,7 +16,7 @@
 %   %best_neighbour = {order, programs} encoding move to best found
 %   %best_makespan
 %%
-function [best_neighbour, best_makespan] = generate_and_test(...
+function [best_neighbour, best_makespan] = par_generate_and_test(...
                  k, L, M, ...
                  machine_costs, machine_start_indices, program_costs,...
                  selected_machines, machine_orders, machine_orders_end)
@@ -29,12 +29,17 @@ function [best_neighbour, best_makespan] = generate_and_test(...
         %Prune selections of machines without a loaded machine
         valid_machines = selected_machines(d-1).data(...
             any(ismember(selected_machines(d-1).data,L),2),:);
-        for cycle = [true, false]            
-            n = numel(valid_machines(:, machine_orders(d-1, cycle+1).data));
+        
+        batch_makespans = Inf(2,1);
+        batch_neighbours(2).move = {};
+        
+        parfor c = 1:2
+            cycle = logical(c-1);
+            n = numel(valid_machines(:, machine_orders(d-1, c).data));
             orders = reshape(...
-                valid_machines(:, machine_orders(d-1, cycle+1).data),...
-                n/d,d);
-            
+               valid_machines(:, machine_orders(d-1, c).data),...
+              n/d,d);
+
             [valid_orders, num_valid] = generate_valid_orders(...
                 d, M, cycle, orders);
 
@@ -42,8 +47,8 @@ function [best_neighbour, best_makespan] = generate_and_test(...
                 continue
             end
             
-            for j = 1:num_valid
-                order = valid_orders(j,:);
+            for i = 1:num_valid
+                order = valid_orders(i,:);
                 programs = generate_programs(order, M, d, cycle);
 
                 %Test
@@ -52,11 +57,13 @@ function [best_neighbour, best_makespan] = generate_and_test(...
                                 machine_costs, machine_start_indices, ...
                                 program_costs);
 
-                if min_neigh_makespan < best_makespan
-                    best_makespan = min_neigh_makespan;
-                    best_neighbour = {order, programs(prog_index,:)};
-                end       
+                if min_neigh_makespan < batch_makespans(c)
+                    batch_makespans(c) = min_neigh_makespan;
+                    batch_neighbours(c).move = {order, programs(prog_index,:)};
+                end
             end
         end
+        [best_makespan, loc] = min(batch_makespans);
+        best_neighbour = batch_neighbours(loc).move;
     end
 end

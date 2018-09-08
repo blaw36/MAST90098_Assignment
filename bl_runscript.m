@@ -9,7 +9,7 @@ rng(10)
 n = 10; % # jobs
 m = 3; % # machines
 a = generate_ms_instances(n, m);
-k = 2; % # of exchanges (k-exch)
+k = 3; % # of exchanges (k-exch)
 
 %% Initialisation algorithm:
     % 'simple' = Costliest job allocated to machine with most 'capacity'
@@ -19,7 +19,7 @@ k = 2; % # of exchanges (k-exch)
 init_method = "simple";
 
 %% Makespan solver
-[outputArray, outputMakespan, num_exchanges] = vds(a, k, init_method);
+[outputArray, outputMakespan, num_exchanges] = gls(a, k, init_method);
 outputMakespan
 num_exchanges
 
@@ -55,7 +55,7 @@ for i = machine_range(1):diff(machine_range)/(machine_steps-1):machine_range(2)
     fprintf("Machines: %d  : ", i);
     a = generate_ms_instances(10*i,i);
     startTime = tic;
-    [outputArray, outputMakespan, num_exchanges] = vds(a, k, init_method);
+    [outputArray, outputMakespan, num_exchanges] = gls(a, k, init_method);
     t = toc(startTime);
     lower_bound = lower_bound_makespan(a);
     fprintf("Relative Error to LB of %f, %d exchanges, %f time\n", ...
