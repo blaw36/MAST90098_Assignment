@@ -62,7 +62,7 @@ function [output_array, makespan, num_exchanges, num_transformations] = ...
         
         while inner_done == false
             %Generate and test neighbourhood
-            if k==2
+            if false %k==2
             [best_inner, best_inner_makespan] = k2_generate_and_test(...
                 i_L, i_M, ...
                 i_machine_costs, i_machine_start_indices, i_program_costs,...
@@ -100,7 +100,7 @@ function [output_array, makespan, num_exchanges, num_transformations] = ...
                 
                 %Note: Can't set makespan and output_array as may need to
                 %return these if no improvement, and can't set M as the
-                %movable programs will get reset at for next sequence.
+                %movable programs will get reset at next sequence.
                 program_costs = i_program_costs;
                 machine_start_indices = i_machine_start_indices;
                 machine_costs = i_machine_costs;
@@ -119,11 +119,6 @@ function [output_array, makespan, num_exchanges, num_transformations] = ...
                 inner_done = true;
             end
         end
-        
-%         disp("Inner Done")
-%         i_L
-%         i_M
-%         i_output_array
              
         % Evaluate termination flag, only if new is better
         if makespan <= best_seq_makespan
@@ -133,12 +128,16 @@ function [output_array, makespan, num_exchanges, num_transformations] = ...
             output_array = best_output_array;
             makespan = best_seq_makespan;
             
-            %Allow all jobs to be moved again, and update M to reflect this
+            %Allow all jobs to be moved again,
             output_array(:,4) = ones(num_jobs,1);
+            % and update M to reflect this
+            non_empty_machines = 1:num_machines;
+            non_empty_machines(machine_start_indices==0) = [];    
+            non_empty_start_indices = machine_start_indices(non_empty_machines);
+            padded = [non_empty_start_indices, num_jobs+1];
+
             M = zeros(1,num_machines);
-            for i = 1:num_machines
-                M(i) = sum(output_array(:,2)==i);
-            end
+            M(non_empty_machines) = diff(padded);
             
             %Update Bookkeeping values
             num_transformations = num_transformations + 1;

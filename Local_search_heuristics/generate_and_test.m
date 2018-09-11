@@ -26,10 +26,14 @@ function [best_neighbour, best_makespan] = generate_and_test(...
     
     %Take the union of all cycles and paths involving <= k machines
     for d = 2:k
+        num_selected = d;
+            
         %Prune selections of machines without a loaded machine
         valid_machines = selected_machines(d-1).data(...
             any(ismember(selected_machines(d-1).data,L),2),:);
-        for cycle = [true, false]            
+        for cycle = [true, false]
+            length_move = num_selected-not(cycle);
+            
             n = numel(valid_machines(:, machine_orders(d-1, cycle+1).data));
             orders = reshape(...
                 valid_machines(:, machine_orders(d-1, cycle+1).data),...
@@ -44,15 +48,21 @@ function [best_neighbour, best_makespan] = generate_and_test(...
             
             for j = 1:num_valid
                 order = valid_orders(j,:);
-                programs = generate_programs(order, M, d, cycle);
+                [programs, num_programs] = generate_programs(order, M, d, cycle);
 
                 %Test
                 [min_neigh_makespan, prog_index] = find_min_neighbour(...
                                 order, programs, ...
                                 machine_costs, machine_start_indices, ...
-                                program_costs);
+                                program_costs,...
+                                num_programs, num_selected, length_move);
 
                 if min_neigh_makespan < best_makespan
+                    %Can pick any of the best neighbours and this
+                    %more exploratory approach seems to help vds
+                    if min_neigh_makespan == best_makespan && rand < 0.5
+                        continue
+                    end
                     best_makespan = min_neigh_makespan;
                     best_neighbour = {order, programs(prog_index,:)};
                 end       

@@ -1,5 +1,6 @@
 % Generates and tests the neighbourhood of the current instance
 %       Optimised for k=2
+%   TODO: Update this
 %% Input:
 %   %num_machines: The number of machines
 %   %k: The size of the k-exchange

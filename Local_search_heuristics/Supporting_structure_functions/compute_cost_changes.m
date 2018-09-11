@@ -10,34 +10,35 @@
 %                when movement specified by the paird program is done to it
 %%
 function changes = compute_cost_changes(order, programs, ...
-                    machine_start_indices, program_costs)
-
-    [num_shuffles,length_shuffle] = size(programs);
-    num_selected_machines = size(order,2);
+                    machine_start_indices, program_costs, ...
+                    num_moves, num_selected, length_move)
     
-    %The indices of the programs to be moved in each shuffle
-    %Slicing order by length_shuffle allows for cycles and paths
-    index_matrix = repmat(machine_start_indices(order(1:length_shuffle))...
-                        ,num_shuffles,1) ...
-                        +programs-1;
-    
-    %program_costs(index_matrix) has same dims as index_matrix unless
-    %index_matrix is a vector, i.e. num_shuffles==1
-    if num_shuffles == 1
+    %indexed_program_costs takes on the dims of programs costs
+    % If it is not indexed by a matrix, so want program_costs to be a 
+    % vertical vector to cover this edge case.
+    if num_moves == 1
         program_costs = program_costs';
     end
-                    
+                       
+    %The inner matrix used to index program costs is the            
+    % indices of the programs to be moved in each shuffle
+    %Slicing order by length_shuffle allows for cycles and paths
+    indexed_program_costs = program_costs(...
+                    repmat(machine_start_indices(order(1:length_move))...
+                            ,num_moves,1) ...
+                    + programs-1 ...
+                            );
+         
     %Table to store inflow and outflow of costs padded with zeros for diff
-    in_out_costs = [zeros(num_shuffles,1), ...
-                    program_costs(index_matrix),...
+    in_out_costs = [zeros(num_moves,1), ...
+                    indexed_program_costs,...
                     ...%This last column isn't there for cycles
-                    zeros(num_shuffles,num_selected_machines-length_shuffle)...
+                    zeros(num_moves,num_selected-length_move)...
                     ];
 
-    if length_shuffle == num_selected_machines
+    if length_move == num_selected
         %cycle, so last will move into first
-        in_out_costs(:,1) = ...
-                program_costs(index_matrix(:,length_shuffle));
+        in_out_costs(:,1) = indexed_program_costs(:,length_move);
     end
     %Per column diff
     changes = - diff(in_out_costs,1,2);

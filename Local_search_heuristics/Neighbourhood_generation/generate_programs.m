@@ -24,6 +24,19 @@ function [programs, programs_end] = generate_programs(order, M, k, cycle)
     rows = prod(progs_per_machine);
     cols = length(progs_per_machine);
 
+    if k == 2
+        if cycle == false
+            programs = (1:rows)';
+        else
+            [col1, col2] = meshgrid(1:progs_per_machine(1),...
+                                    1:progs_per_machine(2));
+            programs = [col1(:), col2(:)];
+        end
+        programs_end = rows;
+        return
+    end
+    
+    
     %In effect this constructs [m1]x[m2]x...x[mj]
     %   where   mi = progs_per_machine(i), 
     %           j = length(progs_per_machine)

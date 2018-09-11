@@ -28,14 +28,23 @@ function [program_costs, ...
         machine_start_indices(machine) = i;
     end
     
-    %Find M and machine_costs
-    M = zeros(1,num_machines);
-    machine_costs = zeros(1,num_machines);
-    for i = 1:num_machines
-        M(i) = sum(output_array(:,2)==i);
-        machine_costs(i) = sum((output_array(:,2)==i) .*output_array(:,1));
-    end
+    %Find M 
+    non_empty_machines = 1:num_machines;
+    non_empty_machines(machine_start_indices==0) = [];    
+    non_empty_start_indices = machine_start_indices(non_empty_machines);
+    padded = [non_empty_start_indices, num_jobs+1];
     
+    M = zeros(1,num_machines);
+    M(non_empty_machines) = diff(padded);
+    
+    %Find machine_costs
+    machine_costs = zeros(1,num_machines);
+    for i = 1:(length(padded)-1)
+        start = padded(i);
+        finish = padded(i+1) - 1;
+        machine_costs(non_empty_machines(i)) = sum(output_array(start:finish,1));
+    end
+
     makespan = max(machine_costs);
     L = find(machine_costs==makespan);
 end

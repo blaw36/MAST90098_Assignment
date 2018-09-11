@@ -15,11 +15,13 @@
 function [min_neigh_makespan, program_index] = find_min_neighbour(...
                         order, programs, ...
                         machine_costs, machine_start_indices, ...
-                        program_costs)
+                        program_costs, ...
+                        num_moves, num_selected, length_move)
                     
     
     changes = compute_cost_changes(order, programs, ...
-                                    machine_start_indices, program_costs);
+                                machine_start_indices, program_costs, ...
+                                num_moves, num_selected, length_move);
     
     %Finds the shuffle with the lowest cost
     changes = machine_costs(order) + changes;
@@ -28,8 +30,8 @@ function [min_neigh_makespan, program_index] = find_min_neighbour(...
     
     %Checks the unchanged machines and finds their max cost
     non_selected_machines = ones(1,length(machine_start_indices));
-    non_selected_machines(order) = -1;
-    %-1 prevents the altered machines from being chosen
+    non_selected_machines(order) = 0;
+    %0 prevents the altered machines from being chosen
     max_other_cost = max(machine_costs.*non_selected_machines);
     
     min_neigh_makespan = max([min_neigh_makespan,max_other_cost]);

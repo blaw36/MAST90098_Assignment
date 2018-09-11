@@ -26,6 +26,8 @@ function [best_neighbour, best_makespan] = par_generate_and_test(...
     
     %Take the union of all cycles and paths involving <= k machines
     for d = 2:k
+        num_selected = d;
+        
         %Prune selections of machines without a loaded machine
         valid_machines = selected_machines(d-1).data(...
             any(ismember(selected_machines(d-1).data,L),2),:);
@@ -35,6 +37,8 @@ function [best_neighbour, best_makespan] = par_generate_and_test(...
         
         parfor c = 1:2
             cycle = logical(c-1);
+            length_move = num_selected-not(cycle);
+            
             n = numel(valid_machines(:, machine_orders(d-1, c).data));
             orders = reshape(...
                valid_machines(:, machine_orders(d-1, c).data),...
@@ -49,15 +53,21 @@ function [best_neighbour, best_makespan] = par_generate_and_test(...
             
             for i = 1:num_valid
                 order = valid_orders(i,:);
-                programs = generate_programs(order, M, d, cycle);
+                [programs, num_programs] = generate_programs(order, M, d, cycle);
 
                 %Test
                 [min_neigh_makespan, prog_index] = find_min_neighbour(...
                                 order, programs, ...
                                 machine_costs, machine_start_indices, ...
-                                program_costs);
-
-                if min_neigh_makespan < batch_makespans(c)
+                                program_costs,...
+                                num_programs, num_selected, length_move);
+                            
+                if min_neigh_makespan <= batch_makespans(c)
+                    %Can pick any of the best neighbours and this
+                    %more exploratory approach seems to help vds
+                    if min_neigh_makespan == batch_makespans(c) && rand < 0.5
+                        continue
+                    end
                     batch_makespans(c) = min_neigh_makespan;
                     batch_neighbours(c).move = {order, programs(prog_index,:)};
                 end

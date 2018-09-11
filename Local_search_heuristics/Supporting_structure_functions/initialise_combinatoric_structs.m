@@ -6,6 +6,8 @@
 %   TODO: Structs incurr overhead
 %       Other way?, not sure if possible variable shape arrays
 %       Fine tune for particular values of k
+%   TODO: Cause this is no longer done iteratively runs into memory 
+%         constraints at about 40000 machines for k=2
 %
 %   %selected_machines: Encodes all the way to select k machines
 %        Selected_machines has 3 dims , (d=[2,..,k], combs=matrix())
@@ -19,7 +21,7 @@
 function [selected_machines, machine_orders, machine_orders_end] = ...
                         initialise_combinatoric_structs(num_machines, k)
     
-    if k==2
+    if false %k==2
         selected_machines(:,2) = ...
                         repelem(1:(num_machines-1),(num_machines-1):-1:1);
         %Vectorise this

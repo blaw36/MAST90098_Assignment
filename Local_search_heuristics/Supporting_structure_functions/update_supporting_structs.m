@@ -29,12 +29,13 @@ function ...
     
     order = move{1};
     programs = move{2};
-    num_moves = length(programs);
+    [num_moves, length_move] = size(programs);
     num_selected = length(order);
     
     %Update machine_costs
     changes = compute_cost_changes(order, programs, ...
-                                machine_start_indices, program_costs);
+                                machine_start_indices, program_costs, ...
+                                num_moves, num_selected, length_move);
     machine_costs(order) = machine_costs(order) + changes;
     
     %Have to update program_costs after machine_costs as uses old locations
@@ -52,7 +53,7 @@ function ...
         %cycle has no change
     end
     
-    %TODO: Do rolling update, instead of recalc
+    %TODO: Do rolling update, instead of recalc, not a large priority
     %Find where each machine first appears in table (if at all)
     machine_start_indices = zeros(1, num_machines);
     for i = size(output_array,1):-1:1
@@ -60,27 +61,7 @@ function ...
         machine_start_indices(machine) = i;
     end
     
-    %Update machine_start_indices
-    %ouput_array sorted by machine
-    %moving programs in array causes start positions of machines to move up
-    %and down. Net movement of start pos of machine i is flow below -flow
-    %above
-%     for i = 1:num_machines
-%         current_pos = machine_start_indices(i)
-%         padded_rel_pos = [0, order<current_pos, 0]
-%         delta = diff(padded_rel_pos)
-%         current_pos = current_pos + sum(delta(1:num_moves))
-%         machine_start_indices(i) = current_pos;
-%     end
-    
     L = find(machine_costs==makespan);
     
-%     order
-%     programs
-%     output_array
-%     M
-%     machine_costs
-%     machine_start_indices
-%     L
 end
 
