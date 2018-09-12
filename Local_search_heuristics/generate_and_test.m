@@ -57,11 +57,12 @@ function [best_neighbour, best_makespan] = generate_and_test(...
                                 program_costs,...
                                 num_programs, num_selected, length_move);
 
-                if min_neigh_makespan < best_makespan
+                if min_neigh_makespan <= best_makespan
                     %Can pick any of the best neighbours and this
                     %more exploratory approach seems to help vds
+                    %TODO: Eps equality / invest this further
                     if min_neigh_makespan == best_makespan && rand < 0.5
-                        continue
+                       continue
                     end
                     best_makespan = min_neigh_makespan;
                     best_neighbour = {order, programs(prog_index,:)};

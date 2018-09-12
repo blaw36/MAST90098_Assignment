@@ -21,18 +21,20 @@
 function [selected_machines, machine_orders, machine_orders_end] = ...
                         initialise_combinatoric_structs(num_machines, k)
     
-    if false %k==2
-        selected_machines(:,2) = ...
-                        repelem(1:(num_machines-1),(num_machines-1):-1:1);
-        %Vectorise this
-        curr = 1;
-        for i = 2:num_machines
-            next = curr + num_machines-i;
-            selected_machines(curr:next,1) = (i:num_machines)';
-            curr = next+1;       
-        end 
+    if  k==2
+        
+%         selected_machines(:,2) = ...
+%                         repelem(1:(num_machines-1),(num_machines-1):-1:1);
+%         %Vectorise this
+%         curr = 1;
+%         for i = 2:num_machines
+%             next = curr + num_machines-i;
+%             selected_machines(curr:next,1) = (i:num_machines)';
+%             curr = next+1;       
+%         end 
         machine_orders = [];
         machine_orders_end = 0;
+        selected_machines = [];
         return
     end
     %Iterate backwards so size doesn't change
