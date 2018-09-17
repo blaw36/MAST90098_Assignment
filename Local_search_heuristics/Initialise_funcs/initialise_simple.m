@@ -8,26 +8,36 @@
 % TODO: If could use an underlying priority queue c imp like
 %       https://au.mathworks.com/matlabcentral/fileexchange/24238-ataiya-pq
 %       then that would be ideal but probs 'cheating'
+%% initialise_simple.m
+% A script which initialises a solution by allocating costliest job from
+% machine 1 through to m. Once each machine has one job, it then allocates
+% costliest job to machine with lowest current total cost.
+
 %% Input:
-%   %inputData:
-%   %num_jobs: the number of jobs
-%   %num_machines: the number of machines
-%% Ouput:
-%   %init_alloc:
+    % input_array: n+1 length vector of job costs, and n+1th element is # of
+        % machines
+    % num_jobs: the number of jobs
+    % num_machines: the number of machines
+    
+%% Output:
+    % init_alloc: left two columns of output_array
+        % rows - a job allocated to a position in a machine
+        % columns - job_cost, machine_no
 %%
 
-function init_alloc = initialise_simple(inputData, num_jobs, num_machines)
+function init_alloc = initialise_simple(input_array, num_jobs, num_machines)
     
     %Uses a binary heap for large num_machines
     %TODO: work out an approx cutoff, 50000 just a random large guess
     %TODO: remove heap?, not going to be working on anything that big
     %anyway
+    
     use_heap = false;
     if num_machines >= 50000
         use_heap = true;
     end
 
-    job_costs = inputData(1:num_jobs);
+    job_costs = input_array(1:num_jobs);
     sorted_job_costs = sort(job_costs ,'descend');
 
     % Pre-allocate for speed

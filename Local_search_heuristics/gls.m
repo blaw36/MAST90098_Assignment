@@ -1,29 +1,30 @@
+%% gls.m
+% A script which solves the makespan problem using a Greedy Local Search
+% (GLS)
 %% Input:
     % input_array: n+1 length vector of job costs, and n+1th element is # of
         % machines
-    % k: specifies which exchange is being used
-    % init_algo: initialisation algorithm:
-        % 'simple' = Costliest job allocated to machine with most 'capacity'
-        % relative to most utilised machine at the time
-        % 'random' = Random allocation (random number generated for machine)
-        % 'naive' = All jobs placed into machine 1
+    % k: specifies the k exchange
+    % init_algo: A string specifying how to pick an initial feasible sol'n:
+        % 'simple', 'random', 'naive'
 %% Output:
     % output_array:
         % rows - a job allocated to a position in a machine
         % columns - job_cost, machine_no, unique job_id
     % makespan:
-        % max, across all machines, of sum of jobs for a given machine
+        % max, across all machines, of sum of job costs for a given machine
     % num_exchanges:
         % number of exchanges performed
 %%
 function [output_array, makespan, num_exchanges] = ...
                             gls(input_array, k, init_algo)                   
     
+    % Extract important information from input, and initialise a sol'n
     [num_jobs, num_machines, output_array, done] = ...
                                 process_input(input_array, k, init_algo);
                                         
-    %Note: Althought it is a little messy passing this many parameters
-    %about, using structures (or objects) incurrs an overhead cost
+    % Note: Although it is a little messy passing this many parameters
+    % about, using structures (or objects) incurrs an overhead cost
     [program_costs,machine_start_indices,M,machine_costs,makespan,L] ...
                     = initialise_supporting_structs(...
                                     output_array, num_machines, num_jobs);

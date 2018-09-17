@@ -1,15 +1,25 @@
-%% SCRIPT
+%% runscript.m
+% A script which generates instances, and solves the problem using both:
+    % GLS (Greedy Local Search)
+    % VDS (Variable Depth Search)
+
+% Clear environment
 clear;
 clc;
-addpath(genpath('.\')); % add everything in the runscript.m directory
-rmpath('Not_in_use'); % remove not_in_use
+% Add everything in the runscript.m directory
+addpath(genpath('.\')); 
+% Remove 'not_in_use' folder from path. This only has archived code
+rmpath('Not_in_use');
+
 %% Set seed
 rng(10);
+
 %% Parameters
-n = 10; % # jobs
-m = 3; % # machines
-a = generate_ms_instances(n, m);
+n = 100; % # jobs
+m = 10; % # machines
+a = generate_ms_instances(n, m); % Generate makespan input vector
 k = 2; % # of exchanges (k-exch)
+method = 'GLS'; % 'VDS' or 'GLS'
 
 %% Initialisation algorithm:
     % 'simple' = Costliest job allocated to machine with most 'capacity'
@@ -19,10 +29,16 @@ k = 2; % # of exchanges (k-exch)
 init_method = "simple";
 
 %% Makespan solver
-[outputArray, outputMakespan, num_exchanges] = vds(a, k, init_method);
+if method == 'GLS'
+    % GLS
+    [outputArray, outputMakespan, num_exchanges] = gls(a, k, init_method);
+elseif method == 'VDS'
+    % VDS
+    [outputArray, outputMakespan, num_exchanges] = vds(a, k, init_method);
+end
+
 outputMakespan
 num_exchanges
-
 
 %% Graphing and analysis
 % Sort the output for presentation
@@ -42,7 +58,6 @@ xlabel('Machine #') % x-axis label
 ylabel('Job cost') % y-axis label
 
 % Ratio vs Lower bound Makespan
-% outputMakespan
 lower_bound = lower_bound_makespan(a);
 ratio_vs_lb = outputMakespan/lower_bound
 
