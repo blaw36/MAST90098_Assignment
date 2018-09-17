@@ -15,8 +15,9 @@
 function [output_array] = ...
             make_move(output_array, machine_start_indices, move, fix_moved)
     
-    %TODO: Nargin, probably faster    
-    if ~exist('fix_moved','var')
+    %Nargin faster, if less flexible, called enough times to be worth it
+    %if ~exist('fix_moved','var')
+    if nargin == 3
         fix_moved=false;
     end
                              

@@ -22,24 +22,22 @@ function changes = compute_cost_changes(order, programs, ...
                        
     %The inner matrix used to index program costs is the            
     % indices of the programs to be moved in each shuffle
-    %Slicing order by length_shuffle allows for cycles and paths
+    %Slicing order by length_move allows for cycles and paths
+    %Adding row vector to matrix adds the row vector to every row
     indexed_program_costs = program_costs(...
-                    repmat(machine_start_indices(order(1:length_move))...
-                            ,num_moves,1) ...
-                    + programs-1 ...
-                            );
-         
-    %Table to store inflow and outflow of costs padded with zeros for diff
-    in_out_costs = [zeros(num_moves,1), ...
-                    indexed_program_costs,...
-                    ...%This last column isn't there for cycles
-                    zeros(num_moves,num_selected-length_move)...
-                    ];
+                    machine_start_indices(order(1:length_move)) ...
+                    + programs-1);
+
+    %Constructs a matrix to store the inflow and outflow of costs
+    %the left column is a padded 0 column,
+    %there is a padded 0 right column for paths as well
+    in_out_costs = zeros(num_moves, num_selected+1);
+    in_out_costs(:,2:(length_move+1)) = indexed_program_costs;
 
     if length_move == num_selected
         %cycle, so last will move into first
         in_out_costs(:,1) = indexed_program_costs(:,length_move);
     end
-    %Per column diff
+    %Per column diff, measures change resulting in moving programs
     changes = - diff(in_out_costs,1,2);
 end

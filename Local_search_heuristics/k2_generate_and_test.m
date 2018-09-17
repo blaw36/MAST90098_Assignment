@@ -1,6 +1,6 @@
 % Generates and tests the neighbourhood of the current instance
-%       Optimised for k=2
-%   TODO: Update this
+%       Improved speed and memory constraints for k=2
+%   TODO: Dynamic choice to use parallel or not
 %% Input:
 %   %num_machines: The number of machines
 %   %k: The size of the k-exchange
@@ -18,11 +18,7 @@
 function [best_neighbour, best_makespan] = k2_generate_and_test(L, M,...
                  machine_costs, machine_start_indices, program_costs)
     k=2;
-    num_selected = k;
     num_machines = length(machine_start_indices);
-    %Prune selections of machines without a loaded machine
-    %valid_machines = selected_machines(...
-    %    any(ismember(selected_machines,L),2),:);
     
     %Pair each loaded machine with all other machines excluding self
     % has size |L|*(m-1)
@@ -32,7 +28,7 @@ function [best_neighbour, best_makespan] = k2_generate_and_test(L, M,...
     curr = 1;
     for i = 1:length(L)
         next = curr + num_machines - 2;
-        valid_machines(curr:next,1) = [1:(i-1),(i+1):num_machines]';
+        valid_machines(curr:next,1) = [1:(L(i)-1),(L(i)+1):num_machines]';
         curr = next+1;       
     end
 
@@ -41,9 +37,9 @@ function [best_neighbour, best_makespan] = k2_generate_and_test(L, M,...
     
     %TODO: Maybe could have a check on the prod(M) here to determine
     %whether to use parfor or for?
-    parfor c = 1:2
+    for c = 1:2
         cycle = logical(c-1);
-        length_move = num_selected-not(cycle);
+        length_move = k-not(cycle);
         
         if cycle
             orders = valid_machines;
@@ -60,14 +56,13 @@ function [best_neighbour, best_makespan] = k2_generate_and_test(L, M,...
 
         for i = 1:num_valid
             order = valid_orders(i,:);
-            [programs, num_programs] = generate_programs(order, M, k, cycle);
-
+            [programs, num_programs] = generate_programs(valid_orders(i,:), M, k, cycle);
             %Test
             [min_neigh_makespan, prog_index] = find_min_neighbour(...
                             order, programs, ...
                             machine_costs, machine_start_indices, ...
                             program_costs, ...
-                            num_programs, num_selected, length_move);
+                            num_programs, k, length_move);
 
             if min_neigh_makespan < batch_makespans(c)
                 batch_makespans(c) = min_neigh_makespan;

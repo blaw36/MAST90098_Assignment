@@ -22,8 +22,9 @@ function ...
                             program_costs, ...
                             machine_start_indices, M, machine_costs, ...
                             makespan, fix_moved)
-    
-    if ~exist('fix_moved','var')
+    %Nargin faster, if less flexible, called enough times to be worth it
+    %if ~exist('fix_moved','var')
+    if nargin == 8                    
         fix_moved=false;
     end
     
@@ -45,14 +46,14 @@ function ...
     if fix_moved
         M(order(1:num_moves)) = M(order(1:num_moves)) - 1;
     else
-        if num_selected>num_moves
+        if num_selected>length_move
             %path
             M(order(1)) = M(order(1)) - 1;
             M(order(num_selected)) = M(order(num_selected)) + 1;
         end
         %cycle has no change
     end
-    
+
     %TODO: Do rolling update, instead of recalc, not a large priority
     %Find where each machine first appears in table (if at all)
     machine_start_indices = zeros(1, num_machines);

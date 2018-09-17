@@ -4,7 +4,7 @@ clc;
 addpath(genpath('.\')); % add everything in the runscript.m directory
 rmpath('Not_in_use'); % remove not_in_use
 %% Set seed
-rng(10)
+rng(10);
 %% Parameters
 n = 10; % # jobs
 m = 3; % # machines
@@ -19,7 +19,7 @@ k = 2; % # of exchanges (k-exch)
 init_method = "simple";
 
 %% Makespan solver
-[outputArray, outputMakespan, num_exchanges] = gls(a, k, init_method);
+[outputArray, outputMakespan, num_exchanges] = vds(a, k, init_method);
 outputMakespan
 num_exchanges
 
@@ -46,20 +46,19 @@ ylabel('Job cost') % y-axis label
 lower_bound = lower_bound_makespan(a);
 ratio_vs_lb = outputMakespan/lower_bound
 
-
 %% Stress tests
 results = [];
-machine_range = [10000,20000];
+machine_range = [40,50];
 machine_steps = 2;
 for i = machine_range(1):diff(machine_range)/(machine_steps-1):machine_range(2)
     fprintf("Machines: %d  : ", i);
     a = generate_ms_instances(10*i,i);
     startTime = tic;
-    [outputArray, outputMakespan, num_exchanges] = gls(a, k, init_method);
+    [outputArray, outputMakespan, num_exchanges, num_transformations] = vds(a, k, init_method);
     t = toc(startTime);
     lower_bound = lower_bound_makespan(a);
-    fprintf("Relative Error to LB of %f, %d exchanges, %f time\n", ...
-        outputMakespan/lower_bound, num_exchanges, t);
+    fprintf("Relative Error to LB of %f, %d exchanges, %d transformations,%f time\n", ...
+        outputMakespan/lower_bound, num_exchanges, num_transformations, t);
     
     % Sort the output for presentation
     [sorted_col, sorting_idx] = sort(outputArray(:,2));

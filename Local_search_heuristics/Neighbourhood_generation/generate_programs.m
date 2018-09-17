@@ -10,9 +10,6 @@
 %%
 
 function [programs, programs_end] = generate_programs(order, M, k, cycle)
-    %Using the current order of machines constructs all ways to
-    %move programs between these machines.
-
     progs_per_machine = M(order);
 
     if cycle == false
@@ -20,19 +17,23 @@ function [programs, programs_end] = generate_programs(order, M, k, cycle)
         progs_per_machine = progs_per_machine(1:k-1);
     end
 
-    %Initialise programs array
-    rows = prod(progs_per_machine);
-    cols = length(progs_per_machine);
+    programs_end = prod(progs_per_machine);
 
     if k == 2
         if cycle == false
-            programs = (1:rows)';
+            %just count through programs of one machine
+            programs = (1:programs_end)';
         else
-            [col1, col2] = meshgrid(1:progs_per_machine(1),...
-                                    1:progs_per_machine(2));
-            programs = [col1(:), col2(:)];
+            %Outer initiated first to fix size
+            %11...122....23....(m2-1)m2...m2
+            programs(:,2) = repelem(1:progs_per_machine(2),progs_per_machine(1));
+            %12...m112...m1...12...m1
+            programs(:,1) = repmat(1:progs_per_machine(1),1,progs_per_machine(2));
+            %Old method- slower
+%             [col1, col2] = meshgrid(1:progs_per_machine(1),...
+%                                 1:progs_per_machine(2));
+%             programs = [col1(:), col2(:)];
         end
-        programs_end = rows;
         return
     end
     
@@ -48,7 +49,7 @@ function [programs, programs_end] = generate_programs(order, M, k, cycle)
     % 1,1,...,2,2,...,n_{m-1},n_{m-1}
     % etc, cumulatively 'telescoping' outwards in the repetitions
     % from right to left
-
+    cols = length(progs_per_machine);
     divisors_repelem = zeros(1,cols);
     % Number of repeats (repelem) required for each program, for 
     % each machine except the last one
@@ -66,10 +67,10 @@ function [programs, programs_end] = generate_programs(order, M, k, cycle)
     end
 
     % Put it all together
-    intermed_programs = zeros(rows,cols);
+    intermed_programs = zeros(programs_end,cols);
     % Last column has no repeated elements, just repeated sequences
     intermed_programs(:,cols) = (repmat(1:progs_per_machine(cols), ...
-        1, rows/progs_per_machine(cols)))';
+        1, programs_end/progs_per_machine(cols)))';
 
     % The rest have repeated elements, and those sequences are then
     % repeated
@@ -79,8 +80,6 @@ function [programs, programs_end] = generate_programs(order, M, k, cycle)
     end
 
     % Put the first row last (first row = itself as part of n/hood)
-    programs = [intermed_programs(2:rows,:); ...
-        intermed_programs(1,:)];
-
-    programs_end = rows;        
+    programs = [intermed_programs(2:programs_end,:); ...
+        intermed_programs(1,:)];    
 end
