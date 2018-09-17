@@ -65,7 +65,7 @@ function [num_jobs, num_machines, output_array, done] = process_input(...
         % Assign unique job_id to each job
         output_array(:,3) = (1:num_jobs)';
         
-        %If need to fix_moved at a movable column
+        %If need to fix_moved add a column storing the movable state
         if fix_moved
             output_array(:,4) = ones(num_jobs,1);
         end

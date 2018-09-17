@@ -5,12 +5,9 @@
 %% Ouput:
 %   %selected_machines: Encodes all the way to select k machines
 %        Selected_machines has 3 dims , (d=[2,..,k], combs=matrix())
-%   %machine_orders: Encodes all the ways to order those machine
+%   %machine_orders: Encodes all the ways to order those machines
 %       machine_orders has 4 dims 
 %           ([2,..,k],[1,2] , orders_for_d_cycle=matrix())
-%   %machine_orders_end: Encodes all the ways to order those machine
-%       machine_orders_end has 3 dims 
-%           ([2,..,k],[1,2] , num rows in matrix)
 %%
 function [selected_machines, machine_orders] = ...
                         initialise_combinatoric_structs(num_machines, k)
@@ -21,6 +18,7 @@ function [selected_machines, machine_orders] = ...
         selected_machines = [];
         return
     end
+    
     %Iterate backwards so size doesn't change
     for d = k:-1:2
         if d == 2
@@ -35,7 +33,7 @@ function [selected_machines, machine_orders] = ...
                 curr = next+1;       
             end 
         else
-            %TODO: This becomes a big bottleneck performance-wise
+            %This becomes a big bottleneck performance-wise
             % as default matlab imp is really slow
             selected_machines(d-1).data = combnk(1:num_machines, d);
         end

@@ -1,6 +1,6 @@
 % Constructs all valid orders of machines.
 %% Input:
-%   %L: The machine numbers of all the loaded machines
+%   %k: the number of machines involved
 %   %M: The number of (movable) programs in each machine
 %   %cycle: Whether the order is encoding a cycle or not
 %   %orders: All possible orders without considering restrictions

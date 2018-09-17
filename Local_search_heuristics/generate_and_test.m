@@ -1,7 +1,4 @@
 % Generates and tests the neighbourhood of the current instance
-
-%NOTE: Changing to largely columns had almost no effect on
-%       speed
 %% Input:
 %   %num_machines: The number of machines
 %   %k: The size of the k-exchange
@@ -31,6 +28,7 @@ function [best_neighbour, best_makespan] = generate_and_test(...
         %Prune selections of machines without a loaded machine
         valid_machines = selected_machines(d-1).data(...
             any(ismember(selected_machines(d-1).data,L),2),:);
+        
         for cycle = [true, false]
             length_move = num_selected-not(cycle);
             

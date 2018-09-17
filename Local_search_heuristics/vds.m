@@ -11,13 +11,13 @@
 %% Output:
     % output_array:
         % rows - a job allocated to a position in a machine
-        % columns - job_cost, machine_no, unique job_id
+        % columns - job_cost, machine_no, unique job_id , movable
     % makespan:
         % max, across all machines, of sum of jobs for a given machines
     % num_exchanges:
         % number of exchanges performed
     % num_transformations:
-        % number of times sequences are generated
+        % number of times a new best of sequence is chosen
 %%
 function [output_array, makespan, num_exchanges, num_transformations] = ...
                             vds(input_array, k, init_algo)                   
@@ -71,18 +71,15 @@ function [output_array, makespan, num_exchanges, num_transformations] = ...
                 k, i_L, i_M, ...
                 i_machine_costs, i_machine_start_indices, i_program_costs,...
                 selected_machines, machine_orders);
-            end    
-%             i_output_array
-%             order = best_inner{1}
-%             programs = best_inner{2}
+            end
             
             %Update to best_inner
             i_output_array = make_move(i_output_array,...
                         i_machine_start_indices, best_inner, fix_moved);
                                             
             [i_program_costs, i_machine_start_indices, ...
-                i_M, i_machine_costs, i_L] ...
-                        = update_supporting_structs(...
+                                            i_M, i_machine_costs, i_L] ...
+                    = update_supporting_structs(...
                                             best_inner, ...
                                             i_output_array, ...
                                             num_machines,...
@@ -123,7 +120,7 @@ function [output_array, makespan, num_exchanges, num_transformations] = ...
         if makespan <= best_seq_makespan
             done = true;
         else
-            % Update, output array, (supporting structs already updated)
+            % Update, to new best (supporting structs already updated)
             output_array = best_output_array;
             makespan = best_seq_makespan;
             
@@ -135,7 +132,7 @@ function [output_array, makespan, num_exchanges, num_transformations] = ...
             non_empty_start_indices = machine_start_indices(non_empty_machines);
             padded = [non_empty_start_indices, num_jobs+1];
 
-            M = zeros(1,num_machines);
+            M = zeros(1, num_machines);
             M(non_empty_machines) = diff(padded);
             
             %Update Bookkeeping values

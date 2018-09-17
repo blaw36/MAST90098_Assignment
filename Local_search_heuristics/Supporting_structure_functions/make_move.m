@@ -26,7 +26,7 @@ function [output_array] = ...
     num_moves = length(program_indices);
     num_machines = length(order_indices);
     
-    %Make the moves
+    %Make the move
     for i = 1:num_moves
         target_index = i+1;
         

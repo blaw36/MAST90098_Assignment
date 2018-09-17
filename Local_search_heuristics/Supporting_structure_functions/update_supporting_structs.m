@@ -11,9 +11,9 @@
 %       output_array the ith machine first appears
 %   %M: The number of (movable) programs in each machine
 %   %machine_costs: The costs of all machines
-%   %L: The machine numbers of all the loaded machines
 %% Ouput:
 %   %As defined above but updated
+%   %L: The machine numbers of all the loaded machines
 %%
 
 function ...
@@ -54,7 +54,8 @@ function ...
         %cycle has no change
     end
 
-    %TODO: Do rolling update, instead of recalc, not a large priority
+    %Could do a rolling update, instead of recalc, but doesn't have a huge
+    %impact on performance
     %Find where each machine first appears in table (if at all)
     machine_start_indices = zeros(1, num_machines);
     for i = size(output_array,1):-1:1
