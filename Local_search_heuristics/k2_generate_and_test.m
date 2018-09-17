@@ -1,6 +1,10 @@
 % Generates and tests the neighbourhood of the current instance
 %       Improved speed and memory constraints for k=2
 %   TODO: Dynamic choice to use parallel or not
+%       better way to do batches that will scale past 2 workers?
+%       use this dynamic switch to refactor gen_test and par_gen_test into
+%       one (make this func a wrapper that spawns and collates parallel
+%       batches of some inner)
 %% Input:
 %   %num_machines: The number of machines
 %   %k: The size of the k-exchange
@@ -35,8 +39,44 @@ function [best_neighbour, best_makespan] = k2_generate_and_test(L, M,...
     batch_makespans = Inf(2,1);
     batch_neighbours(2).move = {};
     
-    %TODO: Maybe could have a check on the prod(M) here to determine
-    %whether to use parfor or for?
+    %TODO: Tune this parameter or modify expression
+    %Idea of expression is in rough order of choose 2 from num_machines
+    %then choose 2 programs to move between them assume all most loaded
+    if max(M(L))^2*num_machines^2>10^6
+    parfor c = 1:2
+        cycle = logical(c-1);
+        length_move = k-not(cycle);
+        
+        if cycle
+            orders = valid_machines;
+        else
+            orders = [valid_machines;valid_machines(:,2),valid_machines(:,1)];
+        end
+
+        [valid_orders, num_valid] = generate_valid_orders(...
+            k, M, cycle, orders);
+
+        if num_valid == 0
+            continue
+        end
+
+        for i = 1:num_valid
+            order = valid_orders(i,:);
+            [programs, num_programs] = generate_programs(valid_orders(i,:), M, k, cycle);
+            %Test
+            [min_neigh_makespan, prog_index] = find_min_neighbour(...
+                            order, programs, ...
+                            machine_costs, machine_start_indices, ...
+                            program_costs, ...
+                            num_programs, k, length_move);
+
+            if min_neigh_makespan < batch_makespans(c)
+                batch_makespans(c) = min_neigh_makespan;
+                batch_neighbours(c).move = {order, programs(prog_index,:)};
+            end
+        end
+    end
+    else
     for c = 1:2
         cycle = logical(c-1);
         length_move = k-not(cycle);
@@ -69,6 +109,7 @@ function [best_neighbour, best_makespan] = k2_generate_and_test(L, M,...
                 batch_neighbours(c).move = {order, programs(prog_index,:)};
             end
         end
+    end
     end
     [best_makespan, loc] = min(batch_makespans);
     best_neighbour = batch_neighbours(loc).move;
