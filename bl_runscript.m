@@ -19,7 +19,7 @@ n = 100; % # jobs
 m = 10; % # machines
 a = generate_ms_instances(n, m); % Generate makespan input vector
 k = 2; % # of exchanges (k-exch)
-method = 'VDS'; % 'VDS' or 'GLS'
+method = 'GLS'; % 'VDS' or 'GLS'
 
 %% Initialisation algorithm:
     % 'simple' = Costliest job allocated to machine with most 'capacity'

@@ -1,19 +1,22 @@
+%% generate_programs.m
 % Constructs all ways to move programs between the specified machines
 %% Input:
-%   %order: Encodes the cycle/path that the movement takes place on.
-%   %M: The number of (movable) programs in each machine
-%   %k: The number of machines involved
-%   %cycle: Whether the order is encoding a cycle or not
-%% Ouput:
-%   %programs: A matrix storing the indices of the programs to be moved
-%   %programs_end: The number of rows of the matrix
+    % order: Encodes the cycle/path that the movement takes place on.
+    % M: The number of (movable) programs in each machine
+    % k: The number of machines involved
+    % cycle: Whether the order is encoding a cycle (true) or not (false)
+%% Output:
+    % programs: A matrix storing the indices of the programs to be moved
+    % programs_end: The number of rows of the programs matrix, indicating
+        % the number of possible program combinations to be moved between
+        % the machines
 %%
 
 function [programs, programs_end] = generate_programs(order, M, k, cycle)
     progs_per_machine = M(order);
 
     if cycle == false
-        %Don't move anything from last machine
+        % Don't move anything from last machine
         progs_per_machine = progs_per_machine(1:k-1);
     end
 
@@ -21,7 +24,7 @@ function [programs, programs_end] = generate_programs(order, M, k, cycle)
 
     if k == 2
         if cycle == false
-            %just count through programs of one machine
+            % just count through programs of one machine
             programs = (1:programs_end)';
         else
             %Outer initiated first to fix size

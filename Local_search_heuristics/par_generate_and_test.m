@@ -12,7 +12,7 @@
 %   %machine_start_indices: The ith value indicates which row of the
 %       output_array the ith machine first appears
 %   %program_costs: The cost of the programs ordered as in output_array
-%% Ouput:
+%% Output:
 %   %best_neighbour = {order, programs} encoding move to best found
 %   %best_makespan
 %%
