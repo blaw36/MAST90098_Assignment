@@ -1,10 +1,7 @@
 % Generates and tests the neighbourhood of the current instance
 %       Improved speed and memory constraints for k=2
-%   TODO: Dynamic choice to use parallel or not
-%       better way to do batches that will scale past 2 workers?
-%       use this dynamic switch to refactor gen_test and par_gen_test into
-%       one (make this func a wrapper that spawns and collates parallel
-%       batches of some inner)
+%   TODO: Parameters used for batching still need to be tuned, but pretty
+%       sure this will be the way to go.
 %% Input:
 %   %num_machines: The number of machines
 %   %k: The size of the k-exchange
@@ -23,94 +20,56 @@ function [best_neighbour, best_makespan] = k2_generate_and_test(L, M,...
                  machine_costs, machine_start_indices, program_costs)
     k=2;
     num_machines = length(machine_start_indices);
+    best_makespan = Inf;
+    best_neighbour = {};
+ 
+    [batches, num_workers, use_par] = construct_batches(L, M, k, num_machines);
     
-    %Pair each loaded machine with all other machines excluding self
-    % has size |L|*(m-1)
-    %Initiate outer column first to fix size
-    valid_machines(:,2) =  repelem(L,num_machines-1);
-    %Vectorise this
-    curr = 1;
-    for i = 1:length(L)
-        next = curr + num_machines - 2;
-        valid_machines(curr:next,1) = [1:(L(i)-1),(L(i)+1):num_machines]';
-        curr = next+1;       
-    end
+    if use_par == false
+        %Just evaluate all of the batches sequentially
+        for b = 1:num_workers
+            cycle = batches(b).cycle;
+            length_move = batches(b).length_move;
+            for j = 1:batches(b).size
+                order = batches(b).batch(j,:);
+                [programs, num_programs] = generate_programs(order, M, k, cycle);
+                %Test
+                [min_neigh_makespan, prog_index] = find_min_neighbour(...
+                                order, programs, ...
+                                machine_costs, machine_start_indices, ...
+                                program_costs, ...
+                                num_programs, k, length_move);
 
-    batch_makespans = Inf(2,1);
-    batch_neighbours(2).move = {};
-    
-    %TODO: Tune this parameter or modify expression
-    %Idea of expression is in rough order of choose 2 from num_machines
-    %then choose 2 programs to move between them assume all most loaded
-    if max(M(L))^2*num_machines^2>10^6
-    parfor c = 1:2
-        cycle = logical(c-1);
-        length_move = k-not(cycle);
-        
-        if cycle
-            orders = valid_machines;
-        else
-            orders = [valid_machines;valid_machines(:,2),valid_machines(:,1)];
-        end
-
-        [valid_orders, num_valid] = generate_valid_orders(...
-            k, M, cycle, orders);
-
-        if num_valid == 0
-            continue
-        end
-
-        for i = 1:num_valid
-            order = valid_orders(i,:);
-            [programs, num_programs] = generate_programs(valid_orders(i,:), M, k, cycle);
-            %Test
-            [min_neigh_makespan, prog_index] = find_min_neighbour(...
-                            order, programs, ...
-                            machine_costs, machine_start_indices, ...
-                            program_costs, ...
-                            num_programs, k, length_move);
-
-            if min_neigh_makespan < batch_makespans(c)
-                batch_makespans(c) = min_neigh_makespan;
-                batch_neighbours(c).move = {order, programs(prog_index,:)};
+                if min_neigh_makespan < best_makespan
+                    best_makespan = min_neigh_makespan;
+                    best_neighbour = {order, programs(prog_index,:)};
+                end
             end
         end
-    end
     else
-    for c = 1:2
-        cycle = logical(c-1);
-        length_move = k-not(cycle);
-        
-        if cycle
-            orders = valid_machines;
-        else
-            orders = [valid_machines;valid_machines(:,2),valid_machines(:,1)];
-        end
+        %Evaluate the batches of neighbours in parallel
+        batch_makespans = Inf(num_workers,1);
+        parfor (b = 1:num_workers, num_workers)
+            cycle = batches(b).cycle;
+            length_move = batches(b).length_move;
+            for j = 1:batches(b).size
+                order = batches(b).batch(j,:);
+                [programs, num_programs] = generate_programs(order, M, k, cycle);
+                %Test
+                [min_neigh_makespan, prog_index] = find_min_neighbour(...
+                                order, programs, ...
+                                machine_costs, machine_start_indices, ...
+                                program_costs, ...
+                                num_programs, k, length_move);
 
-        [valid_orders, num_valid] = generate_valid_orders(...
-            k, M, cycle, orders);
-
-        if num_valid == 0
-            continue
-        end
-
-        for i = 1:num_valid
-            order = valid_orders(i,:);
-            [programs, num_programs] = generate_programs(valid_orders(i,:), M, k, cycle);
-            %Test
-            [min_neigh_makespan, prog_index] = find_min_neighbour(...
-                            order, programs, ...
-                            machine_costs, machine_start_indices, ...
-                            program_costs, ...
-                            num_programs, k, length_move);
-
-            if min_neigh_makespan < batch_makespans(c)
-                batch_makespans(c) = min_neigh_makespan;
-                batch_neighbours(c).move = {order, programs(prog_index,:)};
+                if min_neigh_makespan < batch_makespans(b)
+                    batch_makespans(b) = min_neigh_makespan;
+                    batches(b).move = {order, programs(prog_index,:)};
+                end
             end
         end
+        %Workers finished, so determine best of all batches
+        [best_makespan, loc] = min(batch_makespans);
+        best_neighbour = batches(loc).move;
     end
-    end
-    [best_makespan, loc] = min(batch_makespans);
-    best_neighbour = batch_neighbours(loc).move;
 end

@@ -19,7 +19,7 @@ n = 100; % # jobs
 m = 10; % # machines
 a = generate_ms_instances(n, m); % Generate makespan input vector
 k = 2; % # of exchanges (k-exch)
-method = 'GLS'; % 'VDS' or 'GLS'
+method = 'VDS'; % 'VDS' or 'GLS'
 
 %% Initialisation algorithm:
     % 'simple' = Costliest job allocated to machine with most 'capacity'
@@ -63,7 +63,7 @@ ratio_vs_lb = outputMakespan/lower_bound
 
 %% Stress tests
 results = [];
-machine_range = [50,200];
+machine_range = [50,100];
 machine_steps = 2;
 for i = machine_range(1):diff(machine_range)/(machine_steps-1):machine_range(2)
     fprintf("Machines: %d  : ", i);
