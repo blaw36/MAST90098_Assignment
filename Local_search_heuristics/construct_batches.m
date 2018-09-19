@@ -17,6 +17,7 @@
 function [batches, num_batches, use_par] = construct_batches(L, M, k, ...
                  num_machines)
     use_par = false;
+    BATCH_DIV_PARAM = 4*10^8;
     
     % Pair each loaded machine with all other machines excluding self. Has
         % size |L|*(m-1)
@@ -31,12 +32,9 @@ function [batches, num_batches, use_par] = construct_batches(L, M, k, ...
         curr = next+1;       
     end
     
-    % Construct all the batches for processing
-    sum_valid = 0;
-    num_batches = 0;
-    
     % Allocate work (if req'd) by splitting into sets of only paths, then 
     % of only cycles
+    num_batches = 0;
     for c = 1:2
         cycle = logical(c-1);
         length_move = k-not(cycle);
@@ -61,29 +59,32 @@ function [batches, num_batches, use_par] = construct_batches(L, M, k, ...
         % max(M(L))^2*num_valid^2
         % num_workers = idivide(int32(max(M(L))^2*num_valid^2), 1.0*10^9);
         % fprintf("%d, %d\n",max(M(L)),num_valid);
-        new_workers = 1 + idivide(int32(num_valid*max(M(L))), 2.0*10^4);
-        num_batches = num_batches + new_workers;
+        old_num_batches = num_batches;
+        % Idea is here is big oh for k=2 is O(max(M(L))^2 m^2) (check)
+        % So should look for a threshold in terms of this larger behavior
+        % if we want to  batch together jobs of 'similar' difficulty.
+        % If we don't exceed this threshold, then no need to have multiple
+        % batches.
+        new_batches = max([1,idivide(int32(num_valid*max(M(L)))^2, BATCH_DIV_PARAM)]);
+        num_batches = num_batches + new_batches;
         
         batches(num_batches).move = {};
         batches(num_batches).batch = {};
-        batch_est_size = idivide(int32(num_valid),new_workers);
+        batch_est_size = idivide(int32(num_valid),new_batches);
         
-        for i = 1:new_workers
+        for i = 1:new_batches
             start = (i-1)*batch_est_size+1;
             finish = max(i*batch_est_size, num_valid);
-            batches(i).batch = valid_orders(start:finish,:);
-            batches(i).size = (finish + 1) - start;
-            batches(i).cycle = cycle;
-            batches(i).length_move = length_move;
+            batches(i+old_num_batches).batch = valid_orders(start:finish,:);
+            batches(i+old_num_batches).size = finish + 1-start;
+            batches(i+old_num_batches).cycle = cycle;
+            batches(i+old_num_batches).length_move = length_move;
         end
         
-        sum_valid = sum_valid + num_valid;
-    end
-    
-    % Activate parallel processing if more than 10000 valid orders to be
-    % processed
-    % TODO: Tune
-    if sum_valid > 10^4
-        use_par = true;
+        %We have split the data (for either cycles or paths) which
+        %indicates we think we have enough data to warrant parallel
+        if new_batches>1
+            use_par = false;
+        end
     end
 end
