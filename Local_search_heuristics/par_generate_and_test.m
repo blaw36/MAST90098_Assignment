@@ -62,12 +62,7 @@ function [best_neighbour, best_makespan] = par_generate_and_test(...
                                 program_costs,...
                                 num_programs, num_selected, length_move);
                             
-                if min_neigh_makespan <= batch_makespans(c)
-                    %Can pick any of the best neighbours and this
-                    %more exploratory approach seems to help vds
-                    if min_neigh_makespan == batch_makespans(c) && rand < 0.5
-                        continue
-                    end
+                if min_neigh_makespan < batch_makespans(c)
                     batch_makespans(c) = min_neigh_makespan;
                     batch_neighbours(c).move = {order, programs(prog_index,:)};
                 end

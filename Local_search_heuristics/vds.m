@@ -20,7 +20,10 @@
         % number of times a new best of sequence is chosen
 %%
 function [output_array, makespan, num_exchanges, num_transformations] = ...
-                            vds(input_array, k, init_algo)                   
+                            vds(input_array, k, init_algo, k2_opt)
+    if ~exist('k2_opt','var') || k ~= 2
+        k2_opt=false;
+    end   
     
     %Indicates need to keep track of moved
     fix_moved = true;                    
@@ -62,7 +65,7 @@ function [output_array, makespan, num_exchanges, num_transformations] = ...
         
         while inner_done == false
             %Generate and test neighbourhood
-            if k==2
+            if k2_opt
             [best_inner, best_inner_makespan] = k2_generate_and_test(...
                 i_L, i_M, num_machines,...
                 i_machine_costs, i_machine_start_indices, i_program_costs);

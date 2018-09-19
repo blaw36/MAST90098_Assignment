@@ -17,8 +17,10 @@
         % number of exchanges performed
 %%
 function [output_array, makespan, num_exchanges] = ...
-                            gls(input_array, k, init_algo)                   
-    
+                            gls(input_array, k, init_algo, k2_opt)                   
+    if ~exist('k2_opt','var') || k ~= 2
+        k2_opt=false;
+    end 
     % Extract important information from input, and initialise a sol'n
     [num_jobs, num_machines, output_array, done] = ...
                                 process_input(input_array, k, init_algo);
@@ -40,7 +42,7 @@ function [output_array, makespan, num_exchanges] = ...
     num_exchanges = 0;
     while done == false  
         % Generate and test neighbourhood
-        if k==2
+        if k2_opt
             % Program optimised for k = 2
             [best_neighbour, best_neighbour_makespan] = k2_generate_and_test(...
                 L, M, num_machines, ...
