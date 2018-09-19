@@ -1,20 +1,23 @@
+%% par_generate_and_test.m
 % Generates and tests the neighbourhood of the current instance
+% (generalised for k > 2)
 
 %NOTE: Changing to largely columns had almost no effect on
 %       speed
 %% Input:
-%   %num_machines: The number of machines
-%   %k: The size of the k-exchange
-%   %L: The machine numbers of all the loaded machines
-%   %M: The number of (movable) programs in each machine
-%   %cycle: Whether the order is encoding a cycle or not
-%   %machine_costs: The costs of all machines
-%   %machine_start_indices: The ith value indicates which row of the
-%       output_array the ith machine first appears
-%   %program_costs: The cost of the programs ordered as in output_array
+    % k: The size of the k-exchange
+    % L: The machine numbers of all the loaded machines
+    % M: The number of (movable) programs in each machine
+    % num_machines: The number of machines
+    % machine_costs: The ith value indicates the cost of the ith machine
+    % machine_start_indices: The ith value indicates which row of the 
+        % output_array the ith machine first appears
+    % program_costs: The cost of the programs ordered as in output_array
+    % selected_machines:
+    % machine_orders: 
 %% Output:
-%   %best_neighbour = {order, programs} encoding move to best found
-%   %best_makespan
+    % best_neighbour = {order, programs} encoding move to best found
+    % best_makespan: makespan value of lowest makespan ('best') neighbour
 %%
 function [best_neighbour, best_makespan] = par_generate_and_test(...
                  k, L, M, ...

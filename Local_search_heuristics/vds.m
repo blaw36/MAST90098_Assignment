@@ -1,3 +1,4 @@
+%% vds.m
 % Performs a variable depth search on the passed makespan problem
 %% Input:
     % input_array: n+1 length vector of job costs, and n+1th element is # of

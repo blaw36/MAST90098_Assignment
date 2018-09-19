@@ -1,5 +1,5 @@
-%% k2_generate_and_test.m
-% Constructs batches machine combinations to be processed by workers
+%% construct_batches.m
+% Constructs batches of machine combinations to be processed by workers
 % (parallelisation on computer)
 %   TODO: Tune parameters for dynamic switching (Two of them/ one formula)
 %% Input:
@@ -18,11 +18,12 @@ function [batches, num_batches, use_par] = construct_batches(L, M, k, ...
                  num_machines)
     use_par = false;
     
-    % Pair each loaded machine with all other machines excluding self
-    % has size |L|*(m-1)
-    % Initiate outer column first to fix size
+    % Pair each loaded machine with all other machines excluding self. Has
+        % size |L|*(m-1)
+    % Initiate outer column first to fix matrix size
     valid_machines(:,2) =  repelem(L,num_machines-1);
     % Vectorise this
+    % Generate all pairs, excluding L(i)
     curr = 1;
     for i = 1:length(L)
         next = curr + num_machines - 2;
@@ -33,13 +34,19 @@ function [batches, num_batches, use_par] = construct_batches(L, M, k, ...
     % Construct all the batches for processing
     sum_valid = 0;
     num_batches = 0;
+    
+    % Allocate work (if req'd) by splitting into sets of only paths, then 
+    % of only cycles
     for c = 1:2
         cycle = logical(c-1);
         length_move = k-not(cycle);
         
         if cycle
+            % Set the loaded machine as fixed
             orders = valid_machines;
         else
+            % Generate all combos - as k=2 for this script, quick method to
+            % add in the machine combos, and the reverse
             orders = [valid_machines;valid_machines(:,2),valid_machines(:,1)];
         end
 
@@ -65,13 +72,16 @@ function [batches, num_batches, use_par] = construct_batches(L, M, k, ...
             start = (i-1)*batch_est_size+1;
             finish = max(i*batch_est_size, num_valid);
             batches(i).batch = valid_orders(start:finish,:);
-            batches(i).size = finish + 1-start;
+            batches(i).size = (finish + 1) - start;
             batches(i).cycle = cycle;
             batches(i).length_move = length_move;
         end
         
         sum_valid = sum_valid + num_valid;
     end
+    
+    % Activate parallel processing if more than 10000 valid orders to be
+    % processed
     % TODO: Tune
     if sum_valid > 10^4
         use_par = true;

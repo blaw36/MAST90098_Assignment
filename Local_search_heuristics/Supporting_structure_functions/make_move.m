@@ -26,11 +26,11 @@ function [output_array] = ...
     num_moves = length(program_indices);
     num_machines = length(order_indices);
     
-    %Make the move
+    % Make the move
     for i = 1:num_moves
         target_index = i+1;
         
-        %If cycle then move back to front
+        % If cycle then move back to front
         if i+1>num_machines
             target_index = 1;
         end

@@ -15,11 +15,11 @@ rmpath('Not_in_use');
 rng(10);
 
 %% Parameters
-n = 10; % # jobs
-m = 5; % # machines
+n = 100; % # jobs
+m = 20; % # machines
 a = generate_ms_instances(n, m); % Generate makespan input vector
 k = 2; % # of exchanges (k-exch)
-method = 'GLS'; % 'VDS' or 'GLS'
+method = 'Genetic'; % 'VDS' or 'GLS'
 k2_opt = true;
 
 
@@ -37,6 +37,13 @@ if strcmp(method,'GLS')
 elseif strcmp(method,'VDS')
     % VDS
     [outputArray, outputMakespan, num_exchanges] = vds(a, k, init_method, k2_opt);
+elseif strcmp(method,'Genetic')
+    % Genetic Algorithm
+    [outputArray, outputMakespan, generations] = ...
+            genetic_alg(a, k, init_method, k2_opt, ...
+            3000);
+%             crossover_method, mutation_method, fitness_func, ...
+%             pop_selection_method, init_pop_size);
 end
 
 outputMakespan

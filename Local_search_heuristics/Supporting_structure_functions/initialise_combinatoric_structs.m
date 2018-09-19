@@ -1,7 +1,7 @@
 %% initialise_supporting_structs.m
 % Initialises the supporting combinatoric structs for when k > 2. Uses
 % neighbourhood definition where <= k exchanges of paths and cycles are
-% used.
+% used. (similar to construct_batches.m for k > 2)
 %% Input:
     % num_machines: the number of machines
     % k: the k-exchange
