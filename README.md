@@ -4,6 +4,17 @@ Scheduling Problem.
 
 
 # TODO
+* Local Search
+    * Tuning and improving batching, probably need to setup some 
+    hyper-parameter optimisation. 
+    * Currently VDS defaults to using generate_and_test when k!=2
+    and GLS defaults to using par_generate_and_test when k!=2,
+    which is a bit inconsistent, but probably optimial for each 
+    their feasible ranges. The parallelisation is also only on
+    cycles, however probably a waste of time writing code that
+    won't be used for sake of consitency.
+    * This cycle split parallelisation defs helps so also a shame
+    to just throw away as well.
 * Genetic Algorithm
 * Generating Instances
     * Standard Case ?

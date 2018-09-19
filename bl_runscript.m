@@ -15,11 +15,11 @@ rmpath('Not_in_use');
 rng(10);
 
 %% Parameters
-n = 100; % # jobs
-m = 10; % # machines
+n = 10; % # jobs
+m = 5; % # machines
 a = generate_ms_instances(n, m); % Generate makespan input vector
 k = 2; % # of exchanges (k-exch)
-method = 'VDS'; % 'VDS' or 'GLS'
+method = 'GLS'; % 'VDS' or 'GLS'
 k2_opt = true;
 
 
@@ -65,7 +65,7 @@ ratio_vs_lb = outputMakespan/lower_bound
 
 %% Stress tests
 results = [];
-m_range = [50,60];
+m_range = [50,100];
 m_steps = 2;
 for i = m_range(1):diff(m_range)/(m_steps-1):m_range(2)
     fprintf("Machines: %d  : ", i);

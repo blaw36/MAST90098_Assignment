@@ -32,7 +32,9 @@ function [best_neighbour, best_makespan] = generate_and_test(...
         for cycle = [true, false]
             length_move = num_selected-not(cycle);
             
+            %Count the number of ways to order these valid machines
             n = numel(valid_machines(:, machine_orders(d-1, cycle+1).data));
+            %Arranges these orders each involving d machines
             orders = reshape(...
                 valid_machines(:, machine_orders(d-1, cycle+1).data),...
                 n/d,d);
