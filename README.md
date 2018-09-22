@@ -9,10 +9,13 @@ Scheduling Problem.
     hyper-parameter optimisation. 
     * Currently VDS defaults to using generate_and_test when k!=2
     and GLS defaults to using par_generate_and_test when k!=2,
-    which is a bit inconsistent, but probably optimial for each 
+    which is a bit inconsistent, but probably optimal for each 
     their feasible ranges. The parallelisation is also only on
     cycles, however probably a waste of time writing code that
     won't be used for sake of consitency.
+    * This new batch split may not be better than the old cycle path
+    split (at least for only two workers need to get access to better
+    machine). Scales better in theory but may be better to revert back.
     * This cycle split parallelisation defs helps so also a shame
     to just throw away as well.
 * Genetic Algorithm

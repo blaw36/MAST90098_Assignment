@@ -24,7 +24,7 @@ function [best_neighbour, best_makespan] = k2_generate_and_test(L, M,...
     best_neighbour = {};
  
     % Split work into batches for a number of workers
-    [batches, num_workers, use_par] = construct_batches(L, M, k, num_machines);
+    [batches, num_workers, valid_orders, use_par] = construct_batches(L, M, k, num_machines);
     
     if use_par == false
         % Just evaluate all of the batches sequentially (loop through each
@@ -32,8 +32,9 @@ function [best_neighbour, best_makespan] = k2_generate_and_test(L, M,...
         for b = 1:num_workers
             cycle = batches(b).cycle;
             length_move = batches(b).length_move;
+            batch_orders = valid_orders(batches(b).start:batches(b).finish,:);
             for j = 1:batches(b).size
-                order = batches(b).batch(j,:);
+                order = batch_orders(j,:);
                 % Generate program move combinations
                 [programs, num_programs] = generate_programs(order, M, k, cycle);
                 % Find the minimum makespan neighbour
@@ -52,11 +53,12 @@ function [best_neighbour, best_makespan] = k2_generate_and_test(L, M,...
     else
         % Evaluate the batches of neighbours in parallel
         batch_makespans = Inf(num_workers,1);
-        parfor (b = 1:num_workers, num_workers)
+        parfor b = 1:num_workers
             cycle = batches(b).cycle;
             length_move = batches(b).length_move;
+            batch_orders = valid_orders(batches(b).start:batches(b).finish,:);
             for j = 1:batches(b).size
-                order = batches(b).batch(j,:);
+                order = batch_orders(j,:);
                 % Generate program move combinations
                 [programs, num_programs] = generate_programs(order, M, k, cycle);
                 % Find the minimum makespan neighbour
