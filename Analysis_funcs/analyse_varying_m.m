@@ -1,5 +1,6 @@
-%% analyse_results.m
-% Constructs 3 plots of average [time, makespan, relative_error]
+%% analyse_varying_m.m
+% Constructs 3 plots of average [time, makespan, relative_error] varying
+% the number of proportion of machines
 % If the plot is too "busy" can call this function mutiple times, 
 % specifying subsets of the algs and programs to be displayed.
 %% Input:
@@ -14,7 +15,7 @@
     % alg_names: Identifying names for algs used in the legend.
 %%
 
-function analyse_results(results, alg_subset, num_programs_subset, ...
+function analyse_varying_m(results, alg_subset, num_programs_subset, ...
                         programs_range, machines_denom_iterator, ...
                         alg_names)
 
@@ -62,4 +63,3 @@ function analyse_results(results, alg_subset, num_programs_subset, ...
         pause;
     end
 end
-
