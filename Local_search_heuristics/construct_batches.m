@@ -101,6 +101,8 @@ function [batches, num_batches, valid_orders, use_par] = construct_batches(L, M,
         
         %We have split the data (for either cycles or paths) which
         %indicates we think we have enough data to warrant parallel
+        %TODO: Want to support par on just cycle and path split so need to
+        %move this
         if new_batches>1
             use_par = true;
         end

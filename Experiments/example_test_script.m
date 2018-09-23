@@ -1,3 +1,5 @@
+%A test script demonstrating some things you could do.
+
 %% Testing Parameters
 %TODO: Setup up different gen cases
 gen_method = @(num_programs, num_machines) generate_ms_instances(num_programs, num_machines);
