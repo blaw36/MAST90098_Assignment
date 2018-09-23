@@ -43,6 +43,8 @@ function analyse_varying_m(results, alg_subset, num_programs_subset, ...
     repeated_programs = repmat(programs_range(num_programs_subset), 1,length(alg_names));
     legend_entries = repeated_algs+repeated_programs;
     
+    line_styles = ["-","--",":","-."];
+    
     for i = 1:3
         %Clears the current axis
         cla();
@@ -52,12 +54,15 @@ function analyse_varying_m(results, alg_subset, num_programs_subset, ...
             for n_j = num_programs_subset
                 data = subset(a_i,n_j,:,i);
                 vector = data(:);
-                plot(varying_m,vector);
+                plot(varying_m,vector,line_styles(a_i));
             end
         end
+        title("Varying the Machine Proportion");
         xlabel(x_axis) 
         ylabel(y_axises(i))
+        legend('off');
         legend(legend_entries,'Location','northeast')
+        legend('show');
         
         disp('Press a key for next graphic')
         pause;

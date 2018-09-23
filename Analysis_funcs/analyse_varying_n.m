@@ -56,7 +56,10 @@ function analyse_varying_n(results, alg_subset, num_programs_subset, ...
         title("Machine Proportion = "+machines_proportion);
         xlabel(x_axis) 
         ylabel(y_axises(i))
+        
+        legend('off');
         legend(legend_entries,'Location','northeast')
+        legend('show');
         
         disp('Press a key for next graphic')
         pause;

@@ -15,15 +15,7 @@
         % ([2,..,k],[1,2] , orders_for_d_cycle=matrix())
 %%
 function [selected_machines, machine_orders] = ...
-                        initialise_combinatoric_structs(num_machines, k)
-    
-    if  k==2
-        % Don't use comb data structures, just generate when needed later
-        machine_orders = [];
-        selected_machines = [];
-        return
-    end
-    
+                        initialise_combinatoric_structs(num_machines, k)    
     % Iterate backwards so size doesn't change
     for d = k:-1:2
         if d == 2
