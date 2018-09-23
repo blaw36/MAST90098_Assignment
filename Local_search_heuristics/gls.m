@@ -1,5 +1,5 @@
 %% gls.m
-% A script which solves the makespan problem using a Greedy Local Search
+% A function which solves the makespan problem using a Greedy Local Search
 % (GLS)
 %% Input:
     % input_array: n+1 length vector of job costs, and n+1th element is # of
@@ -34,9 +34,9 @@ function [output_array, makespan, num_exchanges] = ...
     [selected_machines, machine_orders]  ...
                     = initialise_combinatoric_structs(num_machines, k);
                 
-    fprintf("Relative Error to LB after init %f\n",...
-       makespan/lower_bound_makespan(input_array)...
-       );
+    %fprintf("Relative Error to LB after init %f\n",...
+    %   makespan/lower_bound_makespan(input_array)...
+    %   );
     
     % Initialise number of exchanges counter
     num_exchanges = 0;
