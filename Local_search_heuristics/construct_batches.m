@@ -17,7 +17,8 @@
 function [batches, num_batches, valid_orders, use_par] = construct_batches(L, M, k, ...
                  num_machines)
     use_par = false;
-    BATCH_DIV_PARAM = 2*10^6;
+    global BATCH_DIV_PARAM;
+    %BATCH_DIV_PARAM = 2.15*10^6;
     
     % Pair each loaded machine with all other machines excluding self. Has
         % size |L|*(m-1)
@@ -74,7 +75,11 @@ function [batches, num_batches, valid_orders, use_par] = construct_batches(L, M,
         % to determine where to split/create our batches.
         % If we don't exceed this threshold, then no need to have multiple
         % batches.
-        new_batches = 1+floor((num_new_valid*max(M(L))^2)/BATCH_DIV_PARAM);
+        check = num_new_valid*max(M(L))^2/BATCH_DIV_PARAM;
+        if check > 0.5
+            use_par = true;
+        end
+        new_batches = 1+floor(check);
         num_batches = num_batches + new_batches;
         
         batches(num_batches).move = {};
@@ -98,13 +103,5 @@ function [batches, num_batches, valid_orders, use_par] = construct_batches(L, M,
             batches(batch_index).length_move = length_move;
         end
         sum_valid = sum_valid + num_new_valid;
-        
-        %We have split the data (for either cycles or paths) which
-        %indicates we think we have enough data to warrant parallel
-        %TODO: Want to support par on just cycle and path split so need to
-        %move this
-        if new_batches>1
-            use_par = true;
-        end
     end
 end
