@@ -26,14 +26,14 @@ function [output_array, makespan, num_exchanges, num_transformations] = ...
         k2_opt=false;
     end   
     
-    %Indicates need to keep track of moved
+    % Indicates need to keep track of moved for VDS
     fix_moved = true;                    
             
     [num_jobs, num_machines, output_array, done] ...
                 =  process_input(input_array, k, init_algo, fix_moved);
                                         
-    %Note: Althought it is a little messy passing this many parameters
-    %about, using structures (or objects) incurrs an overhead cost
+    % Note: Although it is a little messy passing this many parameters
+    % about, using structures (or objects) incurrs an overhead cost
     [program_costs,machine_start_indices,M,machine_costs,makespan,L] ...
                 = initialise_supporting_structs(...
                         output_array, num_machines, num_jobs);
@@ -49,12 +49,12 @@ function [output_array, makespan, num_exchanges, num_transformations] = ...
     num_transformations = 0;
     num_exchanges = 0;
     
-    %Start Main Loop
+    % Start Main Loop
     while done == false
-        %Start Inner Loop on restricted sequence
+        % Start Inner Loop on restricted sequence
         inner_done = false;
         
-        %Make a copy of items to be used in inner loop
+        % Make a copy of items to be used in inner loop
         i_output_array = output_array;
         i_L = L;
         i_M = M;
@@ -66,7 +66,7 @@ function [output_array, makespan, num_exchanges, num_transformations] = ...
         best_output_array = [];
         
         while inner_done == false
-            %Generate and test neighbourhood
+            % Generate and test neighbourhood
             if k2_opt
             [best_inner, best_inner_makespan] = k2_generate_and_test(...
                 i_L, i_M, num_machines,...
@@ -78,7 +78,7 @@ function [output_array, makespan, num_exchanges, num_transformations] = ...
                 selected_machines, machine_orders);
             end
             
-            %Update to best_inner
+            % Update to best_inner
             i_output_array = make_move(i_output_array,...
                         i_machine_start_indices, best_inner, fix_moved);
                                             
@@ -95,13 +95,13 @@ function [output_array, makespan, num_exchanges, num_transformations] = ...
                                             best_inner_makespan,...
                                             fix_moved);
             
-            %Checks if at new best, if so records the supporting structures
+            % Checks if at new best, if so records the supporting structures
             if best_seq_makespan > best_inner_makespan
                 best_seq_makespan = best_inner_makespan;
                 
-                %Note: Can't set makespan and output_array as may need to
-                %return these if no improvement, and can't set M as the
-                %movable programs will get reset at next sequence.
+                % Note: Can't set makespan and output_array as may need to
+                % return these if no improvement, and can't set M as the
+                % movable programs will get reset at next sequence.
                 program_costs = i_program_costs;
                 machine_start_indices = i_machine_start_indices;
                 machine_costs = i_machine_costs;
@@ -110,12 +110,12 @@ function [output_array, makespan, num_exchanges, num_transformations] = ...
                 best_output_array = i_output_array;
             end
             
-            %Update Bookkeeping values
+            % Update Bookkeeping values
             num_exchanges = num_exchanges + 1;
             
-            %Checks if any of the loaded machines have no moveable programs
-            %in which case, any further actions can only increase costs. So
-            %can terminate here.
+            % Checks if any of the loaded machines have no moveable programs
+            % in which case, any further actions can only increase costs. So
+            % can terminate here.
             if any(i_M(i_L) == 0)
                 inner_done = true;
             end
@@ -129,7 +129,7 @@ function [output_array, makespan, num_exchanges, num_transformations] = ...
             output_array = best_output_array;
             makespan = best_seq_makespan;
             
-            %Allow all jobs to be moved again,
+            % Allow all jobs to be moved again,
             output_array(:,4) = ones(num_jobs,1);
             % and update M to reflect this
             non_empty_machines = 1:num_machines;
@@ -140,7 +140,7 @@ function [output_array, makespan, num_exchanges, num_transformations] = ...
             M = zeros(1, num_machines);
             M(non_empty_machines) = diff(padded);
             
-            %Update Bookkeeping values
+            % Update Bookkeeping values
             num_transformations = num_transformations + 1;
         end
     end

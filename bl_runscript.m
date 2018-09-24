@@ -33,10 +33,12 @@ init_method = "simple";
 %% Makespan solver
 if strcmp(method,'GLS')
     % GLS
-    [outputArray, outputMakespan, num_exchanges] = gls(a, k, init_method, k2_opt);
+    [outputArray, outputMakespan, num_exchanges] = ...
+        gls(a, k, init_method, k2_opt);
 elseif strcmp(method,'VDS')
     % VDS
-    [outputArray, outputMakespan, num_exchanges] = vds(a, k, init_method, k2_opt);
+    [outputArray, outputMakespan, num_exchanges, num_transformations] = ...
+        vds(a, k, init_method, k2_opt);
 elseif strcmp(method,'Genetic')
     % Genetic Algorithm
     [outputArray, outputMakespan, generations] = ...

@@ -1,17 +1,18 @@
 % Generates and tests the neighbourhood of the current instance
 %% Input:
-%   %num_machines: The number of machines
-%   %k: The size of the k-exchange
-%   %L: The machine numbers of all the loaded machines
-%   %M: The number of (movable) programs in each machine
-%   %cycle: Whether the order is encoding a cycle or not
-%   %machine_costs: The costs of all machines
-%   %machine_start_indices: The ith value indicates which row of the
-%       output_array the ith machine first appears
-%   %program_costs: The cost of the programs ordered as in output_array
-%% Ouput:
-%   %best_neighbour = {order, programs} encoding move to best found
-%   %best_makespan
+    % num_machines: The number of machines
+    % k: The size of the k-exchange
+    % L: The machine numbers of all the loaded machines
+    % M: The number of (movable) programs in each machine
+    % Cycle: Whether the order is encoding a cycle or not
+    % machine_costs: The ith value indicates the cost of the ith machine
+    % machine_start_indices: The ith value indicates which row of the 
+        % output_array the ith machine first appears
+    % program_costs: The cost of the programs ordered as in output_array
+ 
+%% Output:
+    % best_neighbour = {order, programs} encoding move to best found
+    % best_makespan: makespan value of lowest makespan ('best') neighbour
 %%
 function [best_neighbour, best_makespan] = generate_and_test(...
                  k, L, M, ...
