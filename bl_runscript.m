@@ -16,10 +16,10 @@ rng(10);
 
 %% Parameters
 n = 100; % # jobs
-m = 20; % # machines
+m = 40; % # machines
 a = generate_ms_instances(n, m); % Generate makespan input vector
 k = 2; % # of exchanges (k-exch)
-method = 'GLS'; % 'VDS' or 'GLS'
+method = 'VDS'; % 'VDS' or 'GLS'
 k2_opt = true;
 
 
@@ -72,11 +72,12 @@ ratio_vs_lb = outputMakespan/lower_bound
 
 %% Stress tests
 results = [];
-m_range = [10000,20000];
-m_steps = 2;
-for i = m_range(1):diff(m_range)/(m_steps-1):m_range(2)
-    fprintf("Machines: %d  : ", i);
-    a = generate_ms_instances(10*i,i);
+n_range = [100,500];
+n_steps = 5;
+for num_jobs = n_range(1):diff(n_range)/(n_steps-1):n_range(2)
+    num_machines = floor(0.4*num_jobs);
+    fprintf("Jobs: %d, Machines : %d \n", num_jobs, num_machines);
+    a = generate_ms_instances(num_jobs, num_machines);
     startTime = tic;
     if strcmp(method,'GLS')
         % GLS
@@ -106,9 +107,9 @@ for i = m_range(1):diff(m_range)/(m_steps-1):m_range(2)
     %NOTE: This will throw errors if a machine hasn't been assigned 
     % anything this can occur if 2 equal max cost machines and only way to 
     % improve is to move a prog to the empty (which doesn't max cost)
-    cost_pm = [(1:i)' accumarray(outputArray(:,2),outputArray(:,1))];
+    cost_pm = [(1:num_machines)' accumarray(outputArray(:,2),outputArray(:,1))];
     % Bar plot
-    bar_plot = draw_bar_plot(sorted_output, i);
+    bar_plot = draw_bar_plot(sorted_output, num_machines);
     title(['Makespan: ' num2str(outputMakespan)])
     xlabel('Machine #') % x-axis label
     ylabel('Job cost') % y-axis label
