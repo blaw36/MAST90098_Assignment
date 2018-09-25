@@ -17,8 +17,8 @@
 function [batches, num_batches, valid_orders, use_par] = construct_batches(L, M, k, ...
                  num_machines)
     use_par = false;
-    global BATCH_DIV_PARAM;
-    %BATCH_DIV_PARAM = 2.15*10^6;
+    %global BATCH_DIV_PARAM;
+    BATCH_DIV_PARAM = 5*10^5;
     
     % Pair each loaded machine with all other machines excluding self. Has
         % size |L|*(m-1)
