@@ -2,20 +2,23 @@
 % uses a genetic algorithm population heuristic method for solving the
 % makespan problem
 
-% Initialise a population
-
 function [output_array, makespan, generations] = ...
-    genetic_alg(input_array, k, init_algo, k2_opt, ...
-    init_pop_size)
+    genetic_alg(input_array, init_pop_size)
 %     crossover_method, mutation_method, fitness_func, ...
 %     pop_selection_method,
 
-% Generate initial population, calculate fitness and other diagnostics
-% All randomly initialised for now
-% TODO: 10% simple with shuffled machines, 90% random
+% wlog, shuffle input_array such that jobs arranged largest to smallest
+% (aligns with our simple initialisation also)
+input_array_aug = zeros(size(input_array));
+input_array_aug = [sort(input_array(:,1:(end-1)), 'descend'), ...
+    input_array(end)];
 
-shuffled_simples_genes = round(0.1*init_pop_size);
-random_genes = init_pop_size - shuffled_simples_genes;
+% Generate initial population
+pop_mat = init_mix_shuff_rand(input_array_aug, init_pop_size, 0.1);
+
+% Calculate fitness and other diagnostics
+
+
 
 for i = 1:shuffled_simples_genes
     [num_jobs, num_machines, output_array, done] = ...
