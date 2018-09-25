@@ -21,9 +21,17 @@ function results = test_algorithm(alg, alg_args, ...
     total_time = 0;
     total_makespan = 0;
     total_rel_error = 0;
-
+    
+    %Generate all the instances first, this allows a seed to be set just
+    %before calling this function for consistent test cases.
+    %Has to be generated before any of the algs are called incase they use
+    %random methods which could mess with the seed.
+    gen_instances(num_trials).a = [];
     for i = 1:num_trials
-        a = gen_method(num_programs, num_machines);
+        gen_instances(i).a = gen_method(num_programs, num_machines);
+    end
+    for i = 1:num_trials
+        a = gen_instances(i).a;
         %Run trial
         startTime = tic;
         %TODO: Check format consistent with genetic, maybe refactor so makespan

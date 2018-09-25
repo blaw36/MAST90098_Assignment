@@ -1,20 +1,24 @@
-% Author: Brendan Law
-% Date: 13th August 2018
+%% generate_ms_instances.m
+% Generates a random makespan problem instance for the given parameters
+%% Input:
+    % n: the number of jobs that need to be assigned (must be integer >= 2)
+    % m: the number of machines to assign the jobs to (must be integer > 0)
+    % hard: a flag indicating whether to use the hard test case generator
+        % from the paper 
+        % "Multi-exhange algorithms for the minimum makespan machine"
+        % described in detail at the start of section 4.1
+%% Output:
+    % inputArray: an array, (p_1,...,p_n,m)
+        % Where p_i represent the integer amount of time required
+        % to do job i = {1,...,n}, and the number of machines, m
+%%
 
-% Here is a rough function to generate instances of
-% the Makespan problem with:
-% n = n jobs that need to be assigned (must be integer >= 2)
-% m = m machines to assign the jobs to (must be integer > 0)
-
-% Output: an array, (p1,...,pn,m)
-% Where p_i represent the integer amount of time required
-% to do job i = {1,...,n}, and the number of machines, m
-
-% Should we have parameters around the size and variability
-% of our randomly generated p_i's?
-
-function inputArray=generate_ms_instances(n,m)
+function inputArray=generate_ms_instances(n, m, hard)
     
+    if ~exist('hard','var')
+        hard=false;
+    end
+
     if (n < 2)     % n >= 2
         error('n must be greater than or equal to 2')
     end
@@ -33,11 +37,22 @@ function inputArray=generate_ms_instances(n,m)
     
     % Pre-allocate for speed
     inputArray = zeros(1,n+1);
+    a = 0;
+    b = n*10;
     
     for i = 1:n
-        inputArray(i) = randi(n*10);
+        if ~hard
+            %Disrete Uniform on [a, b]
+            inputArray(i) = randi([a,b]);
+        else
+            %0.98 of jobs are on the far right of the interval the 
+            %remainder on the far left
+            if i/n < 0.98
+                inputArray(i) = randi([(b-a)*0.9, b]);
+            else
+                inputArray(i) = randi([a, (b-a)*0.02]);
+            end
+        end
     end
-
     inputArray(n+1) = m;
-
 end

@@ -3,7 +3,9 @@
 
 %% Testing Parameters
 %TODO: Setup up different gen cases
-gen_method = @(num_programs, num_machines) generate_ms_instances(num_programs, num_machines);
+hard = false;
+gen_method = @(num_programs, num_machines) ...
+                generate_ms_instances(num_programs, num_machines, hard);
 
 %There are 5 different colored lines by default and 30/10 = 3
 % -> reason for initial params, can alter later.

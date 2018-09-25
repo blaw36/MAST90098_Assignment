@@ -4,6 +4,7 @@ Scheduling Problem.
 
 
 # TODO
+* There is a matlab code to latex app, might be useful
 * Local Search
     * Tuning and improving batching, probably need to setup some 
     hyper-parameter optimisation. 
@@ -23,7 +24,15 @@ Scheduling Problem.
         * some other engineeered case?
     * Existing instance libraries?\
 * Testing:
-    * 
+    * Looking into creating test cases, looks like the uniform choice was fine
+    and is largely used in literature.
+    * One possible extreme case is described here (in english)
+    "Multi-exhange algorithms for the minimum makespan machine"
+    in section "4.1 The Instances"
+    http://citeseerx.ist.psu.edu/viewdoc/download;jsessionid=FF95ABC5BD3FD45008C6441DBD153927?doi=10.1.1.42.7242&rep=rep1&type=pdf 
+    Originally from
+    "Algoritmi di ricerca locale basati su grafi di miglioramento per il problema di assegnamento di lavori a macchine"
+    but my italian isn't too flash.
 * Finding min neighbour
    * Currently has to look through complete list of programs to compute cost
    of switch

@@ -2,8 +2,9 @@
 
 %% Testing Parameters
 %TODO: Setup up different gen cases
-gen_method = @(num_programs, num_machines) generate_ms_instances(num_programs, num_machines);
-
+hard = false;
+gen_method = @(num_programs, num_machines) ...
+                generate_ms_instances(num_programs, num_machines, hard);
 programs_range = 20:20:100;
 machines_denom_iterator = 10;
 num_trials = 20;

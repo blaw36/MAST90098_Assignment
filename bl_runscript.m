@@ -17,7 +17,8 @@ rng(10);
 %% Parameters
 n = 100; % # jobs
 m = 40; % # machines
-a = generate_ms_instances(n, m); % Generate makespan input vector
+hard = true;
+a = generate_ms_instances(n, m, hard); % Generate makespan input vector
 k = 2; % # of exchanges (k-exch)
 method = 'VDS'; % 'VDS' or 'GLS'
 k2_opt = true;
@@ -74,12 +75,16 @@ ratio_vs_lb = outputMakespan/lower_bound
 
 %% Stress tests
 results = [];
-n_range = [100,500];
-n_steps = 5;
+n_range = [100,400];
+n_steps = 4;
+
+global BATCH_DIV_PARAM;
+BATCH_DIV_PARAM = 5*10^4;
+
 for num_jobs = n_range(1):diff(n_range)/(n_steps-1):n_range(2)
     num_machines = floor(0.4*num_jobs);
     fprintf("Jobs: %d, Machines : %d \n", num_jobs, num_machines);
-    a = generate_ms_instances(num_jobs, num_machines);
+    a = generate_ms_instances(num_jobs, num_machines, hard);
     startTime = tic;
     if strcmp(method,'GLS')
         % GLS
@@ -117,4 +122,3 @@ for num_jobs = n_range(1):diff(n_range)/(n_steps-1):n_range(2)
     ylabel('Job cost') % y-axis label
     
 end
-
