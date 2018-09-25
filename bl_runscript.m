@@ -20,7 +20,7 @@ m = 40; % # machines
 hard = true;
 a = generate_ms_instances(n, m, hard); % Generate makespan input vector
 k = 2; % # of exchanges (k-exch)
-method = 'VDS'; % 'VDS' or 'GLS'
+method = 'GLS'; % 'VDS' or 'GLS'
 k2_opt = true;
 
 
@@ -75,7 +75,7 @@ ratio_vs_lb = outputMakespan/lower_bound
 
 %% Stress tests
 results = [];
-n_range = [100,400];
+n_range = [10000,40000];
 n_steps = 4;
 
 global BATCH_DIV_PARAM;

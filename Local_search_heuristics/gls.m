@@ -41,7 +41,12 @@ function [output_array, makespan, num_exchanges] = ...
     
     % Initialise number of exchanges counter
     num_exchanges = 0;
-    while done == false  
+    while done == false
+        % No greedy changes on this neighbourhood will have any effect.
+        if length(L) > k
+            done = true;
+            continue
+        end
         % Generate and test neighbourhood
         if k2_opt
             % Program optimised for k = 2
