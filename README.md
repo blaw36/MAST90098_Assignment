@@ -33,6 +33,11 @@ Scheduling Problem.
     Originally from
     "Algoritmi di ricerca locale basati su grafi di miglioramento per il problema di assegnamento di lavori a macchine"
     but my italian isn't too flash.
+    * Do we want to also report relative to LPT method?
+    * Instead of the current 2nd graph do we want to use scale the average makespan somehow
+    (suppose this is already sort of covered by relative error but might be a better way?)
+    * 'Hardest' machine proportion not consistent accross algorithms and generators
+    will need to consider and properly report on (and 'hardest' in terms of what metric)
 * Finding min neighbour
    * Currently has to look through complete list of programs to compute cost
    of switch

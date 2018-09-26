@@ -1,8 +1,6 @@
 %% k2_generate_and_test.m
 % Generates and tests the neighbourhood of the current instance
-    % Improved speed and memory constraints for k=2
-%   TODO: Parameters used for batching still need to be tuned, but pretty
-%       sure this will be the way to go.
+% Improved speed and memory constraints for k=2
 %% Input:
     % L: The machine numbers of all the loaded machines
     % M: The number of (movable) programs in each machine

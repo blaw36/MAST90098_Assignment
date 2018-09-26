@@ -2,16 +2,16 @@
 
 %% Testing Parameters
 %TODO: Setup up different gen cases
-hard = false;
+hard = true;
 gen_method = @(num_programs, num_machines) ...
                 generate_ms_instances(num_programs, num_machines, hard);
-programs_range = 20:20:100;
+programs_range = 50:50:250;
 machines_denom_iterator = 10;
-num_trials = 20;
+num_trials = 5;
 
 %Set false to disable and use iterator as above.
-%machines_proportion = false;
-machines_proportion = 0.4;
+machines_proportion = false;
+%machines_proportion = 0.4;
 
 %% Algorithms:
 alg_names = ["GLS,k=2,opt", "VDS,k=2,opt"];
@@ -36,10 +36,10 @@ results = compare_algorithms(algs, algs_args, gen_method, ...
 %% Analysis
 alg_subset = [1,2];
 num_programs_subset = 1:length(programs_range);
-% analyse_varying_m(results, alg_subset, num_programs_subset, ...
-%                         programs_range, machines_denom_iterator,...
-%                         alg_names);
-analyse_varying_n(results, alg_subset, num_programs_subset, ...
-                         programs_range, machines_proportion,...
-                         alg_names);
+analyse_varying_m(results, alg_subset, num_programs_subset, ...
+                        programs_range, machines_denom_iterator,...
+                        alg_names);
+% analyse_varying_n(results, alg_subset, num_programs_subset, ...
+%                          programs_range, machines_proportion,...
+%                          alg_names);
 %Could do this multiple times on different subsets ...
