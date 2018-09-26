@@ -43,8 +43,7 @@ elseif strcmp(method,'VDS')
 elseif strcmp(method,'Genetic')
     % Genetic Algorithm
     [outputArray, outputMakespan, generations] = ...
-            genetic_alg(a, k, init_method, k2_opt, ...
-            3000);
+            genetic_alg(a, 3000);
 %             crossover_method, mutation_method, fitness_func, ...
 %             pop_selection_method, init_pop_size);
 end

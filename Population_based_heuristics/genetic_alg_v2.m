@@ -3,15 +3,26 @@
 % makespan problem
 
 function [output_array, makespan, generations] = ...
-    genetic_alg(input_array, init_pop_size)
+    genetic_alg_v2(input_array, init_pop_size)
 %     crossover_method, mutation_method, fitness_func, ...
 %     pop_selection_method,
 
-shuffled_simples_genes = round(0.1*init_pop_size);
-random_genes = init_pop_size - shuffled_simples_genes;
-length_of_input = length(input_array);
-num_jobs = length_of_input - 1;
-num_machines = input_array(length_of_input);
+% wlog, shuffle input_array such that jobs arranged largest to smallest
+% (aligns with our simple initialisation also)
+input_array_aug = zeros(size(input_array));
+input_array_aug = [sort(input_array(:,1:(end-1)), 'descend'), ...
+    input_array(end)];
+
+% Generate initial population
+% Each row corresponds to a gene, each column corresponds to the machine
+% allocated to that job (job order same as in input_array_aug, for all
+% genes)
+[pop_mat, num_jobs, num_machines] = init_mix_shuff_rand(...
+    input_array_aug, init_pop_size, 0.1);
+
+% Calculate cost per machine for each gene, as well as makespan
+jobs_array_aug = input_array_aug(1:(end-1));
+
 
 for i = 1:shuffled_simples_genes
     [num_jobs, num_machines, output_array, done] = ...

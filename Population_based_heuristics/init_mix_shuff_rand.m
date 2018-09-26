@@ -1,7 +1,7 @@
 %% mix_shuffle_random_init.m
 % initialises GA population by using a mix of shuffle and random to a ratio
 
-function [pop_mat] = ...
+function [pop_mat, num_jobs, num_machines] = ...
     init_mix_shuff_rand(input_array, init_pop_size, shuff_prop)
 
 shuffled_simples_genes = round(shuff_prop*init_pop_size);
