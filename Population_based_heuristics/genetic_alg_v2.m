@@ -2,236 +2,167 @@
 % uses a genetic algorithm population heuristic method for solving the
 % makespan problem
 
-function [output_array, makespan, generations] = ...
-    genetic_alg_v2(input_array, init_pop_size)
-%     crossover_method, mutation_method, fitness_func, ...
-%     pop_selection_method,
+%% Inputs:
+	% input_array: Array of jobs, number of machines
+	% init_pop_size: size of population to initialise
+	% simple_prop: proportion of init_pop_size to be from the simple initialisation algorithm. (1-simple_prop) will be from a random initialisation
+	% parent_selection: function used to convert fitness function into parent_select probabilities.
+		% "minMaxLinear" = scale makespans to 1 (min makespan) or 0 (max makespan), and scale to a probability distribution over all candidate genes.
+	% parent_ratio: ratio of parents to init_pop_size for crossover. Eg: 2 means we pair up 2x init_pop_size parents together, resulting in init_pop_size number of children being created from crossover.
+	% crossover_method: Method for crossover and children creation.
+		% "cutover_split" = simple cutover of two parents at one point in the gene, weighted by makespan (lower makespan, more elements get cutover)
+	% mutation_select_method: function used to convert fitness function into a probability of selecting that gene for mutation
+		% "minMaxLinear" = maps each genes' makespan to a probability between 0 (max makespan) and 1 (min makespan)
+	% mutate_method: method used to mutate the genes selected for mutation
+		% "shuffle": swap machines allocated to two randomly selected jobs. Jobs must be from different machines.
+	% popn_cull: Method for culling enlarged population (parents and children, post-mutation) back to init_pop_size for next generation
+		% "top": Takes top init_pop_size, ranked by makespan
+	% termination_criteria: # of generations without improvement as termination condition.
+%% Outputs
+    % best_output: best output of machine allocations to a sorted input job
+    % vector
+    % best_makespan: makespan of the best output
+    % best_generation: generation which yielded the best output
+    % generation_counter: how many generations used in the process before
+    % it terminated
+% To do: include different /flexible criteria for termination
 
-% wlog, shuffle input_array such that jobs arranged largest to smallest
-% (aligns with our simple initialisation also)
-input_array_aug = zeros(size(input_array));
-input_array_aug = [sort(input_array(:,1:(end-1)), 'descend'), ...
-    input_array(end)];
+function [best_output, best_makespan, best_generation, generation_counter] ...
+    = genetic_alg_v2(input_array, init_pop_size, simple_prop, ...
+    parent_selection, parent_ratio, crossover_method, ...
+    mutation_select_method, mutate_method, ...
+    popn_cull, ...
+    termination_criteria)
 
-% Generate initial population
-% Each row corresponds to a gene, each column corresponds to the machine
-% allocated to that job (job order same as in input_array_aug, for all
-% genes)
-[pop_mat, num_jobs, num_machines] = init_mix_shuff_rand(...
-    input_array_aug, init_pop_size, 0.1);
+    % wlog, shuffle input_array such that jobs arranged largest to smallest
+    % (aligns with our simple initialisation also)
+    input_array_aug = zeros(size(input_array));
+    input_array_aug = [sort(input_array(:,1:(end-1)), 'descend'), ...
+        input_array(end)];
 
-% Calculate cost per machine for each gene, as well as makespan
-jobs_array_aug = input_array_aug(1:(end-1));
+    % Generate initial population
+    % Each row corresponds to a gene, each column corresponds to the machine
+    % allocated to that job (job order same as in input_array_aug, for all
+    % genes)
+    [pop_mat, num_jobs, num_machines, jobs_array_aug] = init_mix_shuff_rand(...
+        input_array_aug, init_pop_size, simple_prop);
 
+    % Calculate cost per machine for each gene, as well as makespan
+    machine_cost_mat = calc_machine_costs(jobs_array_aug, pop_mat, ...
+        num_machines);
+    makespan_mat = max(machine_cost_mat,[],2);
 
-for i = 1:shuffled_simples_genes
-    [num_jobs, num_machines, output_array, done] = ...
-        process_input(input_array, k, "simple");
-    pop(i).population = output_array;
-    
-    % Randomly shuffle two elements around
-    j1 = randi(num_jobs,1,1);
-    j2 = randi(num_jobs,1,1);
-    while j1 == j2
-        j2 = randi(num_jobs,1,1);
-    end
-    m1 = pop(i).population(j1,2);
-    pop(i).population(j1,2) = pop(i).population(j2,2);
-    pop(i).population(j2,2) = m1;
-    
-    %%%%%% REPEATED CODE BLOCK ALERT
-    % Neaten and sort, from process_input. We're going to have to
-    % functionalise just this part or separate the initialisation and
-    % neatening functions.
-    % Assign unique job_id to each job
-    pop(i).population(:,3) = (1:num_jobs)';
-    
-    % Sort output_array by machine #
-    pop(i).population = sortrows(...
-        pop(i).population, 2);
-    %%%%%%
-    
-    % Recalculate stats
-    [program_costs,machine_start_indices,M,machine_costs,makespan,L] ...
-        = initialise_supporting_structs(...
-        pop(i).population, num_machines, num_jobs);
-    pop(i).fitness = makespan;
-    pop(i).prog_costs = program_costs;
-    pop(i).mach_start = machine_start_indices;
-    pop(i).movable_progs = M;
-    pop(i).mach_costs = machine_costs;
-end
+    % Begin iterations
+    start_gen_makespan = inf;
+    [new_gen_makespan,gene_indx] = min(makespan_mat);
 
-for i = (shuffled_simples_genes+1):init_pop_size
-    [num_jobs, num_machines, output_array, done] = ...
-        process_input(input_array, k, "random");
-    pop(i).population = output_array;
-    
-    [program_costs,machine_start_indices,M,machine_costs,makespan,L] ...
-        = initialise_supporting_structs(...
-        pop(i).population, num_machines, num_jobs);
-    pop(i).fitness = makespan;
-    pop(i).prog_costs = program_costs;
-    pop(i).mach_start = machine_start_indices;
-    pop(i).movable_progs = M;
-    pop(i).mach_costs = machine_costs;
-end
+    % Initialise generation counter
+    generation_counter = 1;
+    no_chg_generations = 0;
 
-start_gen_makespan = inf;
-new_gen_makespan = min([pop([1:end]).fitness]');
+    % Initialise best generation heuristics
+    best_generation = {};
+    best_generation = {generation_counter, pop_mat(gene_indx,:), new_gen_makespan};
 
-generations = 1;
-no_chg_generations = 0;
-%     while (new_gen_makespan - start_gen_makespan) < -5 % really arbitrary criteria
-while no_chg_generations <= 10 % really arbitrary criteria
-    
-    % Save initial population in case we need to continue using it (no
-    % improvement in this gen)
-    starting_pop = pop;
-    
-    % Pop diagnostics to assign probability of being a parent (lower cost
-    % is better)
-    pop_fit = [pop([1:end]).fitness]';
-    start_gen_makespan = new_gen_makespan;
-    %     tot_score = sum(pop_fit);
-    %     prob_parent = pop_fit./tot_score;
-    %     cumul_prob_parent = cumsum(prob_parent);
-    
-    % Can't think of a way at the moment, just do linear min-max scaling
-    max_pop_fit = max(pop_fit);
-    min_pop_fit = min(pop_fit);
-    pop_fit_scaled = -(pop_fit - max_pop_fit)/(max_pop_fit-min_pop_fit);
-    pop_fit_scaled_tot = sum(pop_fit_scaled);
-    prob_parent = pop_fit_scaled./pop_fit_scaled_tot ;
-    cumul_prob_parent = cumsum(prob_parent);
-    
-    for i = 1:init_pop_size
-        random = rand(1);
-        parents(i) = min(find(random <= cumul_prob_parent));
-    end
-    
-    % Crossover
-    
-    for i = 1:(init_pop_size/2)
-        p1_gene = pop(parents((i*2)-1)).population;
-        p2_gene = pop(parents((i*2))).population;
-        
-        % For comparability on the crossover
-        [p1_gene_sort,p1_gene_sort_indx] = sortrows(p1_gene,1);
-        [p2_gene_sort,p2_gene_sort_indx] = sortrows(p2_gene,1);
-        
-        p1_fitness = pop(parents((i*2)-1)).fitness;
-        p2_fitness = pop(parents((i*2))).fitness;
-        p1_wt = p1_fitness/(p1_fitness + p2_fitness);
-        
-        % 1 denotes get END of p1, 0 denotes get START of p1
-        start_or_end = round(rand(1));
-        % But lower wt is better, so use (1-p1_wt) when allocating
-        % crossover portion.
-        p1_carryover = floor(size(p1_gene_sort,1)*(1-p1_wt));
-        if start_or_end == 1
-            cross_point = size(p1_gene_sort,1) - p1_carryover;
-            pop(init_pop_size+i).population = ...
-                [p2_gene(p2_gene_sort_indx(1:cross_point),:); ...
-                p1_gene(p1_gene_sort_indx((cross_point + 1):num_jobs),:)];
-        elseif start_or_end == 0
-            cross_point = p1_carryover;
-            pop(init_pop_size+i).population = ...
-                [p1_gene(p1_gene_sort_indx(1:cross_point),:); ...
-                p2_gene(p2_gene_sort_indx((cross_point + 1):num_jobs),:)];
+% really arbitrary criteria demanding improvement every n generations
+    while no_chg_generations <= termination_criteria
+
+        start_gen_makespan = new_gen_makespan;
+
+        if parent_selection == "minMaxLinear"
+            prob_parent_select = fit_to_prob_minmaxLinear(makespan_mat, true);
         end
-        
-        %%%%%% REPEATED CODE BLOCK ALERT
-        % Neaten and sort, from process_input. We're going to have to
-        % functionalise just this part or separate the initialisation and
-        % neatening functions.
-        % Assign unique job_id to each job
-        pop(init_pop_size+i).population(:,3) = (1:num_jobs)';
-        
-        % Sort output_array by machine #
-        pop(init_pop_size+i).population = sortrows(...
-            pop(init_pop_size+i).population, 2);
-        %%%%%%
-        
-        [program_costs,machine_start_indices,M,machine_costs,makespan,L] ...
-            = initialise_supporting_structs(...
-            pop(init_pop_size+i).population, ...
-            num_machines, num_jobs);
-        pop(init_pop_size+i).fitness = makespan;
-        pop(init_pop_size+i).prog_costs = program_costs;
-        pop(init_pop_size+i).mach_start = machine_start_indices;
-        pop(init_pop_size+i).movable_progs = M;
-        pop(init_pop_size+i).mach_costs = machine_costs;
-        
-    end
-    
-    % Mutate - randomly pick a point from the neighbourhood to slightly
-    % mutate things (perhaps a 2 neighbourhood?)
-    % For now, we'll just grab 2 jobs and swap their machines randomly
-    for i = 1:length(pop)
-        j1 = randi(num_jobs,1,1);
-        j2 = randi(num_jobs,1,1);
-        while j1 == j2
-            j2 = randi(num_jobs,1,1);
-        end
-        m1 = pop(i).population(j1,2);
-        pop(i).population(j1,2) = pop(i).population(j2,2);
-        pop(i).population(j2,2) = m1;
-        
-        %%%%%% REPEATED CODE BLOCK ALERT
-        % Neaten and sort, from process_input. We're going to have to
-        % functionalise just this part or separate the initialisation and
-        % neatening functions.
-        % Assign unique job_id to each job
-        pop(i).population(:,3) = (1:num_jobs)';
-        
-        % Sort output_array by machine #
-        pop(i).population = sortrows(...
-            pop(i).population, 2);
-        %%%%%%
-        
-        [program_costs,machine_start_indices,M,machine_costs,makespan,L] ...
-            = initialise_supporting_structs(...
-            pop(i).population, ...
-            num_machines, num_jobs);
-        pop(i).fitness = makespan;
-        pop(i).prog_costs = program_costs;
-        pop(i).mach_start = machine_start_indices;
-        pop(i).movable_progs = M;
-        pop(i).mach_costs = machine_costs;
-        
-    end
-    
-    % Trim size back down to init_pop_size
-    pop_fit = [pop([1:end]).fitness]';
-    [pop_fit_sort, pop_fit_sort_indx] = sortrows(pop_fit);
-    genes_to_keep = pop_fit_sort_indx(1:init_pop_size);
-    
-    pop = pop(genes_to_keep);
-    
-    [new_gen_makespan,which_min] = min([pop([1:end]).fitness]');
-    
-    % If we get > 10 generations with no change, stop.
-    % Change is arbitrarily an improvement of 5
-    if (new_gen_makespan - start_gen_makespan) >= -5
-        no_chg_generations = no_chg_generations + 1;
-    end
-    
-    % If no improvement at all, go back to the original population.
-    if (new_gen_makespan > start_gen_makespan)
-        pop = starting_pop;
-        [new_gen_makespan,which_min] = min([pop([1:end]).fitness]');
-    end
-    
-    generations = generations + 1;
-    clc
-    fprintf("Generation: %d \n", generations);
-    fprintf("Makespan: %d \n", new_gen_makespan);
-    
-end
 
-% Default return for now while function under construction
-output_array = pop(which_min).population;
-makespan = pop(which_min).fitness;
-generations = generations;
+        cumul_prob_parent = cumsum(prob_parent_select);
+
+        % Generate parent pairings for crossover
+        parent_mat = generate_parents(cumul_prob_parent, ...
+            parent_ratio, init_pop_size);
+        num_children = size(parent_mat,1);
+
+        % Crossover
+        crossover_children = zeros(num_children, num_jobs);
+        for i = 1:num_children 
+            % Can we do this in batch?
+            parent_pair = parent_mat(i,:);
+            parent_genes = pop_mat(parent_pair,:);
+            parent_fitness = makespan_mat(parent_pair,:);
+
+            if crossover_method == "cutover_split"
+                crossover_children(i,:) = ...
+                c_over_split(parent_pair, parent_genes, parent_fitness, ...
+                    num_jobs);
+            end
+        end
+
+        % Calculate cost per machine of children
+        machine_cost_mat_children = calc_machine_costs(jobs_array_aug, ...
+            crossover_children, num_machines);
+
+        % Combine children and parents for larger population
+        combined_pop_mat = zeros(init_pop_size + num_children, num_jobs);
+        combined_pop_mat = [pop_mat; crossover_children];
+
+        combined_machine_cost_mat = zeros(init_pop_size + num_children, 1);
+        combined_machine_cost_mat = [machine_cost_mat; machine_cost_mat_children];
+        
+        % 1 for parent, 0 for children
+        parent_child_indicator = [ones(size(pop_mat,1),1); ...
+            zeros(size(crossover_children,1),1)];
+
+        combined_makespan_mat = max(combined_machine_cost_mat,[],2);
+
+        % Randomly select elements for mutation
+        if mutation_select_method == "minMaxLinear"
+            prob_mutation_select = fit_to_prob_minmaxLinear(combined_makespan_mat);
+        end
+        random_numbers = rand(size(combined_makespan_mat,1),1);
+        genes_to_mutate = find(random_numbers <= prob_mutation_select)';
+
+        % Mutate
+        if mutate_method == "shuffle"
+            [combined_pop_mat, combined_machine_cost_mat] = ...
+                mutate_shuffle(genes_to_mutate, combined_pop_mat, ...
+                combined_machine_cost_mat, num_machines, num_jobs, ...
+                jobs_array_aug);
+        end
+
+        combined_makespan_mat = max(combined_machine_cost_mat,[],2);
+
+        % Population culling
+        if popn_cull == "top"
+            genes_to_keep = cull_top_n(combined_pop_mat, combined_makespan_mat, ...
+                init_pop_size);
+        end
+
+        pop_mat = combined_pop_mat(genes_to_keep, :);
+        makespan_mat = combined_makespan_mat(genes_to_keep, :);
+        parent_child_indicator = parent_child_indicator(genes_to_keep, :);
+        [new_gen_makespan,gene_indx] = min(makespan_mat);
+
+        generation_counter = generation_counter + 1;
+
+        % If we get > 10 generations with no change, stop.
+        if (new_gen_makespan - start_gen_makespan) >= 0
+            no_chg_generations = no_chg_generations + 1;
+        elseif (new_gen_makespan - start_gen_makespan) < 0
+            no_chg_generations = 0;
+            best_generation = {generation_counter, pop_mat(gene_indx,:), new_gen_makespan};
+        end
+
+        clc
+        fprintf("Generation: %d \n", generation_counter);
+        fprintf("Makespan: %d \n", new_gen_makespan);
+        fprintf("Best makespan: %d \n", best_generation{3});
+        fprintf("Avg fitness: %d \n", round(mean(makespan_mat)));
+        fprintf("Num parents survived: %d \n", ...
+            sum(parent_child_indicator == 1));
+        fprintf("Num children survived: %d \n", ...
+            sum(parent_child_indicator == 0));
+
+    end
+
+    best_output = best_generation{2};
+    best_makespan = best_generation{3};
+    best_generation = best_generation{1};
 end
