@@ -1,11 +1,9 @@
 %% par_generate_and_test.m
 % Generates and tests the neighbourhood of the current instance
 % (generalised for k > 2)
-
-%NOTE: Changing to largely columns had almost no effect on
-%       speed
 %% Input:
     % k: The size of the k-exchange
+    % curr_makespan: the makespan of the current instance
     % L: The machine numbers of all the loaded machines
     % M: The number of (movable) programs in each machine
     % num_machines: The number of machines
@@ -13,17 +11,28 @@
     % machine_start_indices: The ith value indicates which row of the 
         % output_array the ith machine first appears
     % program_costs: The cost of the programs ordered as in output_array
-    % selected_machines:
-    % machine_orders: 
+    % selected_machines: Encodes all all possible m choose k
+        % combinations to select k machines (combs matrix)
+        % Selected_machines has 3 dims , (d=[2,..,k], combs=matrix())
+    % machine_orders: Encodes all the ways to order those k machines as
+        % cycles and as paths (d_cycle matrix)
+        % machine_orders has 4 dims 
+        % ([2,..,k],[1,2] , orders_for_d_cycle=matrix())
+    % greedy_flag: a boolean flag indicating whether greedy or not
 %% Output:
     % best_neighbour = {order, programs} encoding move to best found
     % best_makespan: makespan value of lowest makespan ('best') neighbour
 %%
 function [best_neighbour, best_makespan] = par_generate_and_test(...
-                 k, L, M, ...
+                 k, curr_makespan, L, M, ...
                  machine_costs, machine_start_indices, program_costs,...
-                 selected_machines, machine_orders)
+                 selected_machines, machine_orders, greedy_flag)
     
+    %Equivalent to if ~exist('greedy_flag','var')
+    if nargin == 9
+        greedy_flag = false;
+    end
+              
     best_makespan = inf;
     best_neighbour = {};
     
@@ -64,7 +73,8 @@ function [best_neighbour, best_makespan] = par_generate_and_test(...
                                 order, programs, ...
                                 machine_costs, machine_start_indices, ...
                                 program_costs,...
-                                num_programs, num_selected, length_move);
+                                num_programs, num_selected, length_move,...
+                                curr_makespan, L, greedy_flag);
                             
                 if min_neigh_makespan < batch_makespans(c)
                     batch_makespans(c) = min_neigh_makespan;

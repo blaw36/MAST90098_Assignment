@@ -17,10 +17,10 @@ rng(10);
 %% Parameters
 n = 100; % # jobs
 m = 40; % # machines
-hard = true;
+hard = false;
 a = generate_ms_instances(n, m, hard); % Generate makespan input vector
 k = 2; % # of exchanges (k-exch)
-method = 'Genetic'; % 'VDS' or 'GLS'
+method = 'VDS'; % 'VDS' or 'GLS'
 k2_opt = true;
 
 
@@ -78,11 +78,8 @@ ratio_vs_lb = outputMakespan/lower_bound
 
 %% Stress tests
 results = [];
-n_range = [10000,40000];
-n_steps = 4;
-
-global BATCH_DIV_PARAM;
-BATCH_DIV_PARAM = 5*10^4;
+n_range = [500,1500];
+n_steps = 3;
 
 for num_jobs = n_range(1):diff(n_range)/(n_steps-1):n_range(2)
     num_machines = floor(0.4*num_jobs);

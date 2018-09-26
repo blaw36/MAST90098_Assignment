@@ -1,7 +1,13 @@
 %% construct_batches.m
 % Constructs batches of machine combinations to be processed by workers
 % (parallelisation on computer)
-%   TODO: Tune parameters for dynamic switching
+% A non-passed parameter BATCH_DIV_PARAM is used in this script, this 
+% parameter determines the size of the batches and also whether or not 
+% parallelisation occurs.
+% The resulting behavious is that 'large' optimisation problems are solved
+% entirely in parallel, 'small' optimisation problems are solved entirely
+% in non-parallel, and somewhere in between the problems are solved with a
+% mixture of parallel and non-parallel methods.
 %% Input:
     % L: The machine numbers of all the loaded machines
     % M: The number of (movable) programs in each machine
@@ -14,16 +20,16 @@
     % valid_orders: the orders to be processed in batch
     % use_par: a flag indicating whether to use parallel or not
 %%
-function [batches, num_batches, valid_orders, use_par] = construct_batches(L, M, k, ...
-                 num_machines)
+function [batches, num_batches, valid_orders, use_par] = ...
+                                construct_batches(L, M, k, num_machines)
     use_par = false;
-    %global BATCH_DIV_PARAM;
-    BATCH_DIV_PARAM = 5*10^5;
+    %See above
+    BATCH_DIV_PARAM = 1*10^8;
     
     % Pair each loaded machine with all other machines excluding self. Has
-        % size |L|*(m-1)
+    % size |L|*(m-1)
     % Initiate outer column first to fix matrix size
-    valid_machines(:,2) =  repelem(L,num_machines-1);
+    valid_machines(:,2) =  repelem(L, num_machines-1);
     % Vectorise this
     % Generate all pairs, excluding L(i)
     curr = 1;
@@ -64,28 +70,33 @@ function [batches, num_batches, valid_orders, use_par] = construct_batches(L, M,
         if num_new_valid == 0
             continue
         end
-        
-        %TODO: Tune
-        % max(M(L))^2*num_valid^2
-        % num_workers = idivide(int32(max(M(L))^2*num_valid^2), 1.0*10^9);
-        % fprintf("%d, %d\n",max(M(L)),num_valid);
-        old_num_batches = num_batches;
-        % Idea is here is big oh for k=2 is O(max(M(L))^2 m^2) (check)
+
+        % See above for rational of having this parameter.
+        % Idea here is big oh of number of valid orders for k=2 is 
+        % O(max(M(L))^2 m^2)
         % So should look for a threshold in terms of this larger behavior
         % to determine where to split/create our batches.
         % If we don't exceed this threshold, then no need to have multiple
         % batches.
-        check = num_new_valid*max(M(L))^2/BATCH_DIV_PARAM;
+        check = (num_new_valid*max(M(L)))^2/BATCH_DIV_PARAM;
+        new_batches = 1+floor(check);
+        
+        % This determines whether we use parallel processing or not.
+        % As we have at least two batches (for paths and cycles) even if
+        % new_batches = 1 might still be in our best interest to use
+        % parallelisation, this check>0.5 seeks to achieve this rough
+        % compromise.
         if check > 0.5
             use_par = true;
         end
-        new_batches = 1+floor(check);
+        
+        old_num_batches = num_batches;
         num_batches = num_batches + new_batches;
         
         batches(num_batches).move = {};
         batches(num_batches).batch = {};
         
-        %Seting the size of batches by using ceil, will 'overallocate' to
+        %Setting the size of batches by using ceil, will 'overallocate' to
         %batches before last => last batch won't have a full load but
         %just the remainder
         batch_size = ceil(num_new_valid/new_batches);
