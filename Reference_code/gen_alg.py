@@ -12,6 +12,15 @@ def genetic_alg(input_array, init_pop_size, simple_prop,
     init_func = @(input_array_aug, init_pop_size) init_mix_shuff_rand(input_array_aug, init_pop_size, simple_prop)
     #^ we are treating input_array_aug, init_pop_size as required inputs and simple prop
     #as an additional arg used by the function
+
+    #Did some more reading and found
+    #https://stackoverflow.com/questions/1673193/slow-performance-using-anonymous-functions-in-matlab-have-others-noticed-this
+    #Looks like using anonymous functions will incurr an overhead cost
+    #This means if this method is used, can only use function handles
+    #eg
+    init_func = @init_mix_shuff_rand
+    #This means that all initiation functions would need to take consistent arguments
+    #(or could do something with global vars, but that seems a little dirty)
     ...
 
     #Or could just have one mutation func
