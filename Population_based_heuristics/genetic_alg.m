@@ -5,8 +5,7 @@
 % Initialise a population
 
 function [output_array, makespan, generations] = ...
-    genetic_alg(input_array, k, init_algo, k2_opt, ...
-    init_pop_size)
+    genetic_alg(input_array, init_pop_size)
 %     crossover_method, mutation_method, fitness_func, ...
 %     pop_selection_method,
 
@@ -19,7 +18,7 @@ random_genes = init_pop_size - shuffled_simples_genes;
 
 for i = 1:shuffled_simples_genes
     [num_jobs, num_machines, output_array, done] = ...
-        process_input(input_array, k, "simple");
+        process_input(input_array, 2, "simple");
     pop(i).population = output_array;
     
     % Randomly shuffle two elements around
@@ -57,7 +56,7 @@ end
 
 for i = (shuffled_simples_genes+1):init_pop_size
     [num_jobs, num_machines, output_array, done] = ...
-        process_input(input_array, k, "random");
+        process_input(input_array, 2, "random");
     pop(i).population = output_array;
     
     [program_costs,machine_start_indices,M,machine_costs,makespan,L] ...
