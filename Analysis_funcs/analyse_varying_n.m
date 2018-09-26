@@ -36,7 +36,7 @@ function analyse_varying_n(results, alg_subset, num_programs_subset, ...
     
     %Information to format the axis
     
-    y_axises = ["Average Time", "Average Makespan", "Average Relative Error"];
+    y_axises = ["Log_{10} Average Time", "Average Makespan", "Average Relative Error"];
     x_axis = "Number of Jobs";
     %Construct the legend
     legend_entries = alg_names(alg_subset);
@@ -46,10 +46,16 @@ function analyse_varying_n(results, alg_subset, num_programs_subset, ...
         cla();
         %Sets the plot to store all new information
         hold on;
+        %Resets the color palette
+        ax = gca;
+        ax.ColorOrderIndex = 1;
         for a_i = alg_subset
             for n_j = num_programs_subset
                 data = subset(a_i,:,1,i);
                 vector = data(:);
+                if i == 1
+                    vector = log10(vector);
+                end
                 plot(programs_range,vector);
             end
         end

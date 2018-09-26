@@ -30,7 +30,7 @@ function analyse_varying_m(results, alg_subset, num_programs_subset, ...
     end
     
     %Information to format the axis
-    y_axises = ["Average Time", "Average Makespan", "Average Relative Error"];
+    y_axises = ["Log_{10} Average Time", "Average Makespan", "Average Relative Error"];
     x_axis = "Proportion of machines to jobs";
     %Construct the legend
     %Makes each entry look like ({alg_name})-Jobs:n
@@ -51,9 +51,15 @@ function analyse_varying_m(results, alg_subset, num_programs_subset, ...
         %Sets the plot to store all new information
         hold on;
         for a_i = alg_subset
+            %Resets the color palette for each algorithm
+            ax = gca;
+            ax.ColorOrderIndex = 1;
             for n_j = num_programs_subset
                 data = subset(a_i,n_j,:,i);
                 vector = data(:);
+                if i == 1
+                    vector = log10(vector);
+                end
                 plot(varying_m,vector,line_styles(a_i));
             end
         end
