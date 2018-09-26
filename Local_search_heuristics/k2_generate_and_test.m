@@ -2,6 +2,7 @@
 % Generates and tests the neighbourhood of the current instance
 % Improved speed and memory constraints for k=2
 %% Input:
+    % curr_makespan: the makespan of the current instance
     % L: The machine numbers of all the loaded machines
     % M: The number of (movable) programs in each machine
     % num_machines: The number of machines    
@@ -9,14 +10,21 @@
     % machine_start_indices: The ith value indicates which row of the 
         % output_array the ith machine first appears
     % program_costs: The cost of the programs ordered as in output_array
+    % greedy_flag: a boolean flag indicating whether greedy or not
 %% Output:
     % best_neighbour = {order, programs} encoding move to best found
     % best_makespan: makespan value of lowest makespan ('best') neighbour
 %%
-function [best_neighbour, best_makespan] = k2_generate_and_test(L, M,...
+function [best_neighbour, best_makespan] = k2_generate_and_test(...
+    curr_makespan, L, M,...
     num_machines,...
-    machine_costs, machine_start_indices, program_costs)
+    machine_costs, machine_start_indices, program_costs, greedy_flag)
     
+    %Equivalent to if ~exist('greedy_flag','var')
+    if nargin == 7
+        greedy_flag = false;
+    end
+
     k=2;
     best_makespan = Inf;
     best_neighbour = {};
@@ -40,7 +48,8 @@ function [best_neighbour, best_makespan] = k2_generate_and_test(L, M,...
                                 order, programs, ...
                                 machine_costs, machine_start_indices, ...
                                 program_costs, ...
-                                num_programs, k, length_move);
+                                num_programs, k, length_move, ...
+                                curr_makespan, L, greedy_flag);
 
                 if min_neigh_makespan < best_makespan
                     best_makespan = min_neigh_makespan;
@@ -64,7 +73,8 @@ function [best_neighbour, best_makespan] = k2_generate_and_test(L, M,...
                                 order, programs, ...
                                 machine_costs, machine_start_indices, ...
                                 program_costs, ...
-                                num_programs, k, length_move);
+                                num_programs, k, length_move, ...
+                                curr_makespan, L, greedy_flag);
 
                 if min_neigh_makespan < batch_makespans(b)
                     batch_makespans(b) = min_neigh_makespan;
