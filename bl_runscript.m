@@ -20,7 +20,7 @@ m = 40; % # machines
 hard = false;
 a = generate_ms_instances(n, m, hard); % Generate makespan input vector
 k = 2; % # of exchanges (k-exch)
-method = 'VDS'; % 'VDS' or 'GLS'
+method = 'Genetic'; % 'VDS', 'GLS' or 'Genetic'
 k2_opt = true;
 
 
@@ -34,22 +34,22 @@ init_method = "simple";
 %% Makespan solver
 if strcmp(method,'GLS')
     % GLS
-    [outputArray, outputMakespan, num_exchanges] = ...
+    [outputArray, outputMakespan, num_exchanges, time_taken] = ...
         gls(a, k, init_method, k2_opt);
 elseif strcmp(method,'VDS')
     % VDS
-    [outputArray, outputMakespan, num_exchanges, num_transformations] = ...
-        vds(a, k, init_method, k2_opt);
+    [outputArray, outputMakespan, num_exchanges, num_transformations, ...
+        time_taken] = vds(a, k, init_method, k2_opt);
 elseif strcmp(method,'Genetic')
     % Genetic Algorithm
     % Note that output is based on sorted input vector, where j1, ... , jn
     % is the array of jobs sorted in descending cost order.
-    [outputArray, outputMakespan, best_generation, generations] = ...
-                genetic_alg_v2(a, 3000, 0.1, ...
+    [outputArray, outputMakespan, best_generation, generations, ...
+        time_taken] = genetic_alg_v2(a, 3000, 0.1, ...
                 "minMaxLinear", 5, "cutover_split", ...
                 "minMaxLinear", "shuffle", ...
                 "top", ...
-                50)
+                50);
 end
 
 outputMakespan

@@ -20,8 +20,10 @@
     % num_transformations:
         % number of times a new best of sequence is chosen
 %%
-function [output_array, makespan, num_exchanges, num_transformations] = ...
-                            vds(input_array, k, init_algo, k2_opt)
+function [output_array, makespan, num_exchanges, num_transformations, ...
+    time_taken] = vds(input_array, k, init_algo, k2_opt)
+    
+    start_time = tic;
     if ~exist('k2_opt','var') || k ~= 2
         k2_opt=false;
     end   
@@ -145,4 +147,5 @@ function [output_array, makespan, num_exchanges, num_transformations] = ...
             num_transformations = num_transformations + 1;
         end
     end
+    time_taken = toc(start_time);
 end

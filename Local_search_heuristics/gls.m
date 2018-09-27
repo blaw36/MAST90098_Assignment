@@ -15,9 +15,12 @@
         % max, across all machines, of sum of job costs for a given machine
     % num_exchanges:
         % number of exchanges performed
+    % time_taken:
+        % time taken for algorithm to run
 %%
-function [output_array, makespan, num_exchanges] = ...
+function [output_array, makespan, num_exchanges, time_taken] = ...
                             gls(input_array, k, init_algo, k2_opt)                   
+    start_time = tic;
     if ~exist('k2_opt','var') || k ~= 2
         k2_opt=false;
     end 
@@ -87,4 +90,5 @@ function [output_array, makespan, num_exchanges] = ...
             num_exchanges = num_exchanges + 1;
         end
     end
+    time_taken = toc(start_time);
 end
