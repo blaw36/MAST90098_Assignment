@@ -173,7 +173,13 @@ function [best_makespan, time_taken, init_makespan, best_output,...
 
     end
 
-    best_output = best_generation{2};
+    % Convert best_output to standard output_array format produced by other
+    % two algorithms
+    best_output = [jobs_array_aug', best_generation{2}'];
+    best_output = sortrows(best_output,2);
+    best_output(:,3) = zeros(num_jobs,1); % third column is just arbitrary as a
+    % placeholder
+    
     best_makespan = best_generation{3};
     best_generation = best_generation{1};
     time_taken = toc(start_time);
