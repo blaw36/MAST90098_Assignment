@@ -1,132 +1,94 @@
-% Author: Brendan Law
-% Date: 15th August 2018
-
-% Output array should have, for each m machine
-% The optimal order of the jobs
-% As well as the (m+1)th cell containing the makespan of the problem
-% ie. the total time of longest running machine
-
-% Input:
-    % inputArray: n+1 length vector of job costs, and n+1th element is # of
+%% gls.m
+% A function which solves the makespan problem using a Greedy Local Search
+% (GLS)
+%% Input:
+    % input_array: n+1 length vector of job costs, and n+1th element is # of
         % machines
-    % k_exch: k-value for # of exchanges
-    % init_algo: initialisation algorithm:
-        % 'simple' = Costliest job allocated to machine with most 'capacity'
-        % relative to most utilised machine at the time
-        % 'random' = Random allocation (random number generated for machine)
-        % 'naive' = All jobs placed into machine 1
-
-% Output:
-    % state_array:
+    % k: specifies the k exchange
+    % init_algo: A string specifying how to pick an initial feasible sol'n:
+        % 'simple', 'random', 'naive'
+%% Output:
+    % output_array:
         % rows - a job allocated to a position in a machine
         % columns - job_cost, machine_no, unique job_id
     % makespan:
-        % max, across all machines, of sum of jobs for a given machine
+        % max, across all machines, of sum of job costs for a given machine
     % num_exchanges:
-        % number of (k-)exchanges performed
-function [output_array, makespan, num_exchanges] = ...
-                            gls(inputArray, k_exch, init_algo)
-                        
-% Initialisation
-length_of_input = length(inputArray);
-num_jobs = length_of_input - 1;
-num_machines = inputArray(length_of_input);
-output_array = zeros(num_jobs,3);
-
-% Variable checking
-allowed_init_algos = ["simple", "random", "naive"];
-if sum(strcmp(allowed_init_algos,init_algo)) == 0
-    error("'Init_algo' parameter must be one of: '%s' \n", strjoin(allowed_init_algos,"', '"))
-end
-
-if k_exch > inputArray(length_of_input)
-    error("Number of exchanges cannot exceed number of machines")
-end
-
-% Print some stuff to screen
-fprintf("input_length: %d \n", length_of_input);
-fprintf("num_jobs: %d \n", num_jobs);
-fprintf("number_of_machines: %d \n", num_machines);
-
-if (num_jobs <= num_machines)
-    % If we happen to get less jobs than machines, makespan
-    % is just time of most expensive job
-    output_array = [inputArray(1:num_jobs)', (1:num_jobs)', (1:num_jobs)'];
-    makespan = max(output_array(:,1));
-    num_exchanges = 0;
+        % number of exchanges performed
+    % time_taken:
+        % time taken for algorithm to run
+%%
+function [output_array, makespan, num_exchanges, time_taken] = ...
+                            gls(input_array, k, init_algo, k2_opt)                   
+    start_time = tic;
+    if ~exist('k2_opt','var') || k ~= 2
+        k2_opt=false;
+    end 
+    % Extract important information from input, and initialise a sol'n
+    [num_jobs, num_machines, output_array, done] = ...
+                                process_input(input_array, k, init_algo);
+                                        
+    % Note: Although it is a little messy passing this many parameters
+    % about, using structures (or objects) incurrs an overhead cost
+    [program_costs,machine_start_indices,M,machine_costs,makespan,L] ...
+                    = initialise_supporting_structs(...
+                                    output_array, num_machines, num_jobs);
     
-elseif (num_machines == 1)
-    % If one machine, everything allocated to that machine
-    % Makespan is just the max
-    output_array(:,1:2) = initialise_naive(inputArray, num_jobs);
-    output_array(:,3) = (1:length(output_array))';
-    makespan = sum(output_array(:,1));
-    num_exchanges = 0;
-
-else
-    % Otherwise, we need an initialise function for an initial solution
-    if init_algo == "simple"
-        output_array(:,1:2) = initialise_simple(inputArray, num_jobs, num_machines);
-    elseif init_algo == "random"
-        output_array(:,1:2) = initialise_random(inputArray, num_jobs, num_machines);
-    elseif init_algo == "naive"
-        output_array(:,1:2) = initialise_naive(inputArray, num_jobs);
+    %Can be expensive, so don't want to do it if don't have to
+    if ~done && ~k2_opt
+        [selected_machines, machine_orders]  ...
+                    = initialise_combinatoric_structs(num_machines, k);
     end
     
-    % Assign unique job_id to each job
-    output_array(:,3) = (1:length(output_array))';
-    update = true;
+    % Initialise number of exchanges counter
     num_exchanges = 0;
+    %A flag passed down to indicate greedy
+    greedy_flag = true;
     
-    output_array = sortrows(output_array, 2);
-    [output_array, machine_start_indices, M, machine_costs, makespan, L] ...
-        = update_supporting_structs(output_array, num_machines, num_jobs);
-
-    %fprintf("Relative Error to LB after init %f\n",...
-    %    makespan/lower_bound_makespan(inputArray)...
-    %    );
-    
-    while update == true  
-        %Generate for instance
-        g = NeighbourhoodGenerator(k_exch, L, M);
-        best_neighbour = {};
-        best_neighbour_makespan = makespan;
-        
-        %Cost of each program
-        program_costs = output_array(:,1);
-        
-        %While still neighbours
-        while g.done == false
-            %Find the best neighbour in this batch of neighbours
-            [min_neigh_makespan, prog_index] = find_min_neighbour(...
-                                g.order, g.programs, ...
-                                machine_costs, machine_start_indices, ...
-                                program_costs);
-                                
-            if min_neigh_makespan < best_neighbour_makespan
-                best_neighbour_makespan = min_neigh_makespan;
-                best_neighbour = {g.order, g.programs(prog_index,:)};
-            end
-            %Retrieve next
-            g.next();
+    while done == false
+        % No greedy changes on this neighbourhood will have any effect.
+        if length(L) > k
+            done = true;
+            continue
+        end
+        % Generate and test neighbourhood
+        if k2_opt
+            % Program optimised for k = 2
+            [best_neighbour, best_neighbour_makespan] = k2_generate_and_test(...
+                makespan, L, M, num_machines, ...
+                machine_costs, machine_start_indices, program_costs, ...
+                greedy_flag);
+        else
+            % Program generalised for k > 2
+            [best_neighbour, best_neighbour_makespan] = generate_and_test(...
+                k, makespan, L, M, ...
+                machine_costs, machine_start_indices, program_costs,...
+                selected_machines, machine_orders, greedy_flag);
         end
         
-        % Evaluate termination flag, only if new is better
+        % Set termination flag to true if no improvement from new iteration
         if makespan <= best_neighbour_makespan
-            update = false;
+            done = true;
         else
             % Update to new instance
             makespan = best_neighbour_makespan;
             output_array = make_move(output_array, machine_start_indices,...
                                                 best_neighbour);
                                             
-            [output_array, machine_start_indices, M, machine_costs, ...
-                makespan, L] ...
-            = update_supporting_structs(output_array, num_machines, num_jobs);
+            [program_costs, machine_start_indices, M, machine_costs, L] ...
+                    = update_supporting_structs(...
+                                                best_neighbour, ...
+                                                output_array, ...
+                                                num_machines,...
+                                                program_costs, ...
+                                                machine_start_indices, ...
+                                                M, ...
+                                                machine_costs, ...
+                                                makespan);
             
-            %Update Bookkeeping values
+            % Update number of exchanges counter
             num_exchanges = num_exchanges + 1;
         end
     end
-end
+    time_taken = toc(start_time);
 end

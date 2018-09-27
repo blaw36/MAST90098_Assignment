@@ -1,12 +1,22 @@
-% Author: Brendan Law
-% Date: 19th August 2018
+%% initialise_random.m
+% A script which initialises a solution by randomly allocating jobs to
+% machines.
 
-% Random initialisation:  (initial jobs -> machines f'n)
-    % Each job is randomly allocated to a machine
+%% Input:
+    % input_array: n+1 length vector of job costs, and n+1th element is # of
+        % machines
+    % num_jobs: the number of jobs
+    % num_machines: the number of machines
+    
+%% Output:
+    % init_alloc: left two columns of output_array
+        % rows - a job allocated to a position in a machine
+        % columns - job_cost, machine_no
+%%
 
-function init_alloc = initialise_random(inputData, num_jobs, num_machines)
+function init_alloc = initialise_random(input_array, num_jobs, num_machines)
 
-input_data_jobs = inputData(1:num_jobs);
+input_data_jobs = input_array (1:num_jobs);
 
 % Pre-allocate for speed
 init_alloc = zeros(num_jobs,2);

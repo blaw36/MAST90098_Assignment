@@ -1,15 +1,28 @@
-%% SCRIPT
+%% runscript.m
+% A script which generates instances, and solves the problem using both:
+    % GLS (Greedy Local Search)
+    % VDS (Variable Depth Search)
+
+% Clear environment
 clear;
 clc;
-addpath(genpath('.\')); % add everything in the runscript.m directory
-rmpath('Not_in_use'); % remove not_in_use
+% Add everything in the runscript.m directory
+addpath(genpath('.\')); 
+% Remove 'not_in_use' folder from path. This only has archived code
+rmpath('Not_in_use');
+
 %% Set seed
-rng(10)
+rng(10);
+
 %% Parameters
-n = 200; % # jobs
-m = 100; % # machines
-a = generate_ms_instances(n, m);
-k = 3; % # of exchanges (k-exch)
+n = 100; % # jobs
+m = 40; % # machines
+hard = false;
+a = generate_ms_instances(n, m, hard); % Generate makespan input vector
+k = 2; % # of exchanges (k-exch)
+method = 'Genetic'; % 'VDS', 'GLS' or 'Genetic'
+k2_opt = true;
+
 
 %% Initialisation algorithm:
     % 'simple' = Costliest job allocated to machine with most 'capacity'
@@ -19,7 +32,26 @@ k = 3; % # of exchanges (k-exch)
 init_method = "simple";
 
 %% Makespan solver
-[outputArray, outputMakespan, num_exchanges] = gls(a, k, init_method);
+if strcmp(method,'GLS')
+    % GLS
+    [outputArray, outputMakespan, num_exchanges, time_taken] = ...
+        gls(a, k, init_method, k2_opt);
+elseif strcmp(method,'VDS')
+    % VDS
+    [outputArray, outputMakespan, num_exchanges, num_transformations, ...
+        time_taken] = vds(a, k, init_method, k2_opt);
+elseif strcmp(method,'Genetic')
+    % Genetic Algorithm
+    % Note that output is based on sorted input vector, where j1, ... , jn
+    % is the array of jobs sorted in descending cost order.
+    [outputArray, outputMakespan, best_generation, generations, ...
+        time_taken] = genetic_alg_v2(a, 3000, 0.1, ...
+                "minMaxLinear", 5, "cutover_split", ...
+                "minMaxLinear", "shuffle", ...
+                "top", ...
+                50);
+end
+
 outputMakespan
 num_exchanges
 
@@ -41,38 +73,52 @@ xlabel('Machine #') % x-axis label
 ylabel('Job cost') % y-axis label
 
 % Ratio vs Lower bound Makespan
-% outputMakespan
 lower_bound = lower_bound_makespan(a);
 ratio_vs_lb = outputMakespan/lower_bound
-% return
 
 %% Stress tests
 results = [];
-machine_range = [2000,4000];
-machine_steps = 2;
-for i = machine_range(1):diff(machine_range)/machine_steps:machine_range(2)
-    fprintf("Machines: %d  : ", i);
-    a = generate_ms_instances(10*i,i);
+n_range = [500,1500];
+n_steps = 3;
+
+for num_jobs = n_range(1):diff(n_range)/(n_steps-1):n_range(2)
+    num_machines = floor(0.4*num_jobs);
+    fprintf("Jobs: %d, Machines : %d \n", num_jobs, num_machines);
+    a = generate_ms_instances(num_jobs, num_machines, hard);
     startTime = tic;
-    [outputArray, outputMakespan, num_exchanges] = gls(a, k, init_method);
+    if strcmp(method,'GLS')
+        % GLS
+        [outputArray, outputMakespan, num_exchanges] = ...
+                                                gls(a, k, init_method, k2_opt);
+    elseif strcmp(method,'VDS')
+        % VDS
+        [outputArray, outputMakespan, num_exchanges, ...
+                            num_transformations] = vds(a, k, init_method, k2_opt);
+    end
     t = toc(startTime);
     lower_bound = lower_bound_makespan(a);
-    fprintf("Relative Error to LB of %f, %d exchanges, %f time\n", ...
+    if strcmp(method,'GLS')
+        % GLS
+        fprintf("Relative Error to LB of %f, %d exchanges,%f time\n", ...
         outputMakespan/lower_bound, num_exchanges, t);
+    elseif strcmp(method,'VDS')
+        % VDS
+        fprintf("Relative Error to LB of %f, %d exchanges, %d transformations,%f time\n", ...
+            outputMakespan/lower_bound, num_exchanges, num_transformations, t);
+    end
     
     % Sort the output for presentation
     [sorted_col, sorting_idx] = sort(outputArray(:,2));
     sorted_output = outputArray(sorting_idx,:);
     % Cost per machine
-    %NOTE: This will throw errors if a machine hasn't been assigned anything
-    %this can occur if 2 equal max cost machines and only way to improve is to
-    % to move a prog to the empty (which doesn't max cost)
-    cost_pm = [(1:i)' accumarray(outputArray(:,2),outputArray(:,1))];
+    %NOTE: This will throw errors if a machine hasn't been assigned 
+    % anything this can occur if 2 equal max cost machines and only way to 
+    % improve is to move a prog to the empty (which doesn't max cost)
+    cost_pm = [(1:num_machines)' accumarray(outputArray(:,2),outputArray(:,1))];
     % Bar plot
-    bar_plot = draw_bar_plot(sorted_output, i);
+    bar_plot = draw_bar_plot(sorted_output, num_machines);
     title(['Makespan: ' num2str(outputMakespan)])
     xlabel('Machine #') % x-axis label
     ylabel('Job cost') % y-axis label
     
 end
-

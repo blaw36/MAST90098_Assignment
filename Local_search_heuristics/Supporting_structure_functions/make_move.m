@@ -14,9 +14,11 @@
 
 function [output_array] = ...
             make_move(output_array, machine_start_indices, move, fix_moved)
-        
+    
+    %Nargin faster, if less flexible, called enough times to be worth it
+    %if ~exist('fix_moved','var')
     if nargin == 3
-        fix_moved = false;
+        fix_moved=false;
     end
                              
     order_indices = move{1};
@@ -24,11 +26,11 @@ function [output_array] = ...
     num_moves = length(program_indices);
     num_machines = length(order_indices);
     
-    %Make the moves
+    % Make the move
     for i = 1:num_moves
         target_index = i+1;
         
-        %If cycle then move back to front
+        % If cycle then move back to front
         if i+1>num_machines
             target_index = 1;
         end

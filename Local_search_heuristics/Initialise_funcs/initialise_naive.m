@@ -1,12 +1,21 @@
-% Author: Brendan Law
-% Date: 19th August 2018
+%% initialise_naive.m
+% A script which initialises a solution by allocating all jobs to machine
+% number 1.
 
-% Naive initialisation:  (initial jobs -> machines f'n)
-    % All jobs go to machine 1
+%% Input:
+    % input_array: n+1 length vector of job costs, and n+1th element is # of
+        % machines
+    % num_jobs: the number of jobs
+    
+%% Output:
+    % init_alloc: left two columns of output_array
+        % rows - a job allocated to a position in a machine
+        % columns - job_cost, machine_no
+%%
 
-function init_alloc = initialise_naive(inputData, num_jobs)
+function init_alloc = initialise_naive(input_array, num_jobs)
 
-input_data_jobs = inputData(1:num_jobs);
+input_data_jobs = input_array(1:num_jobs);
 
 % Pre-allocate for speed
 init_alloc = zeros(num_jobs,2);
