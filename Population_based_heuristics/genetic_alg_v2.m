@@ -23,6 +23,8 @@
         % max, across all machines, of sum of jobs for a given machines
     % time_taken:
         % the time taken for the algorithm to run to completion
+    % init_makespan:
+        % the makespan after initiation
     % best_output: best output of machine allocations to a sorted input job
     % vector
     % best_generation: generation which yielded the best output
@@ -30,8 +32,8 @@
     % it terminated
 % To do: include different /flexible criteria for termination
 
-function [best_makespan, time_taken, best_output, best_generation, ...
-    generation_counter] = ...
+function [best_makespan, time_taken, init_makespan, best_output,...
+    best_generation, generation_counter] = ...
             genetic_alg_v2(input_array, init_pop_size, simple_prop, ...
                     parent_selection, parent_ratio, crossover_method, ...
                     mutation_select_method, mutate_method, ...
@@ -61,6 +63,9 @@ function [best_makespan, time_taken, best_output, best_generation, ...
     % Begin iterations
     start_gen_makespan = inf;
     [new_gen_makespan,gene_indx] = min(makespan_mat);
+    
+    %Record makespan after Initialisation
+    init_makespan = new_gen_makespan;
 
     % Initialise generation counter
     generation_counter = 1;

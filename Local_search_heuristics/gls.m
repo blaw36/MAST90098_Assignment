@@ -12,6 +12,8 @@
         % max, across all machines, of sum of jobs for a given machines
     % time_taken:
         % the time taken for the algorithm to run to completion
+    % init_makespan:
+        % the makespan after initiation
     % output_array:
         % rows - a job allocated to a position in a machine
         % columns - job_cost, machine_no, unique job_id
@@ -20,8 +22,8 @@
     % time_taken:
         % time taken for algorithm to run
 %%
-function [makespan, time_taken, output_array, num_exchanges] = ...
-                            gls(input_array, k, init_algo, k2_opt)                   
+function [makespan, time_taken, init_makespan, output_array, ...
+                num_exchanges] = gls(input_array, k, init_algo, k2_opt)                   
     start_time = tic;
     if ~exist('k2_opt','var') || k ~= 2
         k2_opt=false;
@@ -41,6 +43,9 @@ function [makespan, time_taken, output_array, num_exchanges] = ...
         [selected_machines, machine_orders]  ...
                     = initialise_combinatoric_structs(num_machines, k);
     end
+    
+    %Record makespan after Initialisation
+    init_makespan = makespan;
     
     % Initialise number of exchanges counter
     num_exchanges = 0;

@@ -30,7 +30,8 @@ function analyse_varying_m(results, alg_subset, num_programs_subset, ...
     end
     
     %Information to format the axis
-    y_axises = ["Log_{10} Average Time", "Average Makespan", "Average Relative Error"];
+    y_axises = ["Log_{10} Average Time",  "Average Ratio to Initiation",...
+                                        "Average Ratio to Lower Bound"];
     x_axis = "Proportion of machines to jobs";
     %Construct the legend
     %Makes each entry look like ({alg_name})-Jobs:n

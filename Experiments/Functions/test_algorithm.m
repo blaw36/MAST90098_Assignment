@@ -19,8 +19,8 @@
 function results = test_algorithm(alg, alg_args, ...
                         gen_method, num_programs, num_machines, num_trials)
     total_time = 0;
-    total_makespan = 0;
-    total_rel_error = 0;
+    total_rel_init_ratio = 0;
+    total_rel_lb_ratio = 0;
     
     %Generate all the instances first, this allows a seed to be set just
     %before calling this function for consistent test cases.
@@ -34,13 +34,13 @@ function results = test_algorithm(alg, alg_args, ...
         %Retrieve instance
         a = gen_instances(i).a;
         %Run tria
-        [makespan, time_taken] = alg(a, alg_args);
+        [makespan, time_taken, init_makespan] = alg(a, alg_args);
         total_time = total_time + time_taken;
-        total_makespan = total_makespan + makespan;
+        total_rel_init_ratio = total_rel_init_ratio + makespan/init_makespan;
         lb = lower_bound_makespan(a);
-        total_rel_error = total_rel_error + makespan/lb;
+        total_rel_lb_ratio = total_rel_lb_ratio + makespan/lb;
     end
     
     %Get the average results accross the trials
-    results = 1/num_trials * [total_time, total_makespan, total_rel_error];
+    results = 1/num_trials * [total_time, total_rel_init_ratio, total_rel_lb_ratio];
 end

@@ -14,6 +14,8 @@
         % max, across all machines, of sum of jobs for a given machines
     % time_taken:
         % the time taken for the algorithm to run to completion
+    % init_makespan:
+        % the makespan after initiation
     % output_array:
         % rows - a job allocated to a position in a machine
         % columns - job_cost, machine_no, unique job_id , movable
@@ -22,8 +24,9 @@
     % num_transformations:
         % number of times a new best of sequence is chosen
 %%
-function [makespan, time_taken, output_array, num_exchanges, ...
-    num_transformations] = vds(input_array, k, init_algo, k2_opt)
+function [makespan, time_taken, init_makespan, output_array, ...
+            num_exchanges, num_transformations] = ...
+                                vds(input_array, k, init_algo, k2_opt)
     
     start_time = tic;
     if ~exist('k2_opt','var') || k ~= 2
@@ -47,6 +50,9 @@ function [makespan, time_taken, output_array, num_exchanges, ...
         [selected_machines, machine_orders]  ...
                 = initialise_combinatoric_structs(num_machines, k);
     end
+    
+    %Record makespan after Initialisation
+    init_makespan = makespan;
     
     num_transformations = 0;
     num_exchanges = 0;

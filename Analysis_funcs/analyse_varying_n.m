@@ -36,7 +36,8 @@ function analyse_varying_n(results, alg_subset, num_programs_subset, ...
     
     %Information to format the axis
     
-    y_axises = ["Log_{10} Average Time", "Average Makespan", "Average Relative Error"];
+    y_axises = ["Log_{10} Average Time",  "Average Ratio to Initiation",...
+                                        "Average Ratio to Lower Bound"];
     x_axis = "Number of Jobs";
     %Construct the legend
     legend_entries = alg_names(alg_subset);
