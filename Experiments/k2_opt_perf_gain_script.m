@@ -4,6 +4,17 @@
 %TODO: Why is k2_opt gls slower then std for edge case of prop_machines =1?
 %   As far as I can tell they do exactly the same thing
 
+% Desired Output:
+%   Graphs:
+%       Varying machines
+%           Log_10 Time 
+%           Relative_error
+%           -> Use these to establish using machine proportion of 0.4
+%       Varying just num_programs with machine_proportion of 0.4
+%           Log_10 Time
+%   Tables: All to appendix  
+
+
 %% Testing Parameters
 hard = false;
 gen_method = @(num_programs, num_machines) ...

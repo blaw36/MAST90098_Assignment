@@ -7,7 +7,7 @@ def genetic_alg(input_array, init_pop_size, simple_prop,
     # like in the experiments
 
 
-    init_func = @(...) chosen_init_func(...)
+    init_func = @(x,y) chosen_init_func(x,y,a)
     #eg
     init_func = @(input_array_aug, init_pop_size) init_mix_shuff_rand(input_array_aug, init_pop_size, simple_prop)
     #^ we are treating input_array_aug, init_pop_size as required inputs and simple prop
@@ -29,7 +29,7 @@ def genetic_alg(input_array, init_pop_size, simple_prop,
 
     ...
 
-    genetic_alg_wrapper(init_func, parent_selection_func, ...)
+    genetic_alg_wrapper(input_array, init_func, parent_selection_func, ...)
 """
 %
 %% Inputs:

@@ -1,8 +1,12 @@
 %This script runs the experiments for 1.d, 2.c and 3.
+%Vary init_method for question 2
+%Vary hard for question 3
 
 %% Testing Parameters
 %Should at least do a hard test here
 hard = false;
+init_method = "simple";
+%init_method = "random";
 gen_method = @(num_programs, num_machines) ...
                 generate_ms_instances(num_programs, num_machines, hard);
 
@@ -32,19 +36,30 @@ num_trials = 3;
 all_alg_names = ["GLS,k=2", "VDS,k=2", "GLS,k=3"];
 
 alg1 = @(input_array, args) gls(input_array, args{:});
-alg1_args = {2, "simple", true};
+alg1_args = {2, init_method, true};
 
 alg2 = @(input_array, args) vds(input_array, args{:});
-alg2_args = {2, "simple", true};
+alg2_args = {2, init_method, true};
 
 alg3 = @(input_array, args) gls(input_array, args{:});
-alg3_args = {3, "simple", false};
+alg3_args = {3, init_method, false};
 
 all_algs = {alg1, alg2, alg3};
 all_algs_args = {alg1_args, alg2_args, alg3_args};
 
 %% Section 1.d.
 %Just testing GLS,k=2
+% Desired Output:
+%   Graphs:
+%       Varying machines
+%           Log_10 Time 
+%           Relative_error
+%           -> Use these to establish using machine proportion of 0.4
+%       Varying just num_programs with machine_proportion of 0.4
+%           Log_10 Time
+%           Relative_error
+%   Tables: All to appendix  
+
 alg_subset = 1;
 alg_names = all_alg_names(alg_subset);
 algs = all_algs(alg_subset);
@@ -71,6 +86,22 @@ analyse_varying_n(results, alg_subset, num_programs_subset, ...
                          alg_names);
 %% Section 2.c
 %Testing GLS,k=2 and VDS, k=2
+% Desired Output:
+%   Graphs:
+%       Varying machines
+%           Log_10 Time 
+%           Relative_error
+%           Relative_to_init
+%           -> Use these to establish using machine proportion of 0.4
+%       Varying just num_programs with machine_proportion of 0.4
+%           Log_10 Time
+%           Relative_error
+%           Relative_to_init
+%       Varying just num_programs machine_proportion of 0.4 Random Init
+%           Log_10 Time
+%           Relative_error
+%   Tables: All to appendix
+
 alg_subset = 1:2;
 alg_names = all_alg_names(alg_subset);
 algs = all_algs(alg_subset);
@@ -97,6 +128,19 @@ analyse_varying_n(results, alg_subset, num_programs_subset, ...
                          alg_names);
                      
 %% Section 3. ...
+%Testing GLS,k=2, VDS,k=2 and Genetic
+% Desired Output:
+%   Graphs:
+%       Varying machines
+%           Log_10 Time 
+%           Relative_error
+%           -> Use these to establish using machine proportion of 0.4
+%       Varying just num_programs with machine_proportion of 0.4
+%           Log_10 Time
+%           Relative_error
+%       Same again on hard test case
+%   Tables: All to appendix
+
 alg_subset = 1:3;
 alg_names = all_alg_names(alg_subset);
 algs = all_algs(alg_subset);

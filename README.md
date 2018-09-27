@@ -22,22 +22,23 @@ Scheduling Problem.
     * Do we want to also report relative to LPT method?
     * Instead of the current 2nd graph do we want to scale the average makespan somehow
     (suppose this is already sort of covered by relative error but might be a better way?)
-    * 'Hardest' machine proportion not consistent accross algorithms and generators
+    * 'Hardest' machine proportion not consistent across algorithms and generators
     will need to consider and properly report on (and 'hardest' in terms of what metric)
 * Testing Scripts:
     * Decide on all the tests we want to run, maybe do initial rough analysis
     in terms of just a few trials. Need to finalise code before final results
     are locked in. (also experiments with large numbers of trials could take
     a long time to run, [ie leave running over lunch/night])
-    * Reading through the spec, think we'll need
-        * 1.c choose_k_gls_script
-        * (1.c.2 outside of report but needed if only briefly?) k2_opt_perf_gain_script
-            * exact same output so just need time graphs here
-        * 1.d, 2.c, 3. compare_all_script                      (Same test cases)
-            * Maybe only cover hard test case here in final comparision
-            and not in other scripts?(otherwise doubling amount of work)
     * How many trials and on what computer do we want to run these?
     * Automatically save figures instead of waiting for user input
+    * Re-read the spec, also need to include tables
+
+    Metric 1
+                    machine proportion ...
+    num_programs    [alg1_result; alg2_result; alg3_result] 
+    ...
+
+    * Experiments should also vary init method of gls and vds for parts 1 and 2
 
 * Thursday Meeting:
     * Go over progress/issues                  (<<Together>>)

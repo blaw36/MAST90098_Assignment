@@ -1,7 +1,23 @@
 % A script used to experimentally justify our choice of k for GLS.
+% Vary over init method as well
+% Desired Output:
+%   Graphs:
+%       Varying machines
+%           Log_10 Time 
+%           Relative_error
+%           -> Use these to establish using machine proportion of 0.4
+%       Varying just num_programs with machine_proportion of 0.4
+%           vary_init_method
+%               Log_10 Time 
+%               Relative_error
+%               Makespan relative to init
+%       -> Use these all to establish choice of k
+%   Tables: All to appendix    
 
 %% Testing Parameters
 hard = false;
+init_method = "simple";
+%init_method = "random";
 gen_method = @(num_programs, num_machines) ...
                 generate_ms_instances(num_programs, num_machines, hard);
 %30/10 = 3
@@ -13,13 +29,13 @@ num_trials = 3;
 alg_names = ["GLS,k=2", "GLS,k=3"];
 
 alg1 = @(input_array, args) gls(input_array, args{:});
-alg1_args = {2, "simple", false};
+alg1_args = {2, init_method, false};
 
 alg2 = @(input_array, args) gls(input_array, args{:});
-alg2_args = {3, "simple", false};
+alg2_args = {3, init_method, false};
 
 % alg3 = @(input_array, args) gls(input_array, args{:});
-% alg3_args = {4, "simple", false};
+% alg3_args = {4, init_method, false};
 
 algs = {alg1, alg2};
 algs_args = {alg1_args, alg2_args};
