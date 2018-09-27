@@ -11,8 +11,11 @@
 %           Log_10 Time
 %   Tables: All to appendix  
 
+save_path = "Figures/k2_opt";
 
 %% Testing Parameters
+
+
 hard = false;
 gen_method = @(num_programs, num_machines) ...
                 generate_ms_instances(num_programs, num_machines, hard);
@@ -42,7 +45,7 @@ alg_subset = 1:length(algs);
 num_programs_subset = 1:length(programs_range);
 analyse_varying_m(results, alg_subset, num_programs_subset, ...
                         programs_range, machines_denom_iterator,...
-                        alg_names);
+                        alg_names, save_path);
 %% Testing - Fixed machines proportion
 machines_proportion = 0.4;
 programs_range = 5000:5000:25000;
@@ -55,4 +58,4 @@ alg_subset = 1:length(algs);
 num_programs_subset = 1:length(programs_range);
 analyse_varying_n(results, alg_subset, num_programs_subset, ...
                          programs_range, machines_proportion,...
-                         alg_names);
+                         alg_names, save_path);

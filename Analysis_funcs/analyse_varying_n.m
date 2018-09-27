@@ -15,16 +15,19 @@
     % programs_range: a vector of num_programs to vary across
     % machines_proportion: the proportion of machines to jobs
     % alg_names: Identifying names for algs used in the legend.
+    % save_path: An optional param indicating figures should just be saved
+        % to the indicated path
 %%
 
 function analyse_varying_n(results, alg_subset, num_programs_subset, ...
                         programs_range, machines_proportion, ...
-                        alg_names)
-    if size(results,3) ~= 1
-        size(results,3)
-        error("The proportion of machines is being varied");
+                        alg_names, save_path)
+                    
+    %Use empty string to signify no save path
+    if ~exist('save_path','var')
+        save_path = "";
     end
-
+    
     subset = zeros(size(alg_subset,2), size(num_programs_subset,2), ...
                       size(results,3), size(results,4));
     
@@ -68,7 +71,13 @@ function analyse_varying_n(results, alg_subset, num_programs_subset, ...
         legend(legend_entries,'Location','northeast')
         legend('show');
         
-        disp('Press a key for next graphic')
-        pause;
+        if save_path ~= ""
+            %Save to path
+            saveas(gcf,save_path+"n"+string(i)+'.png')
+        else
+            %Display and wait for user input
+            disp('Press a key for next graphic')
+            pause;
+        end
     end
 end

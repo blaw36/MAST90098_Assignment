@@ -60,6 +60,8 @@ all_algs_args = {alg1_args, alg2_args, alg3_args};
 %           Relative_error
 %   Tables: All to appendix  
 
+save_path = "Figures/experiment_GLS";
+
 alg_subset = 1;
 alg_names = all_alg_names(alg_subset);
 algs = all_algs(alg_subset);
@@ -74,7 +76,7 @@ results = compare_algorithms(algs, algs_args, gen_method, ...
 num_programs_subset = 1:length(programs_range);
 analyse_varying_m(results, alg_subset, num_programs_subset, ...
                         programs_range, machines_denom_iterator,...
-                        alg_names);
+                        alg_names, save_path);
 %% Testing - Fixed machines proportion
 results = compare_algorithms(algs, algs_args, gen_method, ...
                             programs_range, machines_denom_iterator, ...
@@ -83,24 +85,27 @@ results = compare_algorithms(algs, algs_args, gen_method, ...
 num_programs_subset = 1:length(programs_range);
 analyse_varying_n(results, alg_subset, num_programs_subset, ...
                          programs_range, machines_proportion,...
-                         alg_names);
+                         alg_names, save_path);
 %% Section 2.c
 %Testing GLS,k=2 and VDS, k=2
 % Desired Output:
 %   Graphs:
 %       Varying machines
 %           Log_10 Time 
-%           Relative_error
-%           Relative_to_init
+%           Ratio to Initiation
+%           Ratio to LowerBound
 %           -> Use these to establish using machine proportion of 0.4
 %       Varying just num_programs with machine_proportion of 0.4
 %           Log_10 Time
-%           Relative_error
-%           Relative_to_init
+%           Ratio to Initiation
+%           Ratio to LowerBound
 %       Varying just num_programs machine_proportion of 0.4 Random Init
 %           Log_10 Time
-%           Relative_error
+%           Ratio to Initiation
+%           Ratio to LowerBound
 %   Tables: All to appendix
+
+save_path = "Figures/experiment_GLS_and_VDS";
 
 alg_subset = 1:2;
 alg_names = all_alg_names(alg_subset);
@@ -116,7 +121,7 @@ results = compare_algorithms(algs, algs_args, gen_method, ...
 num_programs_subset = 1:length(programs_range);
 analyse_varying_m(results, alg_subset, num_programs_subset, ...
                         programs_range, machines_denom_iterator,...
-                        alg_names);
+                        alg_names, save_path);
 %% Testing - Fixed machines proportion
 results = compare_algorithms(algs, algs_args, gen_method, ...
                             programs_range, machines_denom_iterator, ...
@@ -125,7 +130,7 @@ results = compare_algorithms(algs, algs_args, gen_method, ...
 num_programs_subset = 1:length(programs_range);
 analyse_varying_n(results, alg_subset, num_programs_subset, ...
                          programs_range, machines_proportion,...
-                         alg_names);
+                         alg_names, save_path);
                      
 %% Section 3. ...
 %Testing GLS,k=2, VDS,k=2 and Genetic
@@ -133,13 +138,17 @@ analyse_varying_n(results, alg_subset, num_programs_subset, ...
 %   Graphs:
 %       Varying machines
 %           Log_10 Time 
-%           Relative_error
+%           Ratio to Initiation
+%           Ratio to LowerBound
 %           -> Use these to establish using machine proportion of 0.4
 %       Varying just num_programs with machine_proportion of 0.4
 %           Log_10 Time
-%           Relative_error
+%           Ratio to Initiation
+%           Ratio to LowerBound
 %       Same again on hard test case
 %   Tables: All to appendix
+
+save_path = "Figures/experiment_all";
 
 alg_subset = 1:3;
 alg_names = all_alg_names(alg_subset);

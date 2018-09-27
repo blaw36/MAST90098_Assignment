@@ -4,17 +4,21 @@
 %   Graphs:
 %       Varying machines
 %           Log_10 Time 
-%           Relative_error
+%           Ratio to Initiation
+%           Ratio to LowerBound
 %           -> Use these to establish using machine proportion of 0.4
 %       Varying just num_programs with machine_proportion of 0.4
 %           vary_init_method
 %               Log_10 Time 
-%               Relative_error
-%               Makespan relative to init
+%               Ratio to Initiation
+%               Ratio to LowerBound
 %       -> Use these all to establish choice of k
 %   Tables: All to appendix    
 
+save_path = "Figures/choose_k";
+
 %% Testing Parameters
+
 hard = false;
 init_method = "simple";
 %init_method = "random";
@@ -49,7 +53,7 @@ alg_subset = 1:length(algs);
 num_programs_subset = 1:length(programs_range);
 analyse_varying_m(results, alg_subset, num_programs_subset, ...
                         programs_range, machines_denom_iterator,...
-                        alg_names);
+                        alg_names, save_path);
 %% Testing - Fixed machines proportion
 machines_proportion = 0.4;
 programs_range = 50:50:250;
@@ -62,4 +66,4 @@ alg_subset = 1:length(algs);
 num_programs_subset = 1:length(programs_range);
 analyse_varying_n(results, alg_subset, num_programs_subset, ...
                          programs_range, machines_proportion,...
-                         alg_names);
+                         alg_names, save_path);

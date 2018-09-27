@@ -1,6 +1,9 @@
 # Matlab Specific #
 ###################
 *.asv
+# Ignore Generated Graphics #
+#############################
+*.png
 # Compiled source #
 ###################
 *.com
