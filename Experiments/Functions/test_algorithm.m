@@ -36,7 +36,7 @@ function results = test_algorithm(alg, alg_args, ...
         %Run tria
         [makespan, time_taken, init_makespan] = alg(a, alg_args);
         total_time = total_time + time_taken;
-        total_rel_init_ratio = total_rel_init_ratio + makespan/init_makespan;
+        total_rel_init_ratio = total_rel_init_ratio+init_makespan/makespan;
         lb = lower_bound_makespan(a);
         total_rel_lb_ratio = total_rel_lb_ratio + makespan/lb;
     end
