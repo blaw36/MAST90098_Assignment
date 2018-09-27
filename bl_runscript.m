@@ -20,7 +20,7 @@ m = 40; % # machines
 hard = false;
 a = generate_ms_instances(n, m, hard); % Generate makespan input vector
 k = 2; % # of exchanges (k-exch)
-method = 'Genetic'; % 'VDS', 'GLS' or 'Genetic'
+method = 'VDS'; % 'VDS', 'GLS' or 'Genetic'
 k2_opt = true;
 
 
@@ -34,18 +34,18 @@ init_method = "simple";
 %% Makespan solver
 if strcmp(method,'GLS')
     % GLS
-    [outputArray, outputMakespan, num_exchanges, time_taken] = ...
+    [outputMakespan, time_taken, outputArray, num_exchanges] = ...
         gls(a, k, init_method, k2_opt);
 elseif strcmp(method,'VDS')
     % VDS
-    [outputArray, outputMakespan, num_exchanges, num_transformations, ...
-        time_taken] = vds(a, k, init_method, k2_opt);
+    [outputMakespan, time_taken, outputArray, num_exchanges, ...
+        num_transformations] = vds(a, k, init_method, k2_opt);
 elseif strcmp(method,'Genetic')
     % Genetic Algorithm
     % Note that output is based on sorted input vector, where j1, ... , jn
     % is the array of jobs sorted in descending cost order.
-    [outputArray, outputMakespan, best_generation, generations, ...
-        time_taken] = genetic_alg_v2(a, 3000, 0.1, ...
+    [outputMakespan, time_taken, outputArray, best_generation, ...
+        generations] = genetic_alg_v2(a, 3000, 0.1, ...
                 "minMaxLinear", 5, "cutover_split", ...
                 "minMaxLinear", "shuffle", ...
                 "top", ...
@@ -53,7 +53,7 @@ elseif strcmp(method,'Genetic')
 end
 
 outputMakespan
-num_exchanges
+%num_exchanges
 
 %% Graphing and analysis
 % Sort the output for presentation
@@ -88,12 +88,12 @@ for num_jobs = n_range(1):diff(n_range)/(n_steps-1):n_range(2)
     startTime = tic;
     if strcmp(method,'GLS')
         % GLS
-        [outputArray, outputMakespan, num_exchanges] = ...
-                                                gls(a, k, init_method, k2_opt);
+        [outputMakespan, time_taken, outputArray, num_exchanges] = ...
+                                           gls(a, k, init_method, k2_opt);
     elseif strcmp(method,'VDS')
         % VDS
-        [outputArray, outputMakespan, num_exchanges, ...
-                            num_transformations] = vds(a, k, init_method, k2_opt);
+        [outputMakespan, time_taken, outputArray, num_exchanges, ...
+                    num_transformations] = vds(a, k, init_method, k2_opt);
     end
     t = toc(startTime);
     lower_bound = lower_bound_makespan(a);

@@ -31,13 +31,11 @@ function results = test_algorithm(alg, alg_args, ...
         gen_instances(i).a = gen_method(num_programs, num_machines);
     end
     for i = 1:num_trials
+        %Retrieve instance
         a = gen_instances(i).a;
-        %Run trial
-        startTime = tic;
-        %TODO: Check format consistent with genetic, maybe refactor so makespan
-        %first
-        [~,makespan] = alg(a, alg_args);
-        total_time = total_time + toc(startTime);
+        %Run tria
+        [makespan, time_taken] = alg(a, alg_args);
+        total_time = total_time + time_taken;
         total_makespan = total_makespan + makespan;
         lb = lower_bound_makespan(a);
         total_rel_error = total_rel_error + makespan/lb;

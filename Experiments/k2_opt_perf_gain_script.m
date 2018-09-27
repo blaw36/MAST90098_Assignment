@@ -1,9 +1,6 @@
 %A script to measure the performance gain of k2_generate_and_test
 %over the standard generate_and_test. (This should just be for GLS)
 
-%TODO: Why is k2_opt gls slower then std for edge case of prop_machines =1?
-%   As far as I can tell they do exactly the same thing
-
 % Desired Output:
 %   Graphs:
 %       Varying machines

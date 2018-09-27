@@ -8,17 +8,19 @@
     % init_algo: A string specifying how to pick an initial feasible sol'n:
         % 'simple', 'random', 'naive'
 %% Output:
+    % makespan:
+        % max, across all machines, of sum of jobs for a given machines
+    % time_taken:
+        % the time taken for the algorithm to run to completion
     % output_array:
         % rows - a job allocated to a position in a machine
         % columns - job_cost, machine_no, unique job_id
-    % makespan:
-        % max, across all machines, of sum of job costs for a given machine
     % num_exchanges:
         % number of exchanges performed
     % time_taken:
         % time taken for algorithm to run
 %%
-function [output_array, makespan, num_exchanges, time_taken] = ...
+function [makespan, time_taken, output_array, num_exchanges] = ...
                             gls(input_array, k, init_algo, k2_opt)                   
     start_time = tic;
     if ~exist('k2_opt','var') || k ~= 2

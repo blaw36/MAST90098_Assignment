@@ -10,18 +10,20 @@
         % 'random' = Random allocation (random number generated for machine)
         % 'naive' = All jobs placed into machine 1
 %% Output:
+    % makespan:
+        % max, across all machines, of sum of jobs for a given machines
+    % time_taken:
+        % the time taken for the algorithm to run to completion
     % output_array:
         % rows - a job allocated to a position in a machine
         % columns - job_cost, machine_no, unique job_id , movable
-    % makespan:
-        % max, across all machines, of sum of jobs for a given machines
     % num_exchanges:
         % number of exchanges performed
     % num_transformations:
         % number of times a new best of sequence is chosen
 %%
-function [output_array, makespan, num_exchanges, num_transformations, ...
-    time_taken] = vds(input_array, k, init_algo, k2_opt)
+function [makespan, time_taken, output_array, num_exchanges, ...
+    num_transformations] = vds(input_array, k, init_algo, k2_opt)
     
     start_time = tic;
     if ~exist('k2_opt','var') || k ~= 2
