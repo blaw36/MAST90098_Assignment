@@ -30,11 +30,36 @@ Scheduling Problem.
     are locked in. (also experiments with large numbers of trials could take
     a long time to run, [ie leave running over lunch/night])
     * Reading through the spec, think we'll need
-        * choose_k_gls_script
-        * k2_opt_perf_gain_script
+        * 1.c choose_k_gls_script
+        * (1.c.2 outside of report but needed if only briefly?) k2_opt_perf_gain_script
             * exact same output so just need time graphs here
-        * compare_gls_vds_script
-        * compare_all_script
-            * Maybe only cover hard test case here and not in other scripts?
-            (otherwise doubling amount of work)
+        * 1.d, 2.c, 3. compare_all_script                      (Same test cases)
+            * Maybe only cover hard test case here in final comparision
+            and not in other scripts?(otherwise doubling amount of work)
     * How many trials and on what computer do we want to run these?
+    * Automatically save figures instead of waiting for user input
+
+* Thursday Meeting:
+    * Go over progress/issues                  (<<Together>>)
+    * Fully setout project template with rough dot points covering what we want
+        to do in each unfinished section       (<<Together>>)
+    * (<<Subdivide from here?>>)
+    * Decide on final experimental design,
+        * Choose appropriate ranges and num trials (at least for GLS and VDS
+            unlikely to change much from this point on, not sure on genetic)
+        * What machine?
+        * What metrics are we reporting on?
+    * Genetic Alg
+        * Output conversion function to output_array so can use same results analysis
+            (Don't need to include this in runtime of alg)
+        * Refactor?
+        * Hows performance currently tracking?
+        * What areas need most work?
+            * Prioritize these ones.
+    * Report/Latex key areas
+        * Description of k-exhange and proofs?
+        * Pseudo-code sections and proof vds meets conds?
+        * Justification of 
+        * Probably should also have pseudo code for genetic,
+            * Description of higher level wrapper
+            * Description of methodology of each of the final functions chosen

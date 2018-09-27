@@ -41,12 +41,14 @@ results = zeros(length(algs), length(programs_range), ...
 %For each set number of programs
 for j = 1: length(programs_range)
     num_programs = programs_range(j);
+    fprintf("Number of Programs: %d\n", num_programs);
     machine_iterator = floor(num_programs/machines_denom_iterator);
     k = 1;
     %scale the number of machines to the number of programs
     for iterated_machines = machine_iterator:machine_iterator:num_programs
         %Test each alg on this number of programs and machines
         for i=1:length(algs)
+            fprintf("Algorithm: %d\n", i);
             alg = algs{i};
             alg_args = algs_args{i};
             
