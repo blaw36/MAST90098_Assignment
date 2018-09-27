@@ -20,8 +20,8 @@ Scheduling Problem.
         say longest takes about 3mins -> longer than an hour
         but a lot of variance in run times so hard to tune this fway but probably fine 
         if overnight
-    * Automatically save figures instead of waiting for user input
-    * Also output tables (hopefully programatically)
+    * Also output tables, found a lib on file exchange that does most of what
+    we need (might need to tweak) for triple cell (will have a look later)
 
     Metric 1
                     machine proportion ...
