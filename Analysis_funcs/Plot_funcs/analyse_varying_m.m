@@ -4,7 +4,7 @@
 % If the plot is too "busy" can call this function mutiple times, 
 % specifying subsets of the algs and programs to be displayed.
 %% Input:
-    % results: stores the average [time, makespan, relative_error]
+    % results: stores the average [time, ratio_to_init, ratio_to_lb]
         % across the algs, and gen_args\
         % has dims |algs|x|programs_range|x(machines_denom_iterator)x3
     % alg_subset: Specifies a subset of algorithms to plot
@@ -15,11 +15,12 @@
     % alg_names: Identifying names for algs used in the legend.
     % save_path: An optional param indicating figures should just be saved
     % to the indicated path
+    % save_name: An option param giving the filename of the figure
 %%
 
 function analyse_varying_m(results, alg_subset, num_programs_subset, ...
                         programs_range, machines_denom_iterator, ...
-                        alg_names, save_path)
+                        alg_names, save_path, save_name)
     %Use empty string to signify no save path
     if ~exist('save_path','var')
         save_path = "";
@@ -79,7 +80,7 @@ function analyse_varying_m(results, alg_subset, num_programs_subset, ...
         
         if save_path ~= ""
             %Save to path
-            saveas(gcf,save_path+"m"+string(i)+'.png')
+            saveas(gcf,save_path+save_name+"m"+string(i)+'.png')
         else
             %Display and wait for user input
             disp('Press a key for next graphic')

@@ -1,13 +1,29 @@
 %% construct_results_table.m
 %% Input:
-
+    % results: stores the average [time, ratio_to_init, ratio_to_lb]
+        % across the algs, and gen_args\
+        % has dims |algs|x|programs_range|x(machines_denom_iterator)x3
+    % alg_names: Identifying names for algs used in the legend.
+    % alg_subset: Specifies a subset of algorithms to consider
+    % programs_range: a vector of num_programs to vary across
+    % machines_denom_iterator:
+    % save_path: An optional param indicating figures should just be saved
+    % to the indicated path
+    % save_name: An option param giving the filename of the figure
+    % machines_proportion: An optional param which if used indicates
+        % just using one fixed proportion of machines.
 %%
 
 function construct_results_table(results, alg_names, alg_subset, ...
-                        programs_range, machines_denom_iterator, save_path)
+                        programs_range, machines_denom_iterator, ...
+                        save_path, save_name, machines_proportion)
     %Use empty string to signify no save path
     if ~exist('save_path','var')
         save_path = "";
+    end
+    
+    if ~exist('machines_proportion','var')
+        machines_proportion = false;
     end
     
     number_of_algs = size(alg_subset,2);
@@ -20,7 +36,11 @@ function construct_results_table(results, alg_names, alg_subset, ...
                       number_dif_machine_props, number_of_metrics);
     
     %Construct strings that will be used in labelling the tables
-    varying_m = 1/machines_denom_iterator:1/machines_denom_iterator:1;
+    if machines_proportion
+        varying_m = machines_proportion;
+    else
+        varying_m = 1/machines_denom_iterator:1/machines_denom_iterator:1;
+    end
     varying_m = cellstr(string(varying_m));
     programs_range = cellstr(string(programs_range));
     
@@ -30,9 +50,6 @@ function construct_results_table(results, alg_names, alg_subset, ...
     
     for a_i = alg_subset
         for n_j = 1:number_dif_programs
-            size(results)
-            a_i
-            n_j
             subset(a_i, n_j, :, :) = results(a_i, n_j, :, :);            
         end
     end
@@ -51,10 +68,14 @@ function construct_results_table(results, alg_names, alg_subset, ...
         %number of programs.
         table_data = reshape(join(table_data, "\\", 1), ...
                         number_dif_programs, number_dif_machine_props)';
-
-        input.data = cellstr("\begin{tabular}{@{}c@{}}" ...
+        
+        if number_of_algs > 1
+            input.data = cellstr("\begin{tabular}{@{}c@{}}" ...
                           + table_data ...
                           + "\end{tabular}");
+        else
+            input.data = cellstr(table_data);
+        end
         
         % Setting row and column labeks
         input.tableColLabels = programs_range;
@@ -91,8 +112,13 @@ function construct_results_table(results, alg_names, alg_subset, ...
         input.dataFormat = {'%s'}; 
 
         % LaTex table labels and caption:
-        input.tableCaption = metric_names{i};
-        input.tableLabel = metric_names{i};
+        if machines_proportion
+            input.tableCaption = char(save_name+"-Fixed-Proportion: "+metric_names{i});
+            input.tableLabel = char(save_name+"-Fixed-Proportion: "+metric_names{i});
+        else
+            input.tableCaption = char(save_name+"-Varying-Proportion: "+metric_names{i});
+            input.tableLabel = char(save_name+"-Varying-Proportion: "+metric_names{i});
+        end
 
         %Disable borders on this outer table
         input.tableBorders = true;
@@ -108,8 +134,13 @@ function construct_results_table(results, alg_names, alg_subset, ...
         latex = latexTable(input);
         
         if save_path ~= ""
-            %Save to path
-            fid=fopen(save_path+"m"+string(i)+'.tex','w');
+            %Save file
+            if machines_proportion
+                filename = save_path+save_name+"n"+string(i)+'.tex';
+            else
+                filename = save_path+save_name+"m"+string(i)+'.tex';
+            end    
+            fid=fopen(filename,'w');
             nrows = size(latex,1);
             for row = 1:nrows
                 fprintf(fid,'%s\n',latex{row,:});

@@ -17,7 +17,7 @@
         % constant fraction of num_programs should be used. This overwrites
         % anythin specified in machines_denom_iterator.    
 %% Output:
-    % results: stores the average [time, makespan, relative_error]
+    % results: stores the average [time, ratio_to_init, ratio_to_lb]
         % across the algs, and gen_args\
         % has dims |algs|x|programs_range|x(machines_denom_iterator)x3
 %%
