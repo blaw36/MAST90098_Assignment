@@ -1,9 +1,10 @@
 # Matlab Specific #
 ###################
 *.asv
-# Ignore Generated Graphics #
+# Ignore Generated Graphics and Tex #
 #############################
 *.png
+*.tex
 # Compiled source #
 ###################
 *.com

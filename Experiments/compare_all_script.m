@@ -29,7 +29,7 @@ programs_ranges(3).program_range = [base_cases];
 
 machines_proportion = 0.4;
 machines_denom_iterator = 5;
-num_trials = 3;
+num_trials = 1;
 
 %% Algorithms:
 %"Genetic" just k=3 for now
@@ -60,32 +60,38 @@ all_algs_args = {alg1_args, alg2_args, alg3_args};
 %           Relative_error
 %   Tables: All to appendix  
 
-save_path = "Figures/experiment_GLS";
+figure_save_path = "Figures/experiment_GLS";
+table_save_path = "Tables/experiment_GLS";
 
 alg_subset = 1;
 alg_names = all_alg_names(alg_subset);
 algs = all_algs(alg_subset);
 algs_args = all_algs_args(alg_subset);
 programs_range = programs_ranges(1).program_range;
-
-%% Testing - Varying machines proportion
-results = compare_algorithms(algs, algs_args, gen_method, ...
-                            programs_range, machines_denom_iterator, ...
-                            num_trials);
-%% Analysis - Varying machines proportion
-num_programs_subset = 1:length(programs_range);
-analyse_varying_m(results, alg_subset, num_programs_subset, ...
-                        programs_range, machines_denom_iterator,...
-                        alg_names, save_path);
-%% Testing - Fixed machines proportion
-results = compare_algorithms(algs, algs_args, gen_method, ...
-                            programs_range, machines_denom_iterator, ...
-                            num_trials, machines_proportion);
-%% Analysis - Fixed machines proportion
-num_programs_subset = 1:length(programs_range);
-analyse_varying_n(results, alg_subset, num_programs_subset, ...
-                         programs_range, machines_proportion,...
-                         alg_names, save_path);
+% 
+% %% Testing - Varying machines proportion
+% results = compare_algorithms(algs, algs_args, gen_method, ...
+%                             programs_range, machines_denom_iterator, ...
+%                             num_trials);
+% %% Analysis - Varying machines proportion
+% num_programs_subset = 1:length(programs_range);
+% % analyse_varying_m(results, alg_subset, num_programs_subset, ...
+% %                         programs_range, machines_denom_iterator,...
+% %                         alg_names, figure_save_path);
+%                     
+% construct_results_table(results, alg_names, alg_subset, num_programs_subset, ...
+%                         programs_range, machines_denom_iterator, table_save_path)                     
+% 
+% %% Testing - Fixed machines proportion
+% results = compare_algorithms(algs, algs_args, gen_method, ...
+%                             programs_range, machines_denom_iterator, ...
+%                             num_trials, machines_proportion);
+% %% Analysis - Fixed machines proportion
+% num_programs_subset = 1:length(programs_range);
+% analyse_varying_n(results, alg_subset, ...
+%                          programs_range, machines_proportion,...
+%                          alg_names, figure_save_path);
+                     
 %% Section 2.c
 %Testing GLS,k=2 and VDS, k=2
 % Desired Output:
@@ -105,7 +111,8 @@ analyse_varying_n(results, alg_subset, num_programs_subset, ...
 %           Ratio to LowerBound
 %   Tables: All to appendix
 
-save_path = "Figures/experiment_GLS_and_VDS";
+figure_save_path = "Figures/experiment_GLS_and_VDS";
+table_save_path = "Tables/experiment_GLS_and_VDS";
 
 alg_subset = 1:2;
 alg_names = all_alg_names(alg_subset);
@@ -117,11 +124,14 @@ programs_range = programs_ranges(2).program_range;
 results = compare_algorithms(algs, algs_args, gen_method, ...
                             programs_range, machines_denom_iterator, ...
                             num_trials);
+construct_results_table(results, alg_names, alg_subset, ...
+programs_range, machines_denom_iterator, table_save_path)    
+return
 %% Analysis - Varying machines proportion
 num_programs_subset = 1:length(programs_range);
 analyse_varying_m(results, alg_subset, num_programs_subset, ...
                         programs_range, machines_denom_iterator,...
-                        alg_names, save_path);
+                        alg_names, figure_save_path);
 %% Testing - Fixed machines proportion
 results = compare_algorithms(algs, algs_args, gen_method, ...
                             programs_range, machines_denom_iterator, ...
@@ -130,7 +140,7 @@ results = compare_algorithms(algs, algs_args, gen_method, ...
 num_programs_subset = 1:length(programs_range);
 analyse_varying_n(results, alg_subset, num_programs_subset, ...
                          programs_range, machines_proportion,...
-                         alg_names, save_path);
+                         alg_names, figure_save_path);
                      
 %% Section 3. ...
 %Testing GLS,k=2, VDS,k=2 and Genetic
@@ -148,7 +158,7 @@ analyse_varying_n(results, alg_subset, num_programs_subset, ...
 %       Same again on hard test case
 %   Tables: All to appendix
 
-save_path = "Figures/experiment_all";
+figure_save_path = "Figures/experiment_all";
 
 alg_subset = 1:3;
 alg_names = all_alg_names(alg_subset);

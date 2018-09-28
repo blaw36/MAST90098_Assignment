@@ -97,6 +97,8 @@ function latex = latexTable(input)
 %
 % % Switch to generate a complete LaTex document or just a table:
 % input.makeCompleteLatexDocument = 1;
+% % A flag to indicate this table will be placed inside another
+% input.inner = true;
 %
 % % % Now call the function to generate LaTex code:
 % latex = latexTable(input);
@@ -134,9 +136,10 @@ else
     end
 end
 % Other optional fields:
-if ~isfield(input,'tableCaption'),input.tableCaption = 'MyTableCaption';end
-if ~isfield(input,'tableLabel'),input.tableLabel = 'MyTableLabel';end
+if ~isfield(input,'tableCaption'),input.tableCaption = "";end
+if ~isfield(input,'tableLabel'),input.tableLabel = "";end
 if ~isfield(input,'makeCompleteLatexDocument'),input.makeCompleteLatexDocument = 0;end
+if ~isfield(input,'inner'),input.inner = false;end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % process table datatype
@@ -204,7 +207,11 @@ if input.tableBorders
 else
     header = ['\begin{tabular}','{',repmat(input.tableColumnAlignment,1,size(C,2)),'}'];
 end
-latex = {['\begin{table}',input.tablePlacement];'\centering';header};
+if input.inner == false
+    latex = {['\begin{table}',input.tablePlacement];'\centering';header};
+else
+    latex = {'';header};
+end
 
 % generate table
 if input.booktabs
@@ -241,10 +248,17 @@ if input.booktabs
     latex(end+1) = {'\bottomrule'};
 end   
 
-
 % make footer lines for table:
-tableFooter = {'\end{tabular}';['\caption{',input.tableCaption,'}']; ...
-    ['\label{table:',input.tableLabel,'}'];'\end{table}'};
+if (input.tableCaption ~= "") && (input.tableLabel ~="") && input.inner == false
+    tableFooter = {'\end{tabular}';['\caption{',input.tableCaption,'}']; ...
+    [   '\label{table:',input.tableLabel,'}'];'\end{table}'};
+else
+    if input.inner == false
+        tableFooter = {'\end{tabular}';'\end{table}'};
+    else
+        tableFooter = {'\end{tabular}'};
+    end
+end
 if input.tableBorders
     latex = [latex;{hLine};tableFooter];
 else
