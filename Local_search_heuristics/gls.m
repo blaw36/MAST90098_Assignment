@@ -53,20 +53,26 @@ function [makespan, time_taken, init_makespan, output_array, ...
     greedy_flag = true;
     
     while done == false
-        % No greedy changes on this neighbourhood will have any effect.
-        if length(L) > k
+        % Early Termination as no greedy changes will have any effect.
+        % The exchange must interact with all loaded machines to decrease
+        % the makespan. => length(L) <= k for progress to be made.
+        % However if length(L) == k then the only exchange that can make a
+        % difference must choose all loaded machines, and switching jobs
+        % between machines of equal machine cost cannot result in them all
+        % having a lower cost. => length(L) < k for progress to be made.
+        if length(L) >= k
             done = true;
             continue
         end
         % Generate and test neighbourhood
         if k2_opt
-            % Program optimised for k = 2
+            % Function optimised for k = 2
             [best_neighbour, best_neighbour_makespan] = k2_generate_and_test(...
                 makespan, L, M, num_machines, ...
                 machine_costs, machine_start_indices, program_costs, ...
                 greedy_flag);
         else
-            % Program generalised for k > 2
+            % General function for all k
             [best_neighbour, best_neighbour_makespan] = generate_and_test(...
                 k, makespan, L, M, ...
                 machine_costs, machine_start_indices, program_costs,...
