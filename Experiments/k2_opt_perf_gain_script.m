@@ -22,11 +22,9 @@ gen_method = @(num_programs, num_machines) ...
 programs_range = 50:10:150;
 machines_denom_iterator = 10;
 num_trials = 1;
-%all programs
-num_programs_subset = 1:length(programs_range);
 
 %% Algorithms:
-alg_names = ["GLS,k=2,optimised", "GLS,k=2"];
+alg_names = ["GLS,k=2,opt", "GLS,k=2"];
 
 alg1 = @(input_array, args) gls(input_array, args{:});
 alg1_args = {2, "simple", true};
@@ -38,6 +36,15 @@ algs = {alg1, alg2};
 algs_args = {alg1_args, alg2_args};
 %all algs
 alg_subset = 1:length(algs);
+
+%all of the range
+%num_programs_subset = 1:length(programs_range);
+%Only display 6 lines
+num_lines = 6;
+num_algs = length(algs);
+num_dif_programs = length(programs_range);
+num_programs_subset = choose_subset_to_plot(num_lines, num_algs,...
+                                            num_dif_programs);
 
 %% Testing - Varying machines proportion
 results = compare_algorithms(algs, algs_args, gen_method, ...
@@ -54,6 +61,7 @@ construct_results_table(results, alg_names, alg_subset, ...
 %% Testing - Fixed machines proportion
 machines_proportion = 0.4;
 programs_range = 50:10:150;
+%all of the range
 num_programs_subset = 1:length(programs_range);
 
 results = compare_algorithms(algs, algs_args, gen_method, ...

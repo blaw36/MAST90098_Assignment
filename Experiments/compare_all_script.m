@@ -69,7 +69,12 @@ alg_names = all_alg_names(alg_subset);
 algs = all_algs(alg_subset);
 algs_args = all_algs_args(alg_subset);
 programs_range = programs_ranges(1).program_range;
-num_programs_subset = 1:length(programs_range);
+
+num_lines = 6;
+num_algs = length(algs);
+num_dif_programs = length(programs_range);
+num_programs_subset = choose_subset_to_plot(num_lines, num_algs,...
+                                            num_dif_programs);
 
 %% Testing - Varying machines proportion
 results = compare_algorithms(algs, algs_args, gen_method, ...
@@ -84,6 +89,8 @@ construct_results_table(results, alg_names, alg_subset, ...
                         programs_range, machines_denom_iterator, ...
                         table_save_path, save_name)
 %% Testing - Fixed machines proportion
+%all of the range
+num_programs_subset = 1:length(programs_range);
 results = compare_algorithms(algs, algs_args, gen_method, ...
                             programs_range, machines_denom_iterator, ...
                             num_trials, machines_proportion);
@@ -120,7 +127,12 @@ alg_names = all_alg_names(alg_subset);
 algs = all_algs(alg_subset);
 algs_args = all_algs_args(alg_subset);
 programs_range = programs_ranges(2).program_range;
-num_programs_subset = 1:length(programs_range);
+
+num_lines = 6;
+num_algs = length(algs);
+num_dif_programs = length(programs_range);
+num_programs_subset = choose_subset_to_plot(num_lines, num_algs,...
+                                            num_dif_programs);
 
 %% Testing - Varying machines proportion
 results = compare_algorithms(algs, algs_args, gen_method, ...
@@ -134,6 +146,8 @@ construct_results_table(results, alg_names, alg_subset, ...
                         programs_range, machines_denom_iterator, ...
                         table_save_path, save_name)
 %% Testing - Fixed machines proportion
+%all of the range
+num_programs_subset = 1:length(programs_range);
 results = compare_algorithms(algs, algs_args, gen_method, ...
                             programs_range, machines_denom_iterator, ...
                             num_trials, machines_proportion);
@@ -159,6 +173,8 @@ algs_args = {alg1_args, alg2_args};
 alg_subset = 1:length(algs);
 
 %% Testing - Fixed machines proportion Random Init
+%all of the range
+num_programs_subset = 1:length(programs_range);
 results = compare_algorithms(algs, algs_args, gen_method, ...
                             programs_range, machines_denom_iterator, ...
                             num_trials, machines_proportion);
@@ -192,8 +208,12 @@ alg_names = all_alg_names(alg_subset);
 algs = all_algs(alg_subset);
 algs_args = all_algs_args(alg_subset);
 programs_range = programs_ranges(3).program_range;
-num_programs_subset = 1:length(programs_range);
 
+num_lines = 6;
+num_algs = length(algs);
+num_dif_programs = length(programs_range);
+num_programs_subset = choose_subset_to_plot(num_lines, num_algs,...
+                                            num_dif_programs);
 %% Testing - Varying machines proportion
 results = compare_algorithms(algs, algs_args, gen_method, ...
                             programs_range, machines_denom_iterator, ...
@@ -206,6 +226,8 @@ construct_results_table(results, alg_names, alg_subset, ...
                         programs_range, machines_denom_iterator, ...
                         table_save_path, save_name)
 %% Testing - Fixed machines proportion
+%all of the range
+num_programs_subset = 1:length(programs_range);
 results = compare_algorithms(algs, algs_args, gen_method, ...
                             programs_range, machines_denom_iterator, ...
                             num_trials, machines_proportion);
@@ -227,7 +249,12 @@ alg_names = all_alg_names(alg_subset);
 algs = all_algs(alg_subset);
 algs_args = all_algs_args(alg_subset);
 programs_range = programs_ranges(3).program_range;
-num_programs_subset = 1:length(programs_range);
+
+num_lines = 6;
+num_algs = length(algs);
+num_dif_programs = length(programs_range);
+num_programs_subset = choose_subset_to_plot(num_lines, num_algs,...
+                                            num_dif_programs);
 
 %% Testing - Varying machines proportion
 results = compare_algorithms(algs, algs_args, gen_method, ...
@@ -241,6 +268,8 @@ construct_results_table(results, alg_names, alg_subset, ...
                         programs_range, machines_denom_iterator, ...
                         table_save_path, save_name)
 %% Testing - Fixed machines proportion
+%all of the range
+num_programs_subset = 1:length(programs_range);
 results = compare_algorithms(algs, algs_args, gen_method, ...
                             programs_range, machines_denom_iterator, ...
                             num_trials, machines_proportion);

@@ -48,7 +48,7 @@ function analyse_varying_n(results, alg_subset, num_programs_subset, ...
     
     for i = 1:3
         %Clears the current axis
-        cla();
+        clf('reset')
         %Sets the plot to store all new information
         hold on;
         %Resets the color palette
@@ -69,7 +69,7 @@ function analyse_varying_n(results, alg_subset, num_programs_subset, ...
         ylabel(y_axises(i))
         
         legend('off');
-        legend(legend_entries,'Location','northeast')
+        legend(legend_entries,'Location','best')
         legend('show');
         
         if save_path ~= ""

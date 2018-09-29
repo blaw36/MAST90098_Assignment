@@ -55,7 +55,7 @@ function analyse_varying_m(results, alg_subset, num_programs_subset, ...
     
     for i = 1:3
         %Clears the current axis
-        cla();
+        clf('reset')
         %Sets the plot to store all new information
         hold on;
         for a_i = alg_subset
@@ -75,7 +75,7 @@ function analyse_varying_m(results, alg_subset, num_programs_subset, ...
         xlabel(x_axis) 
         ylabel(y_axises(i))
         legend('off');
-        legend(legend_entries,'Location','northeast')
+        legend(legend_entries,'Location','best')
         legend('show');
         
         if save_path ~= ""

@@ -28,12 +28,10 @@ init_method = "simple";
 save_name = "Experiment-Choose-k-Simple";
 
 %30/10 = 3
-programs_range = 50:10:150;
-%all of the range
-num_programs_subset = 1:length(programs_range);
+programs_range = 50:10:100;
 
 %% Algorithms:
-alg_names = ["GLS,k=2", "GLS,k=3"];
+alg_names = ["GLS,k=2", "GLS,k=3", "GLS,k=4"];
 
 
 alg1 = @(input_array, args) gls(input_array, args{:});
@@ -42,13 +40,22 @@ alg1_args = {2, init_method, false};
 alg2 = @(input_array, args) gls(input_array, args{:});
 alg2_args = {3, init_method, false};
 
-% alg3 = @(input_array, args) gls(input_array, args{:});
-% alg3_args = {4, init_method, false};
+alg3 = @(input_array, args) gls(input_array, args{:});
+alg3_args = {4, init_method, false};
 
-algs = {alg1, alg2};
-algs_args = {alg1_args, alg2_args};
+algs = {alg1, alg2, alg3};
+algs_args = {alg1_args, alg2_args, alg3_args};
 % all algs
 alg_subset = 1:length(algs);
+
+%all of the range
+%num_programs_subset = 1:length(programs_range);
+%Only display 6 lines
+num_lines = 6;
+num_algs = length(algs);
+num_dif_programs = length(programs_range);
+num_programs_subset = choose_subset_to_plot(num_lines, num_algs,...
+                                            num_dif_programs);
 
 %% Testing - Varying machines proportion
 results = compare_algorithms(algs, algs_args, gen_method, ...
@@ -64,7 +71,8 @@ construct_results_table(results, alg_names, alg_subset, ...
                         table_save_path, save_name)
 %% Testing - Fixed machines proportion
 machines_proportion = 0.4;
-programs_range = 50:10:150;
+programs_range = 50:10:100;
+%all of the range
 num_programs_subset = 1:length(programs_range);
 
 results = compare_algorithms(algs, algs_args, gen_method, ...
@@ -87,8 +95,11 @@ alg1_args = {2, init_method, false};
 alg2 = @(input_array, args) gls(input_array, args{:});
 alg2_args = {3, init_method, false};
 
-algs = {alg1, alg2};
-algs_args = {alg1_args, alg2_args};
+alg3 = @(input_array, args) gls(input_array, args{:});
+alg3_args = {4, init_method, false};
+
+algs = {alg1, alg2, alg3};
+algs_args = {alg1_args, alg2_args, alg3_args};
 % all algs
 alg_subset = 1:length(algs);
 
