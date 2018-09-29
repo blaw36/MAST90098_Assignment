@@ -19,7 +19,7 @@ table_save_path = "Tables/";
 
 %% Testing Parameters
 machines_denom_iterator = 10;
-num_trials = 1;
+num_trials = 20;
 
 hard = false;
 gen_method = @(num_programs, num_machines) ...
@@ -32,7 +32,6 @@ programs_range = 50:10:100;
 
 %% Algorithms:
 alg_names = ["GLS,k=2", "GLS,k=3", "GLS,k=4"];
-
 
 alg1 = @(input_array, args) gls(input_array, args{:});
 alg1_args = {2, init_method, false};

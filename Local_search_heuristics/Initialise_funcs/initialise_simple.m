@@ -3,13 +3,11 @@
 % A script which initialises a solution by allocating costliest job from
 % machine 1 through to m. Once each machine has one job, it then allocates
 % costliest job to machine with lowest current total cost.
-
 %% Input:
-    % input_array: n+1 length vector of job costs, and n+1th element is # of
-        % machines
+    % input_array: n+1 length vector of job costs, and n+1th element is 
+        % # of machines
     % num_jobs: the number of jobs
-    % num_machines: the number of machines
-    
+    % num_machines: the number of machines   
 %% Output:
     % init_alloc: left two columns of output_array
         % rows - a job allocated to a position in a machine
@@ -18,14 +16,14 @@
 
 function init_alloc = initialise_simple(input_array, num_jobs, num_machines)
     
-    %Sorts the jobs biggest to smallest
+    % Sorts the jobs biggest to smallest
     job_costs = input_array(1:num_jobs);
-    sorted_job_costs = sort(job_costs ,'descend');
+    sorted_job_costs = sort(job_costs, 'descend');
 
     % Pre-allocate for speed
     init_alloc = zeros(num_jobs,2);
 
-    %Stores the current cost per machine.
+    % Stores the current cost per machine.
     machine_costs = [zeros(num_machines,1),(1:num_machines)'];
 
     % First round allocation

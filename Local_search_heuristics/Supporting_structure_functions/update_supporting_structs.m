@@ -1,11 +1,11 @@
+%% update_supporting_structs.m
 % Updates the supporting structures
 %% Input:
 %   %output_array: The newly updated output_array
 %   %move: the move that resulted in the update
 %   %num_machines: the number of machines
 %   %fix_moved: Indicates whether the 4th col of output_array exists and
-%       whether moved programs should be flagged as being moved.
-
+%       whether moved programs should be flaged as being moved.
 %   %program_costs: the cost of the programs ordered as in output_array
 %   %machine_start_indices: The ith value indicates which row of the
 %       output_array the ith machine first appears
@@ -16,12 +16,12 @@
 %   %L: The machine numbers of all the loaded machines
 %%
 
-function ...
-[program_costs, machine_start_indices, M, machine_costs, L] ...
+function [program_costs, machine_start_indices, M, machine_costs, L] ...
     = update_supporting_structs(move, output_array, num_machines, ...
                             program_costs, ...
                             machine_start_indices, M, machine_costs, ...
                             makespan, fix_moved)
+                        
     %Nargin faster, if less flexible, called enough times to be worth it
     %if ~exist('fix_moved','var')
     if nargin == 8                    
@@ -64,6 +64,4 @@ function ...
     end
     
     L = find(machine_costs==makespan);
-    
 end
-

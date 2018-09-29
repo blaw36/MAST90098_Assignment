@@ -1,28 +1,30 @@
-%% initialise_supporting_structs.m
-% Initialises the supporting combinatoric structs for when k > 2. Uses
-% neighbourhood definition where <= k exchanges of paths and cycles are
-% used. (similar to construct_batches.m for k > 2)
+%% initialise_combinatoric_structs.m
+% Initialises the supporting combinatoric structs used to navigate around
+% the neighbourhoods of instances.
 %% Input:
     % num_machines: the number of machines
     % k: the k-exchange
 %% Output:
-    % selected_machines: Encodes all all possible m choose k
-        % combinations to select k machines (combs matrix)
-        % Selected_machines has 3 dims , (d=[2,..,k], combs=matrix())
+    % selected_machines: Encodes all the ways to select d = 2,...,k 
+        % machines from m. 
+        % selected_machines(i).data = a matrix encoding ncr(m,i)
     % machine_orders: Encodes all the ways to order those k machines as
-    % cycles and as paths (d_cycle matrix)
-        % machine_orders has 4 dims 
-        % ([2,..,k],[1,2] , orders_for_d_cycle=matrix())
+        % cycles and as paths
+        % machine_orders(i, 1).data = 
+        %      all the ways to order those k machines in a path
+        % machine_orders(i, 2).data = 
+        %      all the ways to order those k machines in a cycle
 %%
 function [selected_machines, machine_orders] = ...
                         initialise_combinatoric_structs(num_machines, k)    
     % Iterate backwards so size doesn't change
     for d = k:-1:2
+        %An improved version for d==2
         if d == 2
             % Outer column first so doesn't change size
             selected_machines(d-1).data(:,2) = ...
                         repelem(1:(num_machines-1),(num_machines-1):-1:1);
-            % Vectorise this
+
             curr = 1;
             for i = 2:num_machines
                 next = curr + num_machines-i;
@@ -31,7 +33,7 @@ function [selected_machines, machine_orders] = ...
             end 
         else
             % This becomes a big bottleneck performance-wise
-            % as default matlab imp is really slow
+            % as default matlab implementation is really slow
             selected_machines(d-1).data = combnk(1:num_machines, d);
         end
         

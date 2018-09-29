@@ -6,7 +6,6 @@
             % columns - job_cost, machine_num, unique job_id, (movable)
     % num_machines: the number of machines
     % num_jobs: the number of jobs
-    
 %% Output:
     % program_costs: 
     % machine_start_indices: The ith value indicates which row of the
@@ -15,7 +14,6 @@
     % machine_costs: The costs of all machines
     % makespan: The cost of the most loaded machine(s)
     % L: The machine number(s) of all the loaded machine(s)
-
 %%
 function [program_costs, ...
     machine_start_indices, M, machine_costs, makespan, L] ...
@@ -47,7 +45,6 @@ function [program_costs, ...
     % Find machine_costs; sum between start to finish indices of each
     % machine
     machine_costs = zeros(1,num_machines);
-%     for i = 1:(length(padded)-1)
     for i = 1:(length(non_empty_machines))
         start = padded(i);
         finish = padded(i+1) - 1;
@@ -56,6 +53,6 @@ function [program_costs, ...
 
     % Find makespan
     makespan = max(machine_costs);
-    % Find loaded machine(s) (machine(s) with cost = makespan)
+    % Find the loaded machines
     L = find(machine_costs==makespan);
 end

@@ -23,14 +23,14 @@
 function [batches, num_batches, valid_orders, use_par] = ...
                                 construct_batches(L, M, k, num_machines)
     use_par = false;
-    %See above
+    % See above
     BATCH_DIV_PARAM = 1*10^8;
     
     % Pair each loaded machine with all other machines excluding self. Has
     % size |L|*(m-1)
     % Initiate outer column first to fix matrix size
-    valid_machines(:,2) =  repelem(L, num_machines-1);
-    % Vectorise this
+    valid_machines(:,2) = repelem(L, num_machines-1);
+
     % Generate all pairs, excluding L(i)
     curr = 1;
     for i = 1:length(L)
@@ -39,9 +39,9 @@ function [batches, num_batches, valid_orders, use_par] = ...
         curr = next+1;       
     end
     
-    %As the number of valid orders is not known ahead of time can't
-    %pre-allocate, however it is not a large time sink to v-stack the
-    %new_valid_orders twice.
+    % As the number of valid orders is not known ahead of time can't
+    % pre-allocate, however it is not a large time sink to v-stack the
+    % new_valid_orders twice.
     valid_orders = [];
     sum_valid = 0;
     
@@ -58,13 +58,14 @@ function [batches, num_batches, valid_orders, use_par] = ...
         else
             % Generate all combos - as k=2 for this script, quick method to
             % add in the machine combos, and the reverse
-            orders = [valid_machines;valid_machines(:,2),valid_machines(:,1)];
+            orders = [valid_machines;...
+                        valid_machines(:,2), valid_machines(:,1)];
         end
 
         [new_valid_orders, num_new_valid] = generate_valid_orders(...
             k, M, cycle, orders);
         
-        %V-stack new orders see init of valid_orders
+        % V-stack new orders see init of valid_orders
         valid_orders = [valid_orders; new_valid_orders];
 
         if num_new_valid == 0
@@ -96,16 +97,16 @@ function [batches, num_batches, valid_orders, use_par] = ...
         batches(num_batches).move = {};
         batches(num_batches).batch = {};
         
-        %Setting the size of batches by using ceil, will 'overallocate' to
-        %batches before last => last batch won't have a full load but
-        %just the remainder
+        % Setting the size of batches by using ceil, will 'overallocate' to
+        % batches before last => last batch won't have a full load but
+        % just the remainder
         batch_size = ceil(num_new_valid/new_batches);
         for i = 1:new_batches
             start = (i-1)*batch_size+1 + sum_valid;
-            %Last batch only gets remainder
+            % Last batch only gets remainder
             finish = min(i*batch_size, num_new_valid) + sum_valid;
             
-            %Store information needed to process batch in batches
+            % Store information needed to process each batch
             batch_index = i+old_num_batches;
             batches(batch_index).start = start;
             batches(batch_index).finish = finish;            
