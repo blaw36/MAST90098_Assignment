@@ -28,7 +28,7 @@ init_method = "simple";
 save_name = "Experiment-Choose-k-Simple";
 
 %30/10 = 3
-programs_range = 50:50:150;
+programs_range = 50:10:150;
 %all of the range
 num_programs_subset = 1:length(programs_range);
 
@@ -64,7 +64,7 @@ construct_results_table(results, alg_names, alg_subset, ...
                         table_save_path, save_name)
 %% Testing - Fixed machines proportion
 machines_proportion = 0.4;
-programs_range = 50:50:250;
+programs_range = 50:10:150;
 num_programs_subset = 1:length(programs_range);
 
 results = compare_algorithms(algs, algs_args, gen_method, ...

@@ -4,12 +4,6 @@ Scheduling Problem.
 
 # TODO
 * Testing:
-    * Looking into creating test cases, looks like the uniform choice was fine
-    and is largely used in literature.
-    * One possible extreme case is described here (in english)
-    "Multi-exhange algorithms for the minimum makespan machine"
-    in section "4.1 The Instances"
-    http://citeseerx.ist.psu.edu/viewdoc/download;jsessionid=FF95ABC5BD3FD45008C6441DBD153927?doi=10.1.1.42.7242&rep=rep1&type=pdf 
-    Originally from
-    "Algoritmi di ricerca locale basati su grafi di miglioramento per il problema di assegnamento di lavori a macchine"
-    but my italian isn't too flash.
+    * Max of 6 lines at once on the vary prop plots otherwise very crowded
+    * Legend occasionally over things can set legend location to 'bestoutside'
+    but might squish graphic, or just 'best' (inside) but might be less consistent

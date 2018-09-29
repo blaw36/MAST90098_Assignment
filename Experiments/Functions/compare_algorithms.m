@@ -35,6 +35,17 @@ if machines_proportion > 0
     machines_denom_iterator = 1;
 end
 
+%Check Input
+if machines_proportion>0
+    if any(mod(programs_range, machines_proportion))
+        error("Make sure the programs range can be split by the proportion");
+    end
+else
+    if any(mod(programs_range, machines_denom_iterator))
+        error("Make sure the programs range is divisible by the denominator");
+    end
+end
+
 results = zeros(length(algs), length(programs_range), ...
                 machines_denom_iterator, 3);
 
@@ -43,9 +54,10 @@ for j = 1: length(programs_range)
     num_programs = programs_range(j);
     fprintf("Number of Programs: %d\n", num_programs);
     machine_iterator = floor(num_programs/machines_denom_iterator);
-    k = 1;
+    k = 0;
     %scale the number of machines to the number of programs
     for iterated_machines = machine_iterator:machine_iterator:num_programs
+        k = k + 1;
         %Test each alg on this number of programs and machines
         for i=1:length(algs)
             fprintf("Algorithm: %d\n", i);
@@ -64,8 +76,6 @@ for j = 1: length(programs_range)
             rng(num_machines*num_programs);
             results(i,j,k,:) = test_algorithm(alg, alg_args, gen_method, ...
                 num_programs, num_machines, num_trials);
-
         end
-        k = k+1;
     end
 end

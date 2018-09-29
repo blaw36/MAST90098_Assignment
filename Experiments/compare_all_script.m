@@ -12,9 +12,9 @@ table_save_path = "Tables/";
 %want to have additional larger cases for some algs, can just take these in
 %on the end.
 
-base_cases = 50:10:70;
+base_cases = 50:10:150;
 %GLS
-programs_ranges(1).program_range = [base_cases, 200:50:300];
+programs_ranges(1).program_range = [base_cases];
 %GLS+VDS
 programs_ranges(2).program_range = [base_cases];
 %GLS+VDS+Genetic
@@ -69,13 +69,13 @@ alg_names = all_alg_names(alg_subset);
 algs = all_algs(alg_subset);
 algs_args = all_algs_args(alg_subset);
 programs_range = programs_ranges(1).program_range;
+num_programs_subset = 1:length(programs_range);
 
 %% Testing - Varying machines proportion
 results = compare_algorithms(algs, algs_args, gen_method, ...
                             programs_range, machines_denom_iterator, ...
                             num_trials);
 %% Analysis - Varying machines proportion
-num_programs_subset = 1:length(programs_range);
 analyse_varying_m(results, alg_subset, num_programs_subset, ...
                         programs_range, machines_denom_iterator,...
                         alg_names, figure_save_path, save_name);
@@ -88,7 +88,6 @@ results = compare_algorithms(algs, algs_args, gen_method, ...
                             programs_range, machines_denom_iterator, ...
                             num_trials, machines_proportion);
 %% Analysis - Fixed machines proportion
-num_programs_subset = 1:length(programs_range);
 analyse_varying_n(results, alg_subset, num_programs_subset, ...
                          programs_range, machines_proportion,...
                          alg_names, figure_save_path, save_name);

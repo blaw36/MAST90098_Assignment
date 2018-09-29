@@ -1,4 +1,9 @@
 function latex = latexTable(input)
+% Modified by Kurt Stoeckl with:
+    % A flag to indicate this table will be placed inside another
+        % input.inner = true;
+    % The ability to not display captions on the tables.
+
 % An easy to use function that generates a LaTeX table from a given MATLAB
 % input struct containing numeric values. The LaTeX code is printed in the
 % command window for quick copy&paste and given back as a cell array.
