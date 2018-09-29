@@ -51,23 +51,17 @@ function analyse_varying_n(results, alg_subset, num_programs_subset, ...
         clf('reset')
         %Sets the plot to store all new information
         hold on;
-        %Resets the color palette
-        ax = gca;
-        ax.ColorOrderIndex = 1;
         for a_i = alg_subset
-            for n_j = num_programs_subset
-                data = subset(a_i,:,1,i);
-                vector = data(:);
-                if i == 1
-                    vector = log10(vector);
-                end
-                plot(programs_range,vector);
+            data = subset(a_i,:,1,i);
+            vector = data(:);
+            if i == 1
+                vector = log10(vector);
             end
+            plot(programs_range,vector);
         end
         title("Machine Proportion = "+machines_proportion);
         xlabel(x_axis) 
-        ylabel(y_axises(i))
-        
+        ylabel(y_axises(i))        
         legend('off');
         legend(legend_entries,'Location','best')
         legend('show');

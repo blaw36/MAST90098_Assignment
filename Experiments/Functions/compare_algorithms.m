@@ -60,7 +60,7 @@ for j = 1: length(programs_range)
         k = k + 1;
         %Test each alg on this number of programs and machines
         for i=1:length(algs)
-            fprintf("Algorithm: %d\n", i);
+            fprintf("Algorithm: %d, ", i);
             alg = algs{i};
             alg_args = algs_args{i};
             
@@ -76,6 +76,7 @@ for j = 1: length(programs_range)
             rng(num_machines*num_programs);
             results(i,j,k,:) = test_algorithm(alg, alg_args, gen_method, ...
                 num_programs, num_machines, num_trials);
+            fprintf("Time: %f\n", results(i,j,k,1));
         end
     end
 end
