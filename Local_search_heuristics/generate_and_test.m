@@ -1,5 +1,6 @@
 % Generates and tests the neighbourhood of the current instance
 %% Input:
+    % num_machines: The number of machines   
     % k: The size of the k-exchange
     % curr_makespan: the makespan of the current instance
     % L: The machine numbers of all the loaded machines
@@ -22,15 +23,16 @@
     % best_makespan: makespan value of lowest makespan ('best') neighbour
 %%
 function [best_neighbour, best_makespan] = generate_and_test(...
-                 k, curr_makespan, L, M, ...
+                 num_machines, k, curr_makespan, L, M, ...
                  machine_costs, machine_start_indices, program_costs,...
                  selected_machines, machine_orders, greedy_flag)
     
     %Equivalent to if ~exist('greedy_flag','var')
-    if nargin == 9
+    if nargin == 10
         greedy_flag = false;
     end
     
+    num_loaded = length(L);
     best_makespan = inf;
     best_neighbour = {};
     
@@ -69,7 +71,8 @@ function [best_neighbour, best_makespan] = generate_and_test(...
                                 machine_costs, machine_start_indices, ...
                                 program_costs,...
                                 num_programs, num_selected, length_move,...
-                                curr_makespan, L, greedy_flag);
+                                curr_makespan, num_machines, num_loaded,...
+                                greedy_flag);
 
                 if min_neigh_makespan < best_makespan
                     best_makespan = min_neigh_makespan;
