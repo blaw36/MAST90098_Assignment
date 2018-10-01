@@ -27,13 +27,13 @@
         % the makespan after initiation
     % best_output: best output of machine allocations to a sorted input job
     % vector
-    % best_generation: generation which yielded the best output
+    % best_gen_num: generation which yielded the best output
     % generation_counter: how many generations used in the process before
     % it terminated
 % To do: include different /flexible criteria for termination
 
 function [best_makespan, time_taken, init_makespan, best_output,...
-    best_generation, generation_counter] = ...
+    best_gen_num, generation_counter] = ...
             genetic_alg_v2(input_array, init_pop_size, simple_prop, ...
                     parent_selection, parent_ratio, crossover_method, ...
                     mutation_select_method, mutate_method, ...
@@ -79,7 +79,7 @@ function [best_makespan, time_taken, init_makespan, best_output,...
 % really arbitrary criteria demanding improvement every n generations
     while no_chg_generations <= termination_criteria
 
-        start_gen_makespan = new_gen_makespan;
+        start_gen_makespan = best_generation{3};
 
         if parent_selection == "minMaxLinear"
             prob_parent_select = fit_to_prob_minmaxLinear(makespan_mat, true);
@@ -155,42 +155,42 @@ function [best_makespan, time_taken, init_makespan, best_output,...
         generation_counter = generation_counter + 1;
 
         % If we get > 10 generations with no change, stop.
-        if (new_gen_makespan - start_gen_makespan) >= 0
+        if (new_gen_makespan - best_generation{3}) >= 0
             no_chg_generations = no_chg_generations + 1;
-        elseif (new_gen_makespan - start_gen_makespan) < 0
+        elseif (new_gen_makespan - best_generation{3}) < 0
             no_chg_generations = 0;
             best_generation = {generation_counter, pop_mat(gene_indx,:), new_gen_makespan};
         end
-
-        clc
-        fprintf("Generation: %d \n", generation_counter);
-        fprintf("Makespan: %d \n", new_gen_makespan);
-        fprintf("Best generation makespan: %d \n", best_generation{3});
-        fprintf("Best makespan: %d \n", best_makespan);
-        fprintf("Avg fitness: %d \n", round(mean(makespan_mat)));
-        fprintf("Num parents survived: %d \n", ...
-            sum(parent_child_indicator == 1));
-        fprintf("Num children survived: %d \n", ...
-            sum(parent_child_indicator == 0));
         
         %Record new best if encountered
         if best_generation{3} < best_makespan
             best_makespan = best_generation{3};
             best_sol = best_generation{2};
-            %Couldn't do this assignment as best_gen is used differently
-            %above
-            %best_generation = best_generation{1};
+            best_gen_num = best_generation{1};
         end
+        
+        clc
+        fprintf("Generation: %d \n", generation_counter);
+        fprintf("Best makespan in generation: %d \n", new_gen_makespan);
+%         fprintf("Best generation makespan: %d \n", best_generation{3});
+        fprintf("Best makespan: %d \n", best_makespan);
+        fprintf("Avg fitness: %d \n", round(mean(makespan_mat)));
+        fprintf("Num gens no improvement: %d \n", no_chg_generations);
+        fprintf("Num parents survived: %d \n", ...
+            sum(parent_child_indicator == 1));
+        fprintf("Num children survived: %d \n", ...
+            sum(parent_child_indicator == 0));
+
     end
 
     % Convert best_output to standard output_array format produced by other
     % two algorithms
-    best_output = [jobs_array_aug', best_sol];
+    best_output = [jobs_array_aug', best_sol'];
     best_output = sortrows(best_output,2);
     best_output(:,3) = zeros(num_jobs,1); % third column is just arbitrary as a
     % placeholder
     
     %best_makespan = best_generation{3};
-    best_generation = best_generation{1};
+    %best_gen_num = best_generation{1};
     time_taken = toc(start_time);
 end

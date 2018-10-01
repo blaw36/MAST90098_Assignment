@@ -21,7 +21,7 @@ hard = false;
 a = generate_ms_instances(n, m, hard); % Generate makespan input vector
 k = 2; % # of exchanges (k-exch)
 method = 'Genetic'; % 'VDS', 'GLS' or 'Genetic'
-k2_opt = true;
+k2_opt = false;
 
 
 %% Initialisation algorithm:
@@ -47,12 +47,12 @@ elseif strcmp(method,'Genetic')
     % Note that the third column output is meaningless - i've just filled
     % it with 0s to keep in line with the outputs from GLS and VDS.
     [outputMakespan, time_taken, init_makespan, outputArray, ...
-        best_generation, generations]...
+        best_gen_num, generations]...
                              = genetic_alg_v2(a, 3000, 0.1, ...
                                     "minMaxLinear", 5, "cutover_split", ...
                                     "minMaxLinear", "shuffle", ...
                                     "top", ...
-                                    10);
+                                    100);
 end
 
 outputMakespan
