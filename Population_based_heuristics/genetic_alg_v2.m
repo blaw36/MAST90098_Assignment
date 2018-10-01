@@ -82,13 +82,13 @@ function [best_makespan, time_taken, init_makespan, best_output,...
         start_gen_makespan = best_generation{3};
 
         if parent_selection == "minMaxLinear"
-            prob_parent_select = fit_to_prob_minmaxLinear(makespan_mat, true);
+            prob_parent_select = fit_to_prob_minmaxLinear(makespan_mat);
         end
 
-        cumul_prob_parent = cumsum(prob_parent_select);
+%         cumul_prob_parent = cumsum(prob_parent_select);
 
         % Generate parent pairings for crossover
-        parent_mat = generate_parents(cumul_prob_parent, ...
+        parent_mat = generate_parents(prob_parent_select, ...
             parent_ratio, init_pop_size);
         num_children = size(parent_mat,1);
 

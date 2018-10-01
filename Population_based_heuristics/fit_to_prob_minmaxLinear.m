@@ -21,7 +21,16 @@ function makespan_prob = fit_to_prob_minmaxLinear(makespan_mat, ...
 
     max_pop_fit = max(makespan_mat);
     min_pop_fit = min(makespan_mat);
-    makespan_prob = (makespan_mat - min_pop_fit)/(max_pop_fit-min_pop_fit);
+    
+    % If, somehow, max = min (poor diversity), give random probs
+    if max_pop_fit == min_pop_fit
+        makespan_prob = rand(size(makespan_mat,1),1);
+    else
+        makespan_prob = (makespan_mat - min_pop_fit)/ ...
+            (max_pop_fit-min_pop_fit);
+    end
+    
+    
     if distribute_across
         pop_fit_scaled_tot = sum(makespan_prob);
         makespan_prob = makespan_prob./pop_fit_scaled_tot ;
