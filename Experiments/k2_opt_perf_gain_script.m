@@ -19,9 +19,9 @@ hard = false;
 gen_method = @(num_programs, num_machines) ...
                 generate_ms_instances(num_programs, num_machines, hard);
 
-programs_range = 50:10:150;
+programs_range = 5000:5000:35000;
 machines_denom_iterator = 10;
-num_trials = 1;
+num_trials = 20;
 
 %% Algorithms:
 alg_names = ["GLS,k=2,opt", "GLS,k=2"];
@@ -60,7 +60,7 @@ construct_results_table(results, alg_names, alg_subset, ...
                         table_save_path, save_name)
 %% Testing - Fixed machines proportion
 machines_proportion = 0.4;
-programs_range = 50:10:150;
+programs_range = [200:200:800,1000:1000:4000,5000:5000:35000];
 %all of the range
 num_programs_subset = 1:length(programs_range);
 

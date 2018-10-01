@@ -12,9 +12,18 @@ table_save_path = "Tables/";
 %want to have additional larger cases for some algs, can just take these in
 %on the end.
 
-base_cases = 50:10:150;
+%Want these base cases to be runnable by all algs even on the worst test
+%cases
+%limit for vds on random about 1000
+%limit for vds on hard about 1000
+%limit for genetic not known, but gut feeling, feel like we'll wind up
+%getting time performance in the order of vds, worst case can re-run this
+%script with new base cases, or just let genetic run for longer...
+base_cases = [50:10:90,100:100:1000];
 %GLS
-programs_ranges(1).program_range = [base_cases];
+programs_ranges(1).program_range = [base_cases, 2000:2000:8000,...
+                                    10000:10000:50000, ...
+                                    50000:50000:100000];
 %GLS+VDS
 programs_ranges(2).program_range = [base_cases];
 %GLS+VDS+Genetic
@@ -22,7 +31,7 @@ programs_ranges(3).program_range = [base_cases];
 
 machines_proportion = 0.4;
 machines_denom_iterator = 10;
-num_trials = 1;
+num_trials = 20;
 
 hard = false;
 gen_method = @(num_programs, num_machines) ...
@@ -185,98 +194,98 @@ analyse_varying_n(results, alg_subset, num_programs_subset, ...
 construct_results_table(results, alg_names, alg_subset, ...
                     programs_range, machines_denom_iterator, ...
                     table_save_path, save_name, machines_proportion)
-%% Section 3. ...
-%Testing GLS,k=2, VDS,k=2 and Genetic
-% Desired Output:
-%   Graphs:
-%       Varying machines
-%           Log_10 Time 
-%           Ratio to Initiation
-%           Ratio to LowerBound
-%           -> Use these to establish using machine proportion of 0.4
-%       Varying just num_programs with machine_proportion of 0.4
-%           Log_10 Time
-%           Ratio to Initiation
-%           Ratio to LowerBound
-%       Same again on hard test case
-%   Tables: All to appendix
-
-save_name = "Experiment-All-Easy";
-
-alg_subset = 1:3;
-alg_names = all_alg_names(alg_subset);
-algs = all_algs(alg_subset);
-algs_args = all_algs_args(alg_subset);
-programs_range = programs_ranges(3).program_range;
-
-num_lines = 6;
-num_algs = length(algs);
-num_dif_programs = length(programs_range);
-num_programs_subset = choose_subset_to_plot(num_lines, num_algs,...
-                                            num_dif_programs);
-%% Testing - Varying machines proportion
-results = compare_algorithms(algs, algs_args, gen_method, ...
-                            programs_range, machines_denom_iterator, ...
-                            num_trials);
-%% Analysis - Varying machines proportion
-analyse_varying_m(results, alg_subset, num_programs_subset, ...
-                        programs_range, machines_denom_iterator,...
-                        alg_names, figure_save_path, save_name);
-construct_results_table(results, alg_names, alg_subset, ...
-                        programs_range, machines_denom_iterator, ...
-                        table_save_path, save_name)
-%% Testing - Fixed machines proportion
-%all of the range
-num_programs_subset = 1:length(programs_range);
-results = compare_algorithms(algs, algs_args, gen_method, ...
-                            programs_range, machines_denom_iterator, ...
-                            num_trials, machines_proportion);
-%% Analysis - Fixed machines proportion
-analyse_varying_n(results, alg_subset, num_programs_subset, ...
-                         programs_range, machines_proportion,...
-                         alg_names, figure_save_path, save_name);
-construct_results_table(results, alg_names, alg_subset, ...
-                    programs_range, machines_denom_iterator, ...
-                    table_save_path, save_name, machines_proportion)
-
-save_name = "Experiment-All-Hard";
-hard = true;
-gen_method = @(num_programs, num_machines) ...
-                generate_ms_instances(num_programs, num_machines, hard);
-
-alg_subset = 1:3;
-alg_names = all_alg_names(alg_subset);
-algs = all_algs(alg_subset);
-algs_args = all_algs_args(alg_subset);
-programs_range = programs_ranges(3).program_range;
-
-num_lines = 6;
-num_algs = length(algs);
-num_dif_programs = length(programs_range);
-num_programs_subset = choose_subset_to_plot(num_lines, num_algs,...
-                                            num_dif_programs);
-
-%% Testing - Varying machines proportion
-results = compare_algorithms(algs, algs_args, gen_method, ...
-                            programs_range, machines_denom_iterator, ...
-                            num_trials);
-%% Analysis - Varying machines proportion
-analyse_varying_m(results, alg_subset, num_programs_subset, ...
-                        programs_range, machines_denom_iterator,...
-                        alg_names, figure_save_path, save_name);
-construct_results_table(results, alg_names, alg_subset, ...
-                        programs_range, machines_denom_iterator, ...
-                        table_save_path, save_name)
-%% Testing - Fixed machines proportion
-%all of the range
-num_programs_subset = 1:length(programs_range);
-results = compare_algorithms(algs, algs_args, gen_method, ...
-                            programs_range, machines_denom_iterator, ...
-                            num_trials, machines_proportion);
-%% Analysis - Fixed machines proportion
-analyse_varying_n(results, alg_subset, num_programs_subset, ...
-                         programs_range, machines_proportion,...
-                         alg_names, figure_save_path, save_name);
-construct_results_table(results, alg_names, alg_subset, ...
-                    programs_range, machines_denom_iterator, ...
-                    table_save_path, save_name, machines_proportion)
+% %% Section 3. ...
+% %Testing GLS,k=2, VDS,k=2 and Genetic
+% % Desired Output:
+% %   Graphs:
+% %       Varying machines
+% %           Log_10 Time 
+% %           Ratio to Initiation
+% %           Ratio to LowerBound
+% %           -> Use these to establish using machine proportion of 0.4
+% %       Varying just num_programs with machine_proportion of 0.4
+% %           Log_10 Time
+% %           Ratio to Initiation
+% %           Ratio to LowerBound
+% %       Same again on hard test case
+% %   Tables: All to appendix
+% 
+% save_name = "Experiment-All-Easy";
+% 
+% alg_subset = 1:3;
+% alg_names = all_alg_names(alg_subset);
+% algs = all_algs(alg_subset);
+% algs_args = all_algs_args(alg_subset);
+% programs_range = programs_ranges(3).program_range;
+% 
+% num_lines = 6;
+% num_algs = length(algs);
+% num_dif_programs = length(programs_range);
+% num_programs_subset = choose_subset_to_plot(num_lines, num_algs,...
+%                                             num_dif_programs);
+% %% Testing - Varying machines proportion
+% results = compare_algorithms(algs, algs_args, gen_method, ...
+%                             programs_range, machines_denom_iterator, ...
+%                             num_trials);
+% %% Analysis - Varying machines proportion
+% analyse_varying_m(results, alg_subset, num_programs_subset, ...
+%                         programs_range, machines_denom_iterator,...
+%                         alg_names, figure_save_path, save_name);
+% construct_results_table(results, alg_names, alg_subset, ...
+%                         programs_range, machines_denom_iterator, ...
+%                         table_save_path, save_name)
+% %% Testing - Fixed machines proportion
+% %all of the range
+% num_programs_subset = 1:length(programs_range);
+% results = compare_algorithms(algs, algs_args, gen_method, ...
+%                             programs_range, machines_denom_iterator, ...
+%                             num_trials, machines_proportion);
+% %% Analysis - Fixed machines proportion
+% analyse_varying_n(results, alg_subset, num_programs_subset, ...
+%                          programs_range, machines_proportion,...
+%                          alg_names, figure_save_path, save_name);
+% construct_results_table(results, alg_names, alg_subset, ...
+%                     programs_range, machines_denom_iterator, ...
+%                     table_save_path, save_name, machines_proportion)
+% 
+% save_name = "Experiment-All-Hard";
+% hard = true;
+% gen_method = @(num_programs, num_machines) ...
+%                 generate_ms_instances(num_programs, num_machines, hard);
+% 
+% alg_subset = 1:3;
+% alg_names = all_alg_names(alg_subset);
+% algs = all_algs(alg_subset);
+% algs_args = all_algs_args(alg_subset);
+% programs_range = programs_ranges(3).program_range;
+% 
+% num_lines = 6;
+% num_algs = length(algs);
+% num_dif_programs = length(programs_range);
+% num_programs_subset = choose_subset_to_plot(num_lines, num_algs,...
+%                                             num_dif_programs);
+% 
+% %% Testing - Varying machines proportion
+% results = compare_algorithms(algs, algs_args, gen_method, ...
+%                             programs_range, machines_denom_iterator, ...
+%                             num_trials);
+% %% Analysis - Varying machines proportion
+% analyse_varying_m(results, alg_subset, num_programs_subset, ...
+%                         programs_range, machines_denom_iterator,...
+%                         alg_names, figure_save_path, save_name);
+% construct_results_table(results, alg_names, alg_subset, ...
+%                         programs_range, machines_denom_iterator, ...
+%                         table_save_path, save_name)
+% %% Testing - Fixed machines proportion
+% %all of the range
+% num_programs_subset = 1:length(programs_range);
+% results = compare_algorithms(algs, algs_args, gen_method, ...
+%                             programs_range, machines_denom_iterator, ...
+%                             num_trials, machines_proportion);
+% %% Analysis - Fixed machines proportion
+% analyse_varying_n(results, alg_subset, num_programs_subset, ...
+%                          programs_range, machines_proportion,...
+%                          alg_names, figure_save_path, save_name);
+% construct_results_table(results, alg_names, alg_subset, ...
+%                     programs_range, machines_denom_iterator, ...
+%                     table_save_path, save_name, machines_proportion)

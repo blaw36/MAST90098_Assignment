@@ -61,6 +61,7 @@ function [best_makespan, time_taken, init_makespan, best_output,...
     makespan_mat = max(machine_cost_mat,[],2);
 
     % Begin iterations
+    best_makespan = inf;
     start_gen_makespan = inf;
     [new_gen_makespan,gene_indx] = min(makespan_mat);
     
@@ -164,23 +165,32 @@ function [best_makespan, time_taken, init_makespan, best_output,...
         clc
         fprintf("Generation: %d \n", generation_counter);
         fprintf("Makespan: %d \n", new_gen_makespan);
-        fprintf("Best makespan: %d \n", best_generation{3});
+        fprintf("Best generation makespan: %d \n", best_generation{3});
+        fprintf("Best makespan: %d \n", best_makespan);
         fprintf("Avg fitness: %d \n", round(mean(makespan_mat)));
         fprintf("Num parents survived: %d \n", ...
             sum(parent_child_indicator == 1));
         fprintf("Num children survived: %d \n", ...
             sum(parent_child_indicator == 0));
-
+        
+        %Record new best if encountered
+        if best_generation{3} < best_makespan
+            best_makespan = best_generation{3};
+            best_sol = best_generation{2};
+            %Couldn't do this assignment as best_gen is used differently
+            %above
+            %best_generation = best_generation{1};
+        end
     end
 
     % Convert best_output to standard output_array format produced by other
     % two algorithms
-    best_output = [jobs_array_aug', best_generation{2}'];
+    best_output = [jobs_array_aug', best_sol];
     best_output = sortrows(best_output,2);
     best_output(:,3) = zeros(num_jobs,1); % third column is just arbitrary as a
     % placeholder
     
-    best_makespan = best_generation{3};
+    %best_makespan = best_generation{3};
     best_generation = best_generation{1};
     time_taken = toc(start_time);
 end
