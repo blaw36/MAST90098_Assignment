@@ -70,10 +70,25 @@ for j = 1: length(programs_range)
                 num_machines = iterated_machines;
             end
             
-            %Reseting the seed as a funtion of num_machines, num_programs
+            %Setting the seed as a funtion of num_machines, num_programs
             %means that the algorithms will be compared on the same test
-            %case if the gen_method has random elements.
-            rng(num_machines*num_programs);
+            %case even if the gen_method has random elements.
+            
+            %mod(num_machines*num_programs,2^32) is a passable hash function
+            % rng takes as an input an integer <2^32
+            % If it was a perfect hash (which it isn't) then every
+            % generation for a different number of machines and
+            % programs would have a different seed.
+            
+            % In the worst case a match occurs for generation cases with
+            % different numbers of programs and machines. Then if a random
+            % generation method is used, the first portion of programs
+            % generated in these two cases will be the same. (The larger
+            % test case will still have a different 'tail' and given the
+            % nature of having both different numbers of machines,
+            % programs, and a different tail, is likely to be a very
+            % 'different' instance.)
+            rng(mod(num_machines*num_programs,2^32));
             results(i,j,k,:) = test_algorithm(alg, alg_args, gen_method, ...
                 num_programs, num_machines, num_trials);
             fprintf("Time: %f\n", results(i,j,k,1));
