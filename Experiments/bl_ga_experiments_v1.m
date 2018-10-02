@@ -18,30 +18,32 @@ for j = 1:1000000
 end
 finish2 = toc(start2);
 
-start = tic;
-test = pop_mat(1:3000,:);
-for i = 1:size(test,1)
-    pop(i).mach_mat = zeros(num_machines, size(jobs_array_aug,2));
-    for j = 1:size(jobs_array_aug,2)
-        pop(i).mach_mat(test(i,j),j) = 1;
-    end
-end
-stop = toc(start);
 
 %% New way of storing population.
 % Twice as fast!!! Matrix in struct (1s/0s), rather than matrix of integers
 
+start1= tic;
+% test = pop_mat(1:3000,:);
+for i = 1:size(pop_mat,1)
+    pop(i).mach_mat = zeros(num_machines, size(jobs_array_aug,2));
+    for j = 1:size(jobs_array_aug,2)
+        pop(i).mach_mat(pop_mat(i,j),j) = 1;
+    end
+end
+stop1 = toc(start1);
+
+
 start = tic;
-for j = 1:100000%0
+for j = 1:1000%000
      for k = 1:num_machines
-         indicator_mat = (test == k);
+         indicator_mat = (pop_mat == k);
          machine_cost_mat(:,k) = indicator_mat * jobs_array_transpose;
      end
 end
 stop = toc(start);
 
 start2 = tic;
-for j = 1:100000%0
+for j = 1:1000%000
      for k = 1:size(pop,2)
          machine_cost_mat(k,:) = pop(k).mach_mat*jobs_array_transpose;
      end
