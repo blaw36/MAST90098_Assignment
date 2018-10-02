@@ -22,7 +22,7 @@ table_save_path = "Tables/";
 base_cases = [50:10:90,100:100:1000];
 %GLS
 programs_ranges(1).program_range = [base_cases, 2000:2000:8000,...
-                                    10000:10000:50000, ...
+                                    10000:10000:40000, ...
                                     50000:50000:100000];
 %GLS+VDS
 programs_ranges(2).program_range = [base_cases];
@@ -38,7 +38,6 @@ gen_method = @(num_programs, num_machines) ...
                 generate_ms_instances(num_programs, num_machines, hard);
 
 %% Algorithms:
-%"Genetic" just k=3 for now
 all_alg_names = ["GLS,k=2", "VDS,k=2", "Genetic,v2"];
 
 init_method = "simple";
@@ -79,11 +78,13 @@ algs = all_algs(alg_subset);
 algs_args = all_algs_args(alg_subset);
 programs_range = programs_ranges(1).program_range;
 
-num_lines = 6;
-num_algs = length(algs);
-num_dif_programs = length(programs_range);
-num_programs_subset = choose_subset_to_plot(num_lines, num_algs,...
-                                            num_dif_programs);
+%Find the cases to be plotted
+num_programs_subset = [find(programs_range==100), ...
+                        find(programs_range==500), ...
+                        find(programs_range==1000), ...
+                        find(programs_range==5000), ...
+                        find(programs_range==10000), ...
+                        find(programs_range==50000)];
 
 %% Testing - Varying machines proportion
 results = compare_algorithms(algs, algs_args, gen_method, ...
@@ -137,11 +138,9 @@ algs = all_algs(alg_subset);
 algs_args = all_algs_args(alg_subset);
 programs_range = programs_ranges(2).program_range;
 
-num_lines = 6;
-num_algs = length(algs);
-num_dif_programs = length(programs_range);
-num_programs_subset = choose_subset_to_plot(num_lines, num_algs,...
-                                            num_dif_programs);
+num_programs_subset = [find(programs_range==100), ...
+                        find(programs_range==500), ...
+                        find(programs_range==1000)];
 
 %% Testing - Varying machines proportion
 results = compare_algorithms(algs, algs_args, gen_method, ...
@@ -259,11 +258,8 @@ construct_results_table(results, alg_names, alg_subset, ...
 % algs_args = all_algs_args(alg_subset);
 % programs_range = programs_ranges(3).program_range;
 % 
-% num_lines = 6;
-% num_algs = length(algs);
-% num_dif_programs = length(programs_range);
-% num_programs_subset = choose_subset_to_plot(num_lines, num_algs,...
-%                                             num_dif_programs);
+% num_programs_subset = [find(programs_range==100), ...
+%                         find(programs_range==1000)];
 % 
 % %% Testing - Varying machines proportion
 % results = compare_algorithms(algs, algs_args, gen_method, ...

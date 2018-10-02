@@ -40,32 +40,59 @@ function analyse_varying_n(results, alg_subset, num_programs_subset, ...
     
     %Information to format the axis
     
-    y_axises = ["Log_{10} Average Time",  "Average Ratio to Initiation",...
-                                        "Average Ratio to Lower Bound"];
+    y_axises = ["Log_{10} Average Time",...
+                "Average Ratio to Initiation",...
+                "Average Ratio to Lower Bound",...
+                "Log_{10} Average Time"];
     x_axis = "Number of Jobs";
     %Construct the legend
     legend_entries = alg_names(alg_subset);
     
-    for i = 1:3
+    for i = 1:4
         %Clears the current axis
         clf('reset')
+        if i == 4
+            %duplicate the legend to store lines of best fit
+            legend_entries = repelem(legend_entries,1,2);
+        end
         %Sets the plot to store all new information
         hold on;
         for a_i = alg_subset
-            data = subset(a_i,:,1,i);
-            vector = data(:);
-            if i == 1
+            if i<4
+                data = subset(a_i,:,1,i);
+                vector = data(:);
+                if i == 1
+                    vector = log10(vector);
+                end
+                plot(programs_range,vector);
+            else
+                %log log graph with line of best fit
+                data = subset(a_i,:,1,1);
+                vector = data(:);
                 vector = log10(vector);
+                l= polyfit(log10(programs_range),vector',1);
+                lbf = polyval(l,log10(programs_range));
+                plot(log10(programs_range), vector);
+                plot(log10(programs_range), lbf,"--")
+                
+                desc_string = sprintf("logTime = %.2f + %.2f logJobs",l(2),l(1))
+                
+                legend_entries(2*a_i) = desc_string;
             end
-            plot(programs_range,vector);
         end
+        
         title("Machine Proportion = "+machines_proportion);
-        xlabel(x_axis) 
-        ylabel(y_axises(i))        
         legend('off');
         legend(legend_entries,'Location','best')
         legend('show');
+        ylabel(y_axises(i)) 
         
+        if i<4
+            xlabel(x_axis)
+        else
+            xlabel("Log_{10} Number of Programs")
+        end
+
         if save_path ~= ""
             %Save to path
             saveas(gcf,save_path+save_name+"n"+string(i)+'.png')
