@@ -1,13 +1,13 @@
 %% runscript.m
 % A script which generates instances, and solves the problem using both:
-    % GLS (Greedy Local Search)
-    % VDS (Variable Depth Search)
+% GLS (Greedy Local Search)
+% VDS (Variable Depth Search)
 
 % Clear environment
 clear;
 clc;
 % Add everything in the runscript.m directory
-addpath(genpath('.\')); 
+addpath(genpath('.\'));
 % Remove 'not_in_use' folder from path. This only has archived code
 rmpath('Not_in_use');
 
@@ -25,10 +25,10 @@ k2_opt = false;
 
 
 %% Initialisation algorithm:
-    % 'simple' = Costliest job allocated to machine with most 'capacity'
-        % relative to most utilised machine at the time
-    % 'random' = Random allocation (random number generated for machine)
-    % 'naive' = All jobs placed into machine 1
+% 'simple' = Costliest job allocated to machine with most 'capacity'
+% relative to most utilised machine at the time
+% 'random' = Random allocation (random number generated for machine)
+% 'naive' = All jobs placed into machine 1
 init_method = "simple";
 
 %% Makespan solver
@@ -47,28 +47,28 @@ elseif strcmp(method,'Genetic')
     % Note that the third column output is meaningless - i've just filled
     % it with 0s to keep in line with the outputs from GLS and VDS.
     
-%     profile on
+    profile on
     
     [outputMakespan, time_taken, init_makespan, outputArray, ...
         best_gen_num, generations, diags_array]...
-                             = genetic_alg_v2(a, 3000, 0.1, ... %inits
-                             "rndom_mach_chg", floor(0.1*size(a,2)-1), ... %inits
-                             "neg_exp", 5, "cutover_split", ... %crossover
-                             "neg_exp", "rndom_mach_chg", floor(size(a,2)-1*0.2), ... %mutation
-                             "top_and_bottom", ... %culling
-                             10, 100); %termination
-                                
-                                
-%     profile off
-%     profile viewer
+        = genetic_alg_v2(a, 2000, 0.1, ... %inits
+        "rndom_mach_chg", floor(0.1*(size(a,2)-1)), ... %inits
+        "neg_exp", 5, "rndm_split", ... %crossover
+        "neg_exp", "rndom_mach_chg", floor(0.3*(size(a,2)-1)), ... %mutation
+        "top_and_bottom", ... %culling
+        10, 100); %termination
+    
+    
+    profile off
+    profile viewer
 end
 
 outputMakespan
 time_taken
 
 % diags
-    % Columns: Generation#, Best makespan in gen, Best makespan,
-        % AvgFit, NumParentsSurvive, NumChildrenSurvive
+% Columns: Generation#, Best makespan in gen, Best makespan,
+% AvgFit, NumParentsSurvive, NumChildrenSurvive
 
 % plots
 plot(diags_array(:,1),diags_array(:,2), ... % Best makespan in gen
@@ -98,3 +98,36 @@ title(['Makespan: ' num2str(outputMakespan)])
 xlabel('Generation #') % x-axis label
 ylabel('Survival %') % y-axis label
 legend(p, {'parent surv','child surv'}, 'Location','Best')
+
+
+%% Batch experiments
+results = [];
+diagnostics = {};
+machine_prop = 0.4;
+for n = 100:100:500
+    m = n*machine_prop;
+    for j = 1:10
+        a = generate_ms_instances(n, m, hard);
+        [outputMakespan, time_taken, init_makespan, outputArray, ...
+            best_gen_num, generations, diags_array]...
+            = genetic_alg_v2(a, 2000, 0.1, ... %inits
+            "rndom_mach_chg", floor(0.1*(size(a,2)-1)), ... %inits
+            "neg_exp", 5, "rndm_split", ... %crossover
+            "neg_exp", "rndom_mach_chg", floor(0.3*(size(a,2)-1)), ... %mutation
+            "top_and_bottom", ... %culling
+            10, 100); %termination
+        
+        [outputMakespan_gls, time_taken_gls, init_makespan_gls, outputArray, num_exchanges] = ...
+            gls(a, k, 'simple', k2_opt);
+        fprintf("gls: %d\n", outputMakespan_gls)
+        
+        [outputMakespan_vds, time_taken_vds, init_makespan_vds, outputArray, num_exchanges, ...
+            num_transformations] = vds(a, k, 'simple', k2_opt);
+        fprintf("vds: %d\n", outputMakespan_vds)
+        
+        results = [results; [outputMakespan, init_makespan, time_taken, ...
+            best_gen_num, generations, n, m,...
+            outputMakespan_gls, init_makespan_gls, time_taken_gls, ...
+            outputMakespan_vds, init_makespan_vds, time_taken_vds]];
+    end
+end

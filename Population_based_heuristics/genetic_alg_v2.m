@@ -2,42 +2,90 @@
 % uses a genetic algorithm population heuristic method for solving the
 % makespan problem
 
+%% Methods:
+% ~~Fitness calculation: (used to select crossover parents, mutation
+% candidates)
+    % "minMaxLinear": scale makespans to 1 (min makespan) or 0 
+        % (max makespan), and scale to a probability distribution over all 
+        % candidate individuals.
+    % "neg_exp": exp(-b * makespan)
+% ~~Mutation operations: operation which mutates based on an input fitness 
+% array of all the individuals
+    % "pair_swap": swap machines allocated to two randomly selected jobs. 
+        % Jobs must be from different machines.
+    % "rndom_mach_chg": take k different jobs, reassign them to new
+        % machines.
+% ~~Crossover operations: to determine how the genes from two parents are
+% carried over/split into the children
+    % "cutover_split" = simple cutover of two parents at one point (ie. all
+        % jobs up until that point from one parent, all jobs beyond from
+        % the other). Number of jobs from each parent is weighted by
+        % makespan (lower makespan, more elements get cutover).
+    % "rndm_split" = cutover of two parents at many randomly selected
+        % points, but still such that the 'stronger' parent still only gets 
+        % up to their alloted number of job assignments to pass on to their
+        % children.
+% ~~Population culling operations: determines how to scale down the 
+% population to carry on to the next generation
+    % "top": carries the top n (by makespan) individuals over to the next
+        % generation
+    % "top_and_bottom": fills x% of the required number by the top (by 
+        % makespan) individuals over, with the remaining (1-x)% required
+        % made up by the bottom/worst individuals.
+
 %% Inputs:
+% ~~Initialisation:
 	% input_array: Array of jobs, number of machines
 	% init_pop_size: size of population to initialise
-	% simple_prop: proportion of init_pop_size to be from the simple initialisation algorithm. (1-simple_prop) will be from a random initialisation
-    % init_mutate_method: a mutation method used to add randomness to the
-    % simple generated initialised instances
+	% simple_prop: proportion of init_pop_size to be from the simple 
+        % initialisation algorithm. (1-simple_prop) will be from a random 
+        % initialisation
+    % init_mutate_method: mutation operation used to add randomness to the
+        % simple generated initialised instances
     % init_mutate_num_shuffles: number of elements to grab and reassign
-    % machines to (at initiation)
-	% parent_selection: function used to convert fitness function into parent_select probabilities.
-		% "minMaxLinear" = scale makespans to 1 (min makespan) or 0 (max makespan), and scale to a probability distribution over all candidate individuals.
-	% parent_ratio: ratio of parents to init_pop_size for crossover. Eg: 2 means we pair up 2x init_pop_size parents together, resulting in init_pop_size number of children being created from crossover.
-	% crossover_method: Method for crossover and children creation.
-		% "cutover_split" = simple cutover of two parents from one point of each individual, weighted by makespan (lower makespan, more elements get cutover)
-	% mutation_select_method: function used to convert fitness function into a probability of selecting that individual for mutation
-		% "minMaxLinear" = maps each individuals' makespan to a probability between 0 (max makespan) and 1 (min makespan)
-	% mutate_method: method used to mutate the genes of the individuals selected for mutation
-		% "pair_swap": swap machines allocated to two randomly selected jobs. Jobs must be from different machines.
+        % machines to (at initiation) - unused by 'pair_swap' mutation
+% ~~Parent selection and crossover:        
+	% parent_selection: fitness operation to generate probabilities of 
+        % parent selection
+	% parent_ratio: ratio of parents to init_pop_size for crossover. 
+        % Eg: 2 means we pair up 2x init_pop_size parents together, 
+        % resulting in init_pop_size number of children being created from 
+        % crossover.
+	% crossover_method: Crossover operation to create children.
+% ~~Mutation:
+	% mutation_select_method: fitness operation used to generate
+        % probabilities of mutating any given individual
+	% mutate_method: mutation operation performed on selected individuals
     % mutate_num_shuffles: number of elements to grab and reassign
-    % machines to
-	% popn_cull: Method for culling enlarged population (parents and children, post-mutation) back to init_pop_size for next generation
-		% "top": Takes top init_pop_size, ranked by makespan
-	% num_gen_no_improve: # of generations without improvement as termination condition.
-    % max_gens_allowed: # of generations allowed maximum.
+        % machines to (at initiation) - unused by 'pair_swap' mutation 
+% ~~Population culling:        
+	% popn_cull: The population culling operation to reduce population back
+        % to init_pop_size for next generation
+% ~~Termination conditions:
+	% num_gen_no_improve: max # of generations without improvement
+    % max_gens_allowed: max # of generations allowed
 %% Outputs
-    % makespan:
+    % best_makespan:
         % max, across all machines, of sum of jobs for a given machines
     % time_taken:
         % the time taken for the algorithm to run to completion
     % init_makespan:
         % the makespan after initiation
     % best_output: best output of machine allocations to a sorted input job
-    % vector
+        % vector
     % best_gen_num: generation which yielded the best output
     % generation_counter: how many generations used in the process before
-    % it terminated
-% To do: include different /flexible criteria for termination
+        % it terminated
+    % diags_array: array of information which tracks the following metrics
+        % throughout the process:
+            % Generation number
+            % Best makespan in that generation
+            % Best makespan overall
+            % Average fitness of that generation
+            % Minimum fitness of that generation
+            % Maximum fitness of that generation
+            % Number of parents which survived in that generation
+            % Number of children which survived in that generation
 
 function [best_makespan, time_taken, init_makespan, best_output,...
     best_gen_num, generation_counter, diags_array] = ...
@@ -74,7 +122,7 @@ function [best_makespan, time_taken, init_makespan, best_output,...
     start_gen_makespan = inf;
     [new_gen_makespan,indiv_indx] = min(makespan_mat);
     
-    %Record makespan after Initialisation
+    % Record makespan after Initialisation
     init_makespan = new_gen_makespan;
 
     % Initialise generation counter
@@ -96,7 +144,8 @@ function [best_makespan, time_taken, init_makespan, best_output,...
     diags_array = [gen_result];
         
     
-% really arbitrary criteria demanding improvement every n generations
+    % Termination criteria: # generations with no improvement, max number
+    % of generations
     while no_chg_generations <= num_gen_no_improve && ...
             generation_counter <= max_gens_allowed
 
@@ -113,6 +162,17 @@ function [best_makespan, time_taken, init_makespan, best_output,...
             parent_ratio, init_pop_size);
         num_children = size(parent_mat,1);
 
+        % Give some ordering to parent machine numbers so they are more
+        % meaningful in crossover, rather than having 2 'identical'
+        % solutions (but with different arbitrary machine allocations)
+        % crossing over into worse children. Re-assign machine numbers from
+        % 1 (smallest mspan) to num_machine (largest mspan)
+        
+%         % Note: doubtful whether this actually helps
+%         [pop_mat, machine_cost_mat] = ...
+%             sort_population_mspan(pop_mat, machine_cost_mat, ...
+%             num_machines, num_jobs, init_pop_size); 
+        
         % Crossover
         crossover_children = zeros(num_children, num_jobs);
         for i = 1:num_children 
@@ -123,8 +183,12 @@ function [best_makespan, time_taken, init_makespan, best_output,...
 
             if crossover_method == "cutover_split"
                 crossover_children(i,:) = ...
-                c_over_split(parent_pair, parent_indiv, parent_fitness, ...
+                    c_over_split(parent_pair, parent_indiv, parent_fitness, ...
                     num_jobs);
+            elseif crossover_method == "rndm_split"
+                crossover_children(i,:) = ...
+                    c_over_rndm_split(parent_pair, parent_indiv, ...
+                    parent_fitness, num_jobs);
             end
         end
 
@@ -167,24 +231,10 @@ function [best_makespan, time_taken, init_makespan, best_output,...
         indivs_to_mutate = find(random_numbers <= prob_mutation_select)';
 
         % Mutate
-        if mutate_method == "pair_swap"
-            [combined_pop_mat, combined_machine_cost_mat] = ...
-                mutate_shuffle(indivs_to_mutate, combined_pop_mat, ...
-                combined_machine_cost_mat, num_machines, num_jobs, ...
-                jobs_array_aug, mutate_method);
-        elseif mutate_method == "rndom_mach_chg"
-            % new function to handle mutation with random machine change.
-            % This needs a bit of genericising.
-            % Mutation takes: a mutation operator, and a method to
-            % calculate new costs based off that mutation.
-            % Mutation function is a wrapper to feed in the elements which
-            % have been chosen for mutation.
-            
-            [combined_pop_mat, combined_machine_cost_mat] = ...
-                mutate_shuffle(indivs_to_mutate, combined_pop_mat, ...
-                combined_machine_cost_mat, num_machines, num_jobs, ...
-                jobs_array_aug, mutate_method, mutate_num_shuffles);
-        end
+        [combined_pop_mat, combined_machine_cost_mat] = ...
+            mutate_population(indivs_to_mutate, combined_pop_mat, ...
+            combined_machine_cost_mat, num_machines, num_jobs, ...
+            jobs_array_aug, mutate_method, mutate_num_shuffles);
 
         combined_makespan_mat = max(combined_machine_cost_mat,[],2);
 
@@ -195,7 +245,7 @@ function [best_makespan, time_taken, init_makespan, best_output,...
         elseif popn_cull == "top_and_bottom"
             indivs_to_keep = cull_top_bottom_n(combined_pop_mat, combined_makespan_mat, ...
                 init_pop_size, 0.9);
-            % 0.8 is a parameter which states that the top 80% of the new
+            % Last number is a parameter which states that the top 80% of the new
             % pop'n should be strictly by makespan, the remaining 20% are
             % chosen from the worst individuals.
         end
@@ -207,7 +257,6 @@ function [best_makespan, time_taken, init_makespan, best_output,...
 
         generation_counter = generation_counter + 1;
 
-        % If we get > 10 generations with no change, stop.
         if (new_gen_makespan - best_generation{3}) >= 0
             no_chg_generations = no_chg_generations + 1;
         elseif (new_gen_makespan - best_generation{3}) < 0
@@ -215,7 +264,7 @@ function [best_makespan, time_taken, init_makespan, best_output,...
             best_generation = {generation_counter, pop_mat(indiv_indx,:), new_gen_makespan};
         end
         
-        %Record new best if encountered
+        % Record new best if encountered
         if best_generation{3} < best_makespan
             best_makespan = best_generation{3};
             best_sol = best_generation{2};
@@ -256,7 +305,5 @@ function [best_makespan, time_taken, init_makespan, best_output,...
     best_output(:,3) = zeros(num_jobs,1); % third column is just arbitrary as a
     % placeholder
     
-    %best_makespan = best_generation{3};
-    %best_gen_num = best_generation{1};
     time_taken = toc(start_time);
 end

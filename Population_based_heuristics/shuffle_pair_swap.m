@@ -60,7 +60,9 @@ if nargin == 3
     return
 end
 
-costs_shuffled(1) = jobs_array_aug(j1);
-costs_shuffled(2) = jobs_array_aug(j2);
+% Format output to be consistent with other mutation operations
+machines_shuffled(2,:) = [machines_shuffled(2), machines_shuffled(1)];
+
+costs_shuffled = [jobs_array_aug(j1); jobs_array_aug(j2)];
 
 end

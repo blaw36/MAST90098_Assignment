@@ -16,23 +16,22 @@ function [indiv_array, costs_shuffled, machines_shuffled] = ...
     shuffle_rndom_mach_chg(indiv_array, num_machines, num_jobs, ...
     k, jobs_array_aug)
     
-    % Pick k elements
-    jobs_shuffled = randi(num_jobs,1,k);
+    % Pick k distinct jobs
+%     jobs_shuffled = randi(num_jobs,1,k);
+    jobs_shuffled = randperm(num_jobs,k); % without replacement
     
     % Log current machines
     current_assign = indiv_array(jobs_shuffled);
     
     % Reassign machines make sure each is assigned to a new machine
-    new_assign = zeros(1,k);
-    for i = 1:k
-        new_assign(i) = randi(num_machines);
-        while new_assign(i) == current_assign(i)
-            % continue trying until a new machine generated
-            new_assign(i) = randi(num_machines);
-        end
-        % Make the change
-        indiv_array(jobs_shuffled(i)) = new_assign(i);
+    new_assign = randi(num_machines,1,k);
+    matches = find(new_assign == current_assign);
+    while size(matches,2) > 0
+        new_assign(matches) = randi(num_machines,1,size(matches,2));
+        matches = find(new_assign == current_assign);
     end
+    % Make the change
+    indiv_array(jobs_shuffled) = new_assign;
     
     % Log the changes
     machines_shuffled = [current_assign', new_assign'];
