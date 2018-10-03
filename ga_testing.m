@@ -47,19 +47,20 @@ elseif strcmp(method,'Genetic')
     % Note that the third column output is meaningless - i've just filled
     % it with 0s to keep in line with the outputs from GLS and VDS.
     
-    profile on
+%     profile on
     
     [outputMakespan, time_taken, init_makespan, outputArray, ...
         best_gen_num, generations, diags_array]...
-                             = genetic_alg_v2(a, 3000, 0.1, "rndom_mach_chg", ...
-                                    "minMaxLinear", 5, "cutover_split", ...
-                                    "minMaxLinear", "rndom_mach_chg", ...
-                                    "top", ...
-                                    100);
+                             = genetic_alg_v2(a, 3000, 0.1, ... %inits
+                             "rndom_mach_chg", floor(0.1*size(a,2)-1), ... %inits
+                             "neg_exp", 5, "cutover_split", ... %crossover
+                             "neg_exp", "rndom_mach_chg", floor(size(a,2)-1*0.2), ... %mutation
+                             "top_and_bottom", ... %culling
+                             10, 100); %termination
                                 
                                 
-    profile off
-    profile viewer
+%     profile off
+%     profile viewer
 end
 
 outputMakespan
@@ -79,10 +80,19 @@ xlabel('Generation #') % x-axis label
 ylabel('Job cost') % y-axis label
 legend('Best makespan in gen','Best makespan overall','Avg makespan')
 
+% min and max m/span
+plot(diags_array(:,1),diags_array(:,5), ... % Best makespan overall
+    diags_array(:,1),diags_array(:,6) ... % Avg makespan
+    )
+title(['Makespan: ' num2str(outputMakespan)])
+xlabel('Generation #') % x-axis label
+ylabel('Job cost') % y-axis label
+legend('Min makespan in gen','Max makespan in gen')
+
 % parents survived vs children survived
 survival_pcts = [diags_array(:,1), ...
-    diags_array(:,5)./(diags_array(:,5)+diags_array(:,6)), ...
-    diags_array(:,6)./(diags_array(:,5)+diags_array(:,6))];
+    diags_array(:,7)./(diags_array(:,7)+diags_array(:,8)), ...
+    diags_array(:,8)./(diags_array(:,7)+diags_array(:,8))];
 p = bar(survival_pcts(:,1), survival_pcts(:,2:3), 'stacked')
 title(['Makespan: ' num2str(outputMakespan)])
 xlabel('Generation #') % x-axis label

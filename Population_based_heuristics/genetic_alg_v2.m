@@ -8,18 +8,23 @@
 	% simple_prop: proportion of init_pop_size to be from the simple initialisation algorithm. (1-simple_prop) will be from a random initialisation
     % init_mutate_method: a mutation method used to add randomness to the
     % simple generated initialised instances
+    % init_mutate_num_shuffles: number of elements to grab and reassign
+    % machines to (at initiation)
 	% parent_selection: function used to convert fitness function into parent_select probabilities.
-		% "minMaxLinear" = scale makespans to 1 (min makespan) or 0 (max makespan), and scale to a probability distribution over all candidate genes.
+		% "minMaxLinear" = scale makespans to 1 (min makespan) or 0 (max makespan), and scale to a probability distribution over all candidate individuals.
 	% parent_ratio: ratio of parents to init_pop_size for crossover. Eg: 2 means we pair up 2x init_pop_size parents together, resulting in init_pop_size number of children being created from crossover.
 	% crossover_method: Method for crossover and children creation.
 		% "cutover_split" = simple cutover of two parents from one point of each individual, weighted by makespan (lower makespan, more elements get cutover)
 	% mutation_select_method: function used to convert fitness function into a probability of selecting that individual for mutation
-		% "minMaxLinear" = maps each genes' makespan to a probability between 0 (max makespan) and 1 (min makespan)
-	% mutate_method: method used to mutate the genes selected for mutation
+		% "minMaxLinear" = maps each individuals' makespan to a probability between 0 (max makespan) and 1 (min makespan)
+	% mutate_method: method used to mutate the genes of the individuals selected for mutation
 		% "pair_swap": swap machines allocated to two randomly selected jobs. Jobs must be from different machines.
+    % mutate_num_shuffles: number of elements to grab and reassign
+    % machines to
 	% popn_cull: Method for culling enlarged population (parents and children, post-mutation) back to init_pop_size for next generation
 		% "top": Takes top init_pop_size, ranked by makespan
-	% termination_criteria: # of generations without improvement as termination condition.
+	% num_gen_no_improve: # of generations without improvement as termination condition.
+    % max_gens_allowed: # of generations allowed maximum.
 %% Outputs
     % makespan:
         % max, across all machines, of sum of jobs for a given machines
@@ -36,12 +41,12 @@
 
 function [best_makespan, time_taken, init_makespan, best_output,...
     best_gen_num, generation_counter, diags_array] = ...
-            genetic_alg_v2(input_array, init_pop_size, simple_prop, ...
-            init_mutate_method, ...
-            parent_selection, parent_ratio, crossover_method, ...
-            mutation_select_method, mutate_method, ...
-            popn_cull, ...
-            termination_criteria)
+            genetic_alg_v2(input_array, init_pop_size, simple_prop, ... %inits
+            init_mutate_method, init_mutate_num_shuffles, ... %inits
+            parent_selection, parent_ratio, crossover_method, ... %crossover
+            mutation_select_method, mutate_method, mutate_num_shuffles, ... %mutation
+            popn_cull, ... %culling
+            num_gen_no_improve, max_gens_allowed) %termination
 
     start_time = tic;
 
@@ -54,9 +59,10 @@ function [best_makespan, time_taken, init_makespan, best_output,...
     % Generate initial population
     % Each row corresponds to an individual, each column corresponds to the machine
     % allocated to that job (job order same as in input_array_aug, for all
-    % genes)
+    % individuals)
     [pop_mat, num_jobs, num_machines, jobs_array_aug] = init_mix_shuff_rand(...
-        input_array_aug, init_pop_size, simple_prop, init_mutate_method);
+        input_array_aug, init_pop_size, simple_prop,...
+        init_mutate_method, init_mutate_num_shuffles);
 
     % Calculate cost per machine for each individual, as well as makespan
     machine_cost_mat = calc_machine_costs(jobs_array_aug, pop_mat, ...
@@ -66,7 +72,7 @@ function [best_makespan, time_taken, init_makespan, best_output,...
     % Begin iterations
     best_makespan = inf;
     start_gen_makespan = inf;
-    [new_gen_makespan,gene_indx] = min(makespan_mat);
+    [new_gen_makespan,indiv_indx] = min(makespan_mat);
     
     %Record makespan after Initialisation
     init_makespan = new_gen_makespan;
@@ -77,26 +83,30 @@ function [best_makespan, time_taken, init_makespan, best_output,...
 
     % Initialise best generation heuristics
     best_generation = {};
-    best_generation = {generation_counter, pop_mat(gene_indx,:), new_gen_makespan};
+    best_generation = {generation_counter, pop_mat(indiv_indx,:), new_gen_makespan};
 
     % Initialise diagnostics array
-    % Columns: Generation#, Best makespan in gen, Best makespan,
-        % AvgFit, NumParentsSurvive, NumChildrenSurvive
+    % Add to diagnostics table
+        % Columns: Generation#, Best makespan in gen, Best makespan,
+        % AvgFit, MinFit, MaxFit NumParentsSurvive, NumChildrenSurvive
     gen_result = [generation_counter, new_gen_makespan, new_gen_makespan, ...
-        round(mean(makespan_mat)), init_pop_size, 0];
+        round(mean(makespan_mat)), ...
+        round(min(makespan_mat)), round(max(makespan_mat)), ...
+        init_pop_size, 0];
     diags_array = [gen_result];
         
     
 % really arbitrary criteria demanding improvement every n generations
-    while no_chg_generations <= termination_criteria
+    while no_chg_generations <= num_gen_no_improve && ...
+            generation_counter <= max_gens_allowed
 
         start_gen_makespan = best_generation{3};
 
         if parent_selection == "minMaxLinear"
-            prob_parent_select = fit_to_prob_minmaxLinear(makespan_mat);
+            prob_parent_select = fitness_minmaxLinear(makespan_mat);
+        elseif parent_selection == "neg_exp"
+            prob_parent_select = fitness_negexp(makespan_mat);
         end
-
-%         cumul_prob_parent = cumsum(prob_parent_select);
 
         % Generate parent pairings for crossover
         parent_mat = generate_parents(prob_parent_select, ...
@@ -108,12 +118,12 @@ function [best_makespan, time_taken, init_makespan, best_output,...
         for i = 1:num_children 
             % Can we do this in batch?
             parent_pair = parent_mat(i,:);
-            parent_genes = pop_mat(parent_pair,:);
+            parent_indiv = pop_mat(parent_pair,:);
             parent_fitness = makespan_mat(parent_pair,:);
 
             if crossover_method == "cutover_split"
                 crossover_children(i,:) = ...
-                c_over_split(parent_pair, parent_genes, parent_fitness, ...
+                c_over_split(parent_pair, parent_indiv, parent_fitness, ...
                     num_jobs);
             end
         end
@@ -137,15 +147,29 @@ function [best_makespan, time_taken, init_makespan, best_output,...
 
         % Randomly select elements for mutation
         if mutation_select_method == "minMaxLinear"
-            prob_mutation_select = fit_to_prob_minmaxLinear(combined_makespan_mat);
+            prob_mutation_select = fitness_minmaxLinear(...
+                combined_makespan_mat, true);
+        elseif parent_selection == "neg_exp"
+            prob_mutation_select = fitness_negexp(...
+                combined_makespan_mat, true);
         end
+        
+        % Convert to between 0 and 1
+        % The problem here is the min gets allocated 0, and the max gets
+        % allocated 1
+        min_prob = min(prob_mutation_select);
+        max_prob = max(prob_mutation_select);
+        prob_mutation_select = ...
+            (prob_mutation_select - min_prob)./...
+            (max_prob - min_prob );
+        
         random_numbers = rand(size(combined_makespan_mat,1),1);
-        genes_to_mutate = find(random_numbers <= prob_mutation_select)';
+        indivs_to_mutate = find(random_numbers <= prob_mutation_select)';
 
         % Mutate
         if mutate_method == "pair_swap"
             [combined_pop_mat, combined_machine_cost_mat] = ...
-                mutate_shuffle(genes_to_mutate, combined_pop_mat, ...
+                mutate_shuffle(indivs_to_mutate, combined_pop_mat, ...
                 combined_machine_cost_mat, num_machines, num_jobs, ...
                 jobs_array_aug, mutate_method);
         elseif mutate_method == "rndom_mach_chg"
@@ -155,20 +179,31 @@ function [best_makespan, time_taken, init_makespan, best_output,...
             % calculate new costs based off that mutation.
             % Mutation function is a wrapper to feed in the elements which
             % have been chosen for mutation.
+            
+            [combined_pop_mat, combined_machine_cost_mat] = ...
+                mutate_shuffle(indivs_to_mutate, combined_pop_mat, ...
+                combined_machine_cost_mat, num_machines, num_jobs, ...
+                jobs_array_aug, mutate_method, mutate_num_shuffles);
         end
 
         combined_makespan_mat = max(combined_machine_cost_mat,[],2);
 
         % Population culling
         if popn_cull == "top"
-            genes_to_keep = cull_top_n(combined_pop_mat, combined_makespan_mat, ...
+            indivs_to_keep = cull_top_n(combined_pop_mat, combined_makespan_mat, ...
                 init_pop_size);
+        elseif popn_cull == "top_and_bottom"
+            indivs_to_keep = cull_top_bottom_n(combined_pop_mat, combined_makespan_mat, ...
+                init_pop_size, 0.9);
+            % 0.8 is a parameter which states that the top 80% of the new
+            % pop'n should be strictly by makespan, the remaining 20% are
+            % chosen from the worst individuals.
         end
 
-        pop_mat = combined_pop_mat(genes_to_keep, :);
-        makespan_mat = combined_makespan_mat(genes_to_keep, :);
-        parent_child_indicator = parent_child_indicator(genes_to_keep, :);
-        [new_gen_makespan,gene_indx] = min(makespan_mat);
+        pop_mat = combined_pop_mat(indivs_to_keep, :);
+        makespan_mat = combined_makespan_mat(indivs_to_keep, :);
+        parent_child_indicator = parent_child_indicator(indivs_to_keep, :);
+        [new_gen_makespan,indiv_indx] = min(makespan_mat);
 
         generation_counter = generation_counter + 1;
 
@@ -177,7 +212,7 @@ function [best_makespan, time_taken, init_makespan, best_output,...
             no_chg_generations = no_chg_generations + 1;
         elseif (new_gen_makespan - best_generation{3}) < 0
             no_chg_generations = 0;
-            best_generation = {generation_counter, pop_mat(gene_indx,:), new_gen_makespan};
+            best_generation = {generation_counter, pop_mat(indiv_indx,:), new_gen_makespan};
         end
         
         %Record new best if encountered
@@ -193,6 +228,8 @@ function [best_makespan, time_taken, init_makespan, best_output,...
 %         fprintf("Best generation makespan: %d \n", best_generation{3});
         fprintf("Best makespan: %d \n", best_makespan);
         fprintf("Avg fitness: %d \n", round(mean(makespan_mat)));
+        fprintf("Min fitness: %d \n", round(min(makespan_mat)));
+        fprintf("Max fitness: %d \n", round(max(makespan_mat)));
         fprintf("Num gens no improvement: %d \n", no_chg_generations);
         fprintf("Num parents survived: %d \n", ...
             sum(parent_child_indicator == 1));
@@ -201,9 +238,11 @@ function [best_makespan, time_taken, init_makespan, best_output,...
         
         % Add to diagnostics table
         % Columns: Generation#, Best makespan in gen, Best makespan,
-        % AvgFit, NumParentsSurvive, NumChildrenSurvive
+        % AvgFit, MinFit, MaxFit NumParentsSurvive, NumChildrenSurvive
         gen_result = [generation_counter, new_gen_makespan, best_makespan, ...
             round(mean(makespan_mat)), ...
+            round(min(makespan_mat)), ...
+            round(max(makespan_mat)), ...
             sum(parent_child_indicator == 1), ...
             sum(parent_child_indicator == 0)];
         diags_array = [diags_array; gen_result];

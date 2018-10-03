@@ -3,7 +3,7 @@
 
 function [pop_mat, num_jobs, num_machines, jobs_array_aug] = ...
     init_mix_shuff_rand(input_array_aug, init_pop_size, shuff_prop, ...
-    shuff_method)
+    shuff_method,num_shuffles)
 
 shuffled_simples_indiv = round(shuff_prop*init_pop_size);
 random_indiv = init_pop_size - shuffled_simples_indiv;
@@ -28,7 +28,7 @@ for i = 1:shuffled_simples_indiv
             num_jobs);
     elseif shuff_method == "rndom_mach_chg"
         indiv_array = shuffle_rndom_mach_chg(tmp(:,2)', num_machines, ...
-            num_jobs, floor(num_jobs*0.1));
+            num_jobs, num_shuffles);
     end
         
     simple_indiv_mat(i,:) = indiv_array ;

@@ -5,10 +5,10 @@
 
 
 
-function genes_to_keep = cull_top_n(pop_mat, makespan_mat, ...
+function indivs_to_keep = cull_top_n(pop_mat, makespan_mat, ...
     init_pop_size)
 
     [pop_sort, pop_sort_indx] = sortrows(makespan_mat);
-    genes_to_keep = pop_sort_indx(1:init_pop_size);
+    indivs_to_keep = pop_sort_indx(1:init_pop_size);
 
 end
