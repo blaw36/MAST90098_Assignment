@@ -1,4 +1,4 @@
-%% shuffle_elmts_pairs
+%% shuffle_pair_swap
 % pairwise at a time, for now
 % keep a log of:
     % the job cost of shuffled pair
@@ -7,13 +7,13 @@
 % See if we can input # of shuffles (run as a loop, how to efficiently keep
 % track of cost changes?)
 
-function [gene_array, costs_shuffled, machines_shuffled] = ...
-    shuffle_elmts_pairs(gene_array, num_machines, num_jobs, jobs_array_aug)
+function [indiv_array, costs_shuffled, machines_shuffled] = ...
+    shuffle_pair_swap(indiv_array, num_machines, num_jobs, jobs_array_aug)
 
 % Randomly select first job to shuffle
 % Grab first element
 j1 = randi(num_jobs,1,1);
-machines_shuffled(1) = gene_array(j1);
+machines_shuffled(1) = indiv_array(j1);
 
 % Select a different (non-empty) machine to the first job, and select a 
 % second job from there. First machine guaranteed to not be empty is it was
@@ -33,14 +33,14 @@ elseif length(remaining_machines) == 1
 %     do something else
 end
 
-m2_elements = find(gene_array == machines_shuffled(2));
+m2_elements = find(indiv_array == machines_shuffled(2));
 % Re-sample until one is found (lazy - fix this to use machine_costs array 
 % instead!) % If there are no other non-empty machine, need to shuffle into
 % an empty machine. Code that in
 while isempty(m2_elements)
     machines_shuffled(2) = remaining_machines( ...
         randi(remaining_machine_length));
-    m2_elements = find(gene_array == machines_shuffled(2));
+    m2_elements = find(indiv_array == machines_shuffled(2));
 end
 
 if length(m2_elements) == 1
@@ -51,8 +51,8 @@ else
 end
 
 % Do the swap
-gene_array(j2) = machines_shuffled(1);
-gene_array(j1) = machines_shuffled(2);
+indiv_array(j2) = machines_shuffled(1);
+indiv_array(j1) = machines_shuffled(2);
 
 if nargin == 3
     % if no jobs_array, don't return costs of shuffled (save some time)
