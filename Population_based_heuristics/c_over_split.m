@@ -2,7 +2,7 @@
 
 % basic crossover by cutting over at parent 1, and filling the rest with
 % parent 2.
-% Note that because each parent's gene consists of a sequence of machines
+% Note that because each parent consists of a sequence of machines
 % over a sorted array of jobs (at the start), the ith position in both
 % parents represents the machine they have allocated to the ith job, where
 % the ith job is the same for both.

@@ -10,8 +10,8 @@
 		% "minMaxLinear" = scale makespans to 1 (min makespan) or 0 (max makespan), and scale to a probability distribution over all candidate genes.
 	% parent_ratio: ratio of parents to init_pop_size for crossover. Eg: 2 means we pair up 2x init_pop_size parents together, resulting in init_pop_size number of children being created from crossover.
 	% crossover_method: Method for crossover and children creation.
-		% "cutover_split" = simple cutover of two parents at one point in the gene, weighted by makespan (lower makespan, more elements get cutover)
-	% mutation_select_method: function used to convert fitness function into a probability of selecting that gene for mutation
+		% "cutover_split" = simple cutover of two parents from one point of each individual, weighted by makespan (lower makespan, more elements get cutover)
+	% mutation_select_method: function used to convert fitness function into a probability of selecting that individual for mutation
 		% "minMaxLinear" = maps each genes' makespan to a probability between 0 (max makespan) and 1 (min makespan)
 	% mutate_method: method used to mutate the genes selected for mutation
 		% "shuffle": swap machines allocated to two randomly selected jobs. Jobs must be from different machines.
@@ -49,13 +49,13 @@ function [best_makespan, time_taken, init_makespan, best_output,...
         input_array(end)];
 
     % Generate initial population
-    % Each row corresponds to a gene, each column corresponds to the machine
+    % Each row corresponds to an individual, each column corresponds to the machine
     % allocated to that job (job order same as in input_array_aug, for all
     % genes)
     [pop_mat, num_jobs, num_machines, jobs_array_aug] = init_mix_shuff_rand(...
         input_array_aug, init_pop_size, simple_prop);
 
-    % Calculate cost per machine for each gene, as well as makespan
+    % Calculate cost per machine for each individual, as well as makespan
     machine_cost_mat = calc_machine_costs(jobs_array_aug, pop_mat, ...
         num_machines);
     makespan_mat = max(machine_cost_mat,[],2);
