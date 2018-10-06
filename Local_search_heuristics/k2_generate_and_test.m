@@ -31,7 +31,7 @@ function [best_neighbour, best_makespan] = k2_generate_and_test(...
  
     % Split work into batches for a number of workers
     [batches, num_workers, valid_orders, use_par] = ...
-                                construct_batches(L, M, k, num_machines);
+        construct_batches(L, M, k, num_machines,num_loaded, greedy_flag);
     
     if use_par == false
         % Just evaluate all of the batches sequentially (loop through each

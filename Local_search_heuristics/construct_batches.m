@@ -13,6 +13,8 @@
     % M: The number of (movable) programs in each machine
     % k: The size of the k-exchange
     % num_machines: The number of machines
+    % num_loaded: The number of loaded machines
+    % greedy_flag: A boolean flag indicating whether greedy or not
 %% Output:
     % batches: a list with the data required for each batch of machine 
         % orders to be processed
@@ -21,22 +23,33 @@
     % use_par: a flag indicating whether to use parallel or not
 %%
 function [batches, num_batches, valid_orders, use_par] = ...
-                                construct_batches(L, M, k, num_machines)
+        construct_batches(L, M, k, num_machines, num_loaded, greedy_flag)
     use_par = false;
     % See above
     BATCH_DIV_PARAM = 1*10^8;
     
-    % Pair each loaded machine with all other machines excluding self. Has
-    % size |L|*(m-1)
-    % Initiate outer column first to fix matrix size
-    valid_machines(:,2) = repelem(L, num_machines-1);
+    if ~greedy_flag
+        % Pair each loaded machine with all other machines excluding self.
+        % Has size |L|*(m-1)
+        % Initiate outer column first to fix matrix size
+        valid_machines(:,2) = repelem(L, num_machines-1);
 
-    % Generate all pairs, excluding L(i)
-    curr = 1;
-    for i = 1:length(L)
-        next = curr + num_machines - 2;
-        valid_machines(curr:next,1) = [1:(L(i)-1),(L(i)+1):num_machines]';
-        curr = next+1;       
+        % Generate all pairs, excluding L(i)
+        curr = 1;
+        for i = 1:length(L)
+            next = curr + num_machines - 2;
+            valid_machines(curr:next,1) = [1:(L(i)-1),(L(i)+1):num_machines]';
+            curr = next+1;       
+        end
+    else
+        %If greedy than only pair of machines that can result in an
+        %improvement of the makespan is a loaded and unloaded machine. For
+        %paths the loaded machine must be first (doesn't matter cycles, so
+        %just use the same arrangement)
+        num_unloaded = num_machines-num_loaded;
+        machines = 1:num_machines;
+        unloaded = machines(~ismember(machines,L));
+        orders = [repelem(L, num_unloaded)',repelem(unloaded,num_loaded)'];
     end
     
     % As the number of valid orders is not known ahead of time can't
@@ -51,23 +64,24 @@ function [batches, num_batches, valid_orders, use_par] = ...
     for c = 1:2
         cycle = logical(c-1);
         length_move = k-not(cycle);
-        
-        if cycle
-            % Set the loaded machine as fixed
-            orders = valid_machines;
-        else
-            % Generate all combos - as k=2 for this script, quick method to
-            % add in the machine combos, and the reverse
-            orders = [valid_machines;...
-                        valid_machines(:,2), valid_machines(:,1)];
+        if ~greedy_flag
+            if cycle
+                % Just return the valid_machines as all cycles between 2
+                % machines
+                orders = valid_machines;
+            else
+                % Generate the 2-perms of the machines for k==2
+                orders = [valid_machines;...
+                            valid_machines(:,2), valid_machines(:,1)];
+            end
         end
-
-        [new_valid_orders, num_new_valid] = generate_valid_orders(...
-            k, M, cycle, orders);
         
+        [new_valid_orders, num_new_valid] = generate_valid_orders(...
+                                                    k, M, cycle, orders);
+
         % V-stack new orders see init of valid_orders
         valid_orders = [valid_orders; new_valid_orders];
-
+        
         if num_new_valid == 0
             continue
         end

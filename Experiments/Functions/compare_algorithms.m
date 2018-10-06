@@ -36,11 +36,7 @@ if machines_proportion > 0
 end
 
 %Check Input
-if machines_proportion>0
-    if any(mod(programs_range, machines_proportion))
-        error("Make sure the programs range can be split by the proportion");
-    end
-else
+if machines_proportion<=0
     if any(mod(programs_range, machines_denom_iterator))
         error("Make sure the programs range is divisible by the denominator");
     end
