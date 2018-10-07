@@ -15,13 +15,13 @@ rmpath('Not_in_use');
 rng(10);
 
 %% Parameters
-n = 100; % # jobs
-m = 40; % # machines
+n = 50; % # jobs
+m = 20; % # machines
 hard = false;
 a = generate_ms_instances(n, m, hard); % Generate makespan input vector
 k = 2; % # of exchanges (k-exch)
 method = 'Genetic'; % 'VDS', 'GLS' or 'Genetic'
-k2_opt = false;
+k2_opt = true;
 
 
 %% Initialisation algorithm:
@@ -57,7 +57,11 @@ elseif strcmp(method,'Genetic')
 end
 
 outputMakespan
-%num_exchanges
+% Ratio vs Lower bound Makespan
+lower_bound = lower_bound_makespan(a);
+ratio_vs_lb = outputMakespan/lower_bound
+time_taken
+return
 
 %% Graphing and analysis
 % Sort the output for presentation
@@ -75,10 +79,6 @@ bar_plot = draw_bar_plot(sorted_output, m);
 title(['Makespan: ' num2str(outputMakespan)])
 xlabel('Machine #') % x-axis label
 ylabel('Job cost') % y-axis label
-
-% Ratio vs Lower bound Makespan
-lower_bound = lower_bound_makespan(a);
-ratio_vs_lb = outputMakespan/lower_bound
 
 %% Stress tests
 results = [];
