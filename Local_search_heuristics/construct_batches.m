@@ -42,10 +42,11 @@ function [batches, num_batches, valid_orders, use_par] = ...
             curr = next+1;       
         end
     else
-        %If greedy than only pair of machines that can result in an
-        %improvement of the makespan is a loaded and unloaded machine. For
-        %paths the loaded machine must be first (doesn't matter cycles, so
-        %just use the same arrangement)
+        % If greedy and as k==2 then the only pair of machines that can 
+        % result in an improvement of the makespan is a loaded and unloaded
+        % machine. For paths the loaded machine must be first of the two 
+        % (doesn't matter cycles, so just use the same arrangement), as 
+        % otherwise you would be increasing the load of the loaded machine.
         num_unloaded = num_machines-num_loaded;
         machines = 1:num_machines;
         unloaded = machines(~ismember(machines,L));
