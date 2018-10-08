@@ -14,18 +14,29 @@
 
 function [indiv_array, costs_shuffled, machines_shuffled] = ...
     geo_path_cycle_shuffle(indiv_array, num_machines, num_jobs, ...
-    k, jobs_array_aug)
+    k, jobs_array_aug, machine_cost_mat)
 
     cycle_prob = 0.75;
     stop_prob = 0.5;
     %tries to scale k to make this method more comparable to other
     %mutations
-    k = ceil(k*stop_prob-1*cycle_prob);
+    k = max([ceil(k*stop_prob-1*cycle_prob),1]);
+        
+%     % Pick k distinct initial jobs
+%     jobs = randperm(num_jobs,k); % without replacement
+%     % and log their current machines
+%     jobs_curr_machines = indiv_array(jobs);
     
-    % Pick k distinct initial jobs
-    jobs = randperm(num_jobs,k); % without replacement
-    % and log their current machines
-    jobs_curr_machines = indiv_array(jobs);
+    % Or Pick the k most costly machines
+    [sorted_costs,indices] = sort(machine_cost_mat,'descend');
+    jobs_curr_machines = indices(1:k);
+%     machine_cost_mat
+%     indiv_array
+
+    %Pick the first job for each of these machines
+    %https://au.mathworks.com/matlabcentral/answers/22926-finding-the-indices-of-the-elements-of-one-array-in-another
+    jobs = arrayfun(@(x)find(x == indiv_array,1), jobs_curr_machines);
+
     start_machines = jobs_curr_machines;
     %Record these jobs as being changed
     jobs_shuffled = [jobs];
@@ -36,12 +47,20 @@ function [indiv_array, costs_shuffled, machines_shuffled] = ...
     while still_changing > 0
         % Pick k distinct jobs
         next_jobs = randperm(num_jobs,still_changing); % without replacement
+        % Log their machines
+        jobs_next_machines = indiv_array(next_jobs);
+        
+        %Switch the jobs which are in the same machine
+        matches = find(jobs_curr_machines == jobs_next_machines);
+        while size(matches,2) > 0
+            next_jobs(matches) = randperm(num_jobs,size(matches,2));
+            jobs_next_machines(matches) = indiv_array(next_jobs(matches));
+            matches = find(jobs_curr_machines == jobs_next_machines);
+        end
+        
         %Record these jobs as being changed
         jobs_shuffled = [jobs_shuffled,next_jobs];
 
-        % Log their machines
-        jobs_next_machines = indiv_array(next_jobs);
-    
         % Assign the current jobs to the next machines
         indiv_array(jobs) = jobs_next_machines;
 
@@ -60,7 +79,7 @@ function [indiv_array, costs_shuffled, machines_shuffled] = ...
         
         if num_cycles>0
             %assign the next jobs to the starting machine for those cycles
-            ending_with_cycle_indices = (1+still_changing):(1+still_changing+num_cycles-1);
+            ending_with_cycle_indices = (1+still_changing):(still_changing+num_cycles);
             start_of_cycle = start_machines(ending_with_cycle_indices);
             end_of_cycle = indiv_array(ending_with_cycle_indices);
             indiv_array(ending_with_cycle_indices) = start_of_cycle;
@@ -70,7 +89,6 @@ function [indiv_array, costs_shuffled, machines_shuffled] = ...
                                  end_of_cycle', start_of_cycle'];
         end
 
-        
         % Increment the jobs and their machines
         jobs = next_jobs(1:still_changing);
         jobs_curr_machines = jobs_next_machines(1:still_changing);
