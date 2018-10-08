@@ -251,6 +251,9 @@ function [best_makespan, time_taken, init_makespan, best_output,...
         end
 
         pop_mat = combined_pop_mat(indivs_to_keep, :);
+        %machine_cost_mat = combined_machine_cost_mat(indivs_to_keep, :);
+        machine_cost_mat = calc_machine_costs(jobs_array_aug, pop_mat, ...
+                                                num_machines);
         makespan_mat = combined_makespan_mat(indivs_to_keep, :);
         parent_child_indicator = parent_child_indicator(indivs_to_keep, :);
         [new_gen_makespan,indiv_indx] = min(makespan_mat);
