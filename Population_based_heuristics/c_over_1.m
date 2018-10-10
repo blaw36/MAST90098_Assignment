@@ -10,6 +10,9 @@
 %
 % Eventually we will get to a state with several unassigned jobs remaining,
 % then just assign them with some sensible method (probably greedy)
+%
+% Uses fitness ratio to make it more likely to draw machines from fitter
+% parents.
 
 
 function child_array = c_over_1(parent_pair, parent_genes, ...
@@ -27,7 +30,11 @@ function child_array = c_over_1(parent_pair, parent_genes, ...
     parent_indices = [1,1];
     
     %Pick the most fit parent first
-    [~, current_parent] = max(parent_fitness); 
+    [~, current_parent] = max(parent_fitness);
+    %Measures proportion of fitness each parent carries
+    fitness_ratio = parent_fitness/sum(parent_fitness);
+    %Normalizes so can treat as prob
+    fitness_ratio = fitness_ratio/sum(fitness_ratio);
     
     while any(parent_indices <= num_machines)
         done = false;
@@ -50,28 +57,34 @@ function child_array = c_over_1(parent_pair, parent_genes, ...
             %Check if all these jobs in the parent machine are currently
             %un_assigned
             
-            % Commented out with %% was a failed attempt at speedup via
-            % ismembc2
+            % Commented out with %% and % % % were two failed attempts at
+            % speedups
             
 % %             found_in_parent_loc = ismembc2(parent_machine_jobs,un_assigned_jobs);
 % %             if all(found_in_parent_loc)
-            if all(ismembc(parent_machine_jobs, un_assigned_jobs))
+% % %             a = ismembc(un_assigned_jobs,parent_machine_jobs);
+%             if sum(a) == length(parent_machine_jobs)
+           if all(ismembc(parent_machine_jobs, un_assigned_jobs))
 %                 if so, assign those jobs and mark being done
                 done = true;
 % %                 un_assigned_jobs(found_in_parent_loc) = [];
                 un_assigned_jobs = un_assigned_jobs(...
                         ~ismembc(un_assigned_jobs,parent_machine_jobs));
+% % %                 un_assigned_jobs = un_assigned_jobs(~a);
                 child_array(parent_machine_jobs) = parent_machine;
                 child_machine_cost(parent_machine) = ...
                     parent_machine_cost(current_parent, parent_machine);
-            end
-            %TODO: Could use fitness here to increase the chance of drawing
-            %from the more fit parent
+           end
             parent_index = parent_index + 1;
         end
-        %Record current index and switch parent
+        %TODO: Could use fitness here to increase the chance of drawing
+        %from the more fit parent
+        %Record current index
         parent_indices(current_parent) = parent_index;
-        current_parent = 1 + mod(current_parent,2);               
+        %Switch parent if rand numb exceeds fitness ratio
+        if rand > fitness_ratio(current_parent)
+            current_parent = 1 + mod(current_parent,2);
+        end
     end
     
     %Assign the remaining jobs
