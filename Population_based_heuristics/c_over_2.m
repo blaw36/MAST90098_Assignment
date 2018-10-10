@@ -2,7 +2,7 @@
 % Same general idea as in c_over_1 but do it faster.
 
 
-function child_array = c_over_1(parent_pair, parent_genes, ...
+function child_array = c_over_2(parent_pair, parent_genes, ...
                     parent_fitness, parent_machine_cost, jobs_array_aug,...
                     num_jobs, num_machines)
 
@@ -12,38 +12,41 @@ function child_array = c_over_1(parent_pair, parent_genes, ...
     all_jobs = 1:num_jobs;
     un_assigned_jobs = 1:num_jobs;
     
+    [~, least_fit_parent] = min(parent_fitness);
+    
     %Pick an initial random subset of machines from both parents, could do
     %this based off fitness, but some fixed frac of each would also do.
-    prop_1 = 1/3;
-    prop_2 = 1/3;
     
-    ordered_m_parents = [randperm(num_machines,ceil(prop_1*num_machines));
-                         randperm(num_machines,ceil(prop_2*num_machines))];
-                     
+    %Over-allocate to prop to least fit parent
+    props = [1/3,1/3];
+    props(least_fit_parent) = 1/2;
+    
+    p1_machines = randperm(num_machines,ceil(props(1)*num_machines));
+    p2_machines = randperm(num_machines,ceil(props(2)*num_machines));
+    
+    if least_fit_parent == 1
+        least_fit_machines = p1_machines;
+    else
+        least_fit_machines = p2_machines;
+    end
     %Find all jobs in each parent subset
-    p1_job_vec = ismember(parent_genes(1,:),ordered_m_parents(1,:));
-    p2_job_vec = ismember(parent_genes(2,:),ordered_m_parents(2,:));
+    p1_job_vec = ismember(parent_genes(1,:),p1_machines);
+    p2_job_vec = ismember(parent_genes(2,:),p2_machines);
     
-    collisions = p1_job_vec.*p2_job_vec;
-    
-    %Then want to pick the least fit parent and remove all of the machines
-    %from the least fit parent that are involved in a collision
-    [~, least_fit_parent] = min(parent_fitness); 
+    collisions = p1_job_vec.*p2_job_vec; 
     
     %parent_genes(least_fit_parent,:)
     %This also includes zero, but can just ignore this
     least_fit_parent_collision_machines = ...
         unique(collisions.*parent_genes(least_fit_parent,:));
     
-    non_col_machines = ordered_m_parents(least_fit_parent,...
-            ~ismember(ordered_m_parents(least_fit_parent,:),...
+    non_col_machines = least_fit_machines(...
+            ~ismember(least_fit_machines,...
                       least_fit_parent_collision_machines));
                   
     if 1 == least_fit_parent
         p1_machines = non_col_machines;
-        p2_machines = ordered_m_parents(2,:);
     else
-        p1_machines =  ordered_m_parents(1,:);
         p2_machines = non_col_machines;
     end
     
