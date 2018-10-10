@@ -41,22 +41,28 @@ function child_array = c_over_3(parent_pair, parent_genes, ...
             other_parent_col_machines = ...
                     sort(parent_genes(other_parent,parent_machine_jobs));
             
-            %Delete these machines from the queue of parent machines being
-            %considered
+            % Delete these machines from the queue of parent machines being
+            % considered
             % Only second element of ismembc must be sorted
-            parents{other_parent}.ordered_m(...
+            other_parent_col_locs = ...
                             ismembc(parents{other_parent}.ordered_m, ...
-                                    other_parent_col_machines)...
-                            ) = [];
-            %Delete last from current parent
-            %Delete last (not first as faster time complexity
-            parents{current_parent}. ...
-                ordered_m(parent_num_machines(current_parent)) = [];
+                                    other_parent_col_machines);
+            
+            % faster to re-assign to non-collisions then delete
+            parents{other_parent}.ordered_m = ...
+                parents{other_parent}.ordered_m(~other_parent_col_locs);
+            
             %Update the record of how many parent machines
             parent_num_machines(other_parent) = ...
                                 length(parents{other_parent}.ordered_m);
             parent_num_machines(current_parent) =  ...
                                 parent_num_machines(current_parent) - 1;
+                            
+            %Delete last from current parent
+            % faster to reassign to front slice
+            parents{current_parent}.ordered_m = ...
+                parents{current_parent}.ordered_m(1:parent_num_machines(current_parent));
+            
         end
         %Switch parents
         current_parent = other_parent;

@@ -34,8 +34,6 @@ function child_array = c_over_1(parent_pair, parent_genes, ...
         parent_index = parent_indices(current_parent);
         while parent_index <= num_machines && ~done
             parent_machine = ordered_m_parents(current_parent,parent_index);
-%             parent_machine_jobs =  all_jobs(...
-%                 parent_genes(current_parent,:)==parent_machine);
             
             % ismembc is a faster (debated? but seems faster here) version
             % of ismember. Requires perhaps both arrays to be sorted
@@ -51,14 +49,18 @@ function child_array = c_over_1(parent_pair, parent_genes, ...
             
             %Check if all these jobs in the parent machine are currently
             %un_assigned
-%             if all(ismember(parent_machine_jobs, un_assigned_jobs))
+            
+            % Commented out with %% was a failed attempt at speedup via
+            % ismembc2
+            
+% %             found_in_parent_loc = ismembc2(parent_machine_jobs,un_assigned_jobs);
+% %             if all(found_in_parent_loc)
             if all(ismembc(parent_machine_jobs, un_assigned_jobs))
-                %if so, assign those jobs and mark being done
+%                 if so, assign those jobs and mark being done
                 done = true;
-%                 un_assigned_jobs(...
-%                     ismember(un_assigned_jobs,parent_machine_jobs)) = [];
-                un_assigned_jobs(...
-                    ismembc(un_assigned_jobs,parent_machine_jobs)) = [];
+% %                 un_assigned_jobs(found_in_parent_loc) = [];
+                un_assigned_jobs = un_assigned_jobs(...
+                        ~ismembc(un_assigned_jobs,parent_machine_jobs));
                 child_array(parent_machine_jobs) = parent_machine;
                 child_machine_cost(parent_machine) = ...
                     parent_machine_cost(current_parent, parent_machine);
