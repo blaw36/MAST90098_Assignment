@@ -33,3 +33,26 @@ def cross_over1(p1, p2, num_jobs, num_machines):
 
     use greedy to assign rest of un_assigned to child
     return child
+
+
+
+def cross_over2(parent_pair, parent_genes, ...
+    parent_fitness, num_jobs):
+
+    
+    '''
+    Want a fast way to pick a non-overlapping (in terms of jobs)
+    subset of machines from both parents.
+
+    We know that each parent won't overlap on their own machines so only
+    need to inspect collision with other parent.
+    '''
+
+    pick an initial random proportion of machines of each parent
+        could do 1/2 of each or base of fitness
+
+    find all machine collisions via via vector mult
+
+    remove all of the machines were collisions occur
+        from the least fit parent
+
