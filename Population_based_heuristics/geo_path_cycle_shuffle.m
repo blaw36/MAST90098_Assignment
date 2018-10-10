@@ -14,7 +14,7 @@
 
 function [indiv_array, costs_shuffled, machines_shuffled] = ...
     geo_path_cycle_shuffle(indiv_array, num_machines, num_jobs, ...
-    k, jobs_array_aug, machine_cost_mat)
+    k, machine_cost_mat, jobs_array_aug)
 
     cycle_prob = 0.75;
     stop_prob = 0.5;
@@ -29,9 +29,13 @@ function [indiv_array, costs_shuffled, machines_shuffled] = ...
     
     % Or Pick the k most costly machines
     [sorted_costs,indices] = sort(machine_cost_mat,'descend');
+    % Restrict k to number of non-empty machines
+    num_non_empty_machines = sum(sorted_costs > 0);
+    k = min(k, num_non_empty_machines);
     jobs_curr_machines = indices(1:k);
 %     machine_cost_mat
 %     indiv_array
+
 
     %Pick the first job for each of these machines
     %https://au.mathworks.com/matlabcentral/answers/22926-finding-the-indices-of-the-elements-of-one-array-in-another
@@ -41,7 +45,7 @@ function [indiv_array, costs_shuffled, machines_shuffled] = ...
     %Record these jobs as being changed
     jobs_shuffled = [jobs];
     machines_shuffled = [];
-    
+     
     %Set the number of paths_cycles that are currently being moved along
     still_changing = k;
     while still_changing > 0
@@ -53,6 +57,11 @@ function [indiv_array, costs_shuffled, machines_shuffled] = ...
         %Switch the jobs which are in the same machine
         matches = find(jobs_curr_machines == jobs_next_machines);
         while size(matches,2) > 0
+            
+            % If we are trying to move 1 job, and there is only its own machine
+            % possible (perhaps it's the only non-zero machine)
+            %%% INSERT BUG FIX HERE
+
             next_jobs(matches) = randperm(num_jobs,size(matches,2));
             jobs_next_machines(matches) = indiv_array(next_jobs(matches));
             matches = find(jobs_curr_machines == jobs_next_machines);
@@ -94,7 +103,7 @@ function [indiv_array, costs_shuffled, machines_shuffled] = ...
         jobs_curr_machines = jobs_next_machines(1:still_changing);
     end
     
-    if nargin == 4
+    if nargin == 5
         % if no jobs_array, don't return costs of shuffled (save some time)
         costs_shuffled = [];
         return

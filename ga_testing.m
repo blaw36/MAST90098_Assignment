@@ -51,10 +51,10 @@ elseif strcmp(method,'Genetic')
     
     [outputMakespan, time_taken, init_makespan, outputArray, ...
         best_gen_num, generations, diags_array]...
-        = genetic_alg_v2(a, 2000, 0.1, ... %inits
+        = genetic_alg_v2(a, 500, 0.1, ... %inits
         "rndom_mach_chg", floor(0.1*(size(a,2)-1)), ... %inits
-        "neg_exp", 5, "rndm_split", ... %crossover
-        "neg_exp", "rndom_mach_chg", floor(0.3*(size(a,2)-1)), ... %mutation
+        "neg_exp", 5, "c_over_1", ... %crossover
+        "neg_exp", "geo_path_cycle", floor(0.3*(size(a,2)-1)), ... %mutation
         "top_and_bottom", ... %culling
         10, 100); %termination
     

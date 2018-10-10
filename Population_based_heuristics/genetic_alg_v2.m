@@ -285,19 +285,19 @@ function [best_makespan, time_taken, init_makespan, best_output,...
             best_gen_num = best_generation{1};
         end
         
-        clc
-        fprintf("Generation: %d \n", generation_counter);
-        fprintf("Best makespan in generation: %d \n", new_gen_makespan);
-%         fprintf("Best generation makespan: %d \n", best_generation{3});
-        fprintf("Best makespan: %d \n", best_makespan);
-        fprintf("Avg fitness: %d \n", round(mean(makespan_mat)));
-        fprintf("Min fitness: %d \n", round(min(makespan_mat)));
-        fprintf("Max fitness: %d \n", round(max(makespan_mat)));
-        fprintf("Num gens no improvement: %d \n", no_chg_generations);
-        fprintf("Num parents survived: %d \n", ...
-            sum(parent_child_indicator == 1));
-        fprintf("Num children survived: %d \n", ...
-            sum(parent_child_indicator == 0));
+%         clc
+%         fprintf("Generation: %d \n", generation_counter);
+%         fprintf("Best makespan in generation: %d \n", new_gen_makespan);
+% %         fprintf("Best generation makespan: %d \n", best_generation{3});
+%         fprintf("Best makespan: %d \n", best_makespan);
+%         fprintf("Avg fitness: %d \n", round(mean(makespan_mat)));
+%         fprintf("Min fitness: %d \n", round(min(makespan_mat)));
+%         fprintf("Max fitness: %d \n", round(max(makespan_mat)));
+%         fprintf("Num gens no improvement: %d \n", no_chg_generations);
+%         fprintf("Num parents survived: %d \n", ...
+%             sum(parent_child_indicator == 1));
+%         fprintf("Num children survived: %d \n", ...
+%             sum(parent_child_indicator == 0));
         
         % Add to diagnostics table
         % Columns: Generation#, Best makespan in gen, Best makespan,
