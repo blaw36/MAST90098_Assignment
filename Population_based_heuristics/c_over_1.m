@@ -34,16 +34,31 @@ function child_array = c_over_1(parent_pair, parent_genes, ...
         parent_index = parent_indices(current_parent);
         while parent_index <= num_machines && ~done
             parent_machine = ordered_m_parents(current_parent,parent_index);
-            parent_machine_jobs =  all_jobs(...
-                parent_genes(current_parent,:)==parent_machine);
+%             parent_machine_jobs =  all_jobs(...
+%                 parent_genes(current_parent,:)==parent_machine);
+            
+            % ismembc is a faster (debated? but seems faster here) version
+            % of ismember. Requires perhaps both arrays to be sorted
+            % though. This might work for us as un_assigned_jobs is sorted,
+            % and parent_machine_jobs can be pre-sorted with no issue.
+            % https://undocumentedmatlab.com/blog/ismembc-undocumented-helper-function
+            % https://stackoverflow.com/questions/17714487/is-there-a-function-like-ismember-but-more-efficient
+            % There is another function, 'ismembc2', which returns the
+            % indices of membership rather than a logical.
+            parent_machine_jobs =  sort(all_jobs(...
+                parent_genes(current_parent,:)==parent_machine));
+
             
             %Check if all these jobs in the parent machine are currently
             %un_assigned
-            if all(ismember(parent_machine_jobs, un_assigned_jobs))
+%             if all(ismember(parent_machine_jobs, un_assigned_jobs))
+            if all(ismembc(parent_machine_jobs, un_assigned_jobs))
                 %if so, assign those jobs and mark being done
                 done = true;
+%                 un_assigned_jobs(...
+%                     ismember(un_assigned_jobs,parent_machine_jobs)) = [];
                 un_assigned_jobs(...
-                    ismember(un_assigned_jobs,parent_machine_jobs)) = [];
+                    ismembc(un_assigned_jobs,parent_machine_jobs)) = [];
                 child_array(parent_machine_jobs) = parent_machine;
                 child_machine_cost(parent_machine) = ...
                     parent_machine_cost(current_parent, parent_machine);

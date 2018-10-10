@@ -1,5 +1,6 @@
-%% mix_shuffle_random_init.m
-% initialises GA population by using a mix of shuffle and random to a ratio
+%% init_mix_shuff_rand.m
+% initialises GA population by using a mix of (slightly) shuffled simples
+% and random to a ratio
 
 function [pop_mat, num_jobs, num_machines, jobs_array_aug] = ...
     init_mix_shuff_rand(input_array_aug, init_pop_size, shuff_prop, ...

@@ -15,8 +15,8 @@ rmpath('Not_in_use');
 rng(10);
 
 %% Parameters
-n = 100; % # jobs
-m = 40; % # machines
+n = 50; % # jobs
+m = 20; % # machines
 hard = false;
 a = generate_ms_instances(n, m, hard); % Generate makespan input vector
 k = 2; % # of exchanges (k-exch)
@@ -53,8 +53,8 @@ elseif strcmp(method,'Genetic')
         best_gen_num, generations, diags_array]...
         = genetic_alg_v2(a, 500, 0.1, ... %inits
         "rndom_mach_chg", floor(0.1*(size(a,2)-1)), ... %inits
-        "neg_exp", 5, "c_over_1", ... %crossover
-        "neg_exp", "geo_path_cycle", floor(0.3*(size(a,2)-1)), ... %mutation
+        "neg_exp", 5, "c_over_3", ... %crossover
+        "neg_exp", "geo_path_cycle", floor(0.6*(size(a,2)-1)), ... %mutation
         "top_and_bottom", ... %culling
         10, 100); %termination
     
