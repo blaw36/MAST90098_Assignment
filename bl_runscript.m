@@ -48,11 +48,11 @@ elseif strcmp(method,'Genetic')
     % it with 0s to keep in line with the outputs from GLS and VDS.
     [outputMakespan, time_taken, init_makespan, outputArray, ...
         best_gen_num, generations, diags_array]...
-        = genetic_alg_v2(a, 2000, 0.1, ... %inits
+        = genetic_alg_v2(a, 500, 0.1, ... %inits
         "rndom_mach_chg", floor(0.1*(size(a,2)-1)), ... %inits
-        "neg_exp", 5, "c_over_3", ... %crossover
-        "neg_exp", "rndom_mach_chg", floor(0.3*(size(a,2)-1)), ... %mutation
-        "top_and_bottom", ... %culling
+        "neg_exp", 2, "c_over_3", ... %crossover
+        "neg_exp", "rndom_mach_chg", floor(0.6*(size(a,2)-1)), ... %mutation
+        "top_and_randsamp", 0.7, ... %culling
         10, 100); %termination
 end
 

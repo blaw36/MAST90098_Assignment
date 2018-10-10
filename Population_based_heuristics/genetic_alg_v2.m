@@ -32,6 +32,8 @@
     % "top_and_bottom": fills x% of the required number by the top (by 
         % makespan) individuals over, with the remaining (1-x)% required
         % made up by the bottom/worst individuals.
+    % "top_and_randsamp": fills x% of the required number by the top n, the
+        % rest are filled by random sample
 
 %% Inputs:
 % ~~Initialisation:
@@ -61,6 +63,8 @@
 % ~~Population culling:        
 	% popn_cull: The population culling operation to reduce population back
         % to init_pop_size for next generation
+    % cull_prop: the relevant culling proportion parameter (of
+        % init_pop_size) that's used by most of our culling operations
 % ~~Termination conditions:
 	% num_gen_no_improve: max # of generations without improvement
     % max_gens_allowed: max # of generations allowed
@@ -93,7 +97,7 @@ function [best_makespan, time_taken, init_makespan, best_output,...
             init_mutate_method, init_mutate_num_shuffles, ... %inits
             parent_selection, parent_ratio, crossover_method, ... %crossover
             mutation_select_method, mutate_method, mutate_num_shuffles, ... %mutation
-            popn_cull, ... %culling
+            popn_cull, cull_prop, ... %culling
             num_gen_no_improve, max_gens_allowed) %termination
 
     start_time = tic;
@@ -260,10 +264,14 @@ function [best_makespan, time_taken, init_makespan, best_output,...
                 init_pop_size);
         elseif popn_cull == "top_and_bottom"
             indivs_to_keep = cull_top_bottom_n(combined_pop_mat, combined_makespan_mat, ...
-                init_pop_size, 0.9);
+                init_pop_size, cull_prop);
             % Last number is a parameter which states that the top 80% of the new
             % pop'n should be strictly by makespan, the remaining 20% are
             % chosen from the worst individuals.
+        elseif popn_cull == "top_and_randsamp"
+            % Takes the top x%, rand sample from the rest
+            indivs_to_keep = cull_top_and_randsamp(combined_pop_mat, combined_makespan_mat, ...
+                init_pop_size, cull_prop);
         end
 
         pop_mat = combined_pop_mat(indivs_to_keep, :);

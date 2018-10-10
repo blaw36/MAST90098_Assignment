@@ -1,4 +1,4 @@
-%% cull_top_n.m
+%% cull_top_bottom_n.m
 % Basic culling based on top n makespans, to req'd size n (usually is the 
 % init_pop_size)
 % output should be some array of rows to grab from the large pop_mat.
