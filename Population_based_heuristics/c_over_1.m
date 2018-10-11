@@ -37,6 +37,7 @@ function child_array = c_over_1(parent_pair, parent_genes, ...
     fitness_ratio = fitness_ratio/sum(fitness_ratio);
     
     child_machine = 1;
+    child_indices = randperm(num_machines,num_machines);
     
     while child_machine <= num_machines && any(parent_indices <= num_machines)
         done = false;
@@ -57,7 +58,7 @@ function child_array = c_over_1(parent_pair, parent_genes, ...
 
             
             %Check if all these jobs in the parent machine are currently
-            %un_assigned
+            %un_assigned (if the parent machine is not empty)
             
             % Commented out with %% and % % % were two failed attempts at
             % speedups
@@ -77,9 +78,10 @@ function child_array = c_over_1(parent_pair, parent_genes, ...
 
                 %Assign the child all of the jobs in the machine, but
                 %re-index the machines
-                %TODO: Maybe a random re-index would be better?
-                child_array(parent_machine_jobs) = child_machine;
-                child_machine_cost(child_machine) = ...
+                %NOTE using the random index takes longer but achieves
+                %better results
+                child_array(parent_machine_jobs) = child_indices(child_machine);
+                child_machine_cost(child_indices(child_machine)) = ...
                     parent_machine_cost(current_parent, parent_machine);
                 child_machine = child_machine + 1;
            end

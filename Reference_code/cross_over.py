@@ -56,3 +56,34 @@ def cross_over2(parent_pair, parent_genes, ...
     remove all of the machines were collisions occur
         from the least fit parent
 
+    pass
+
+def cross_over3():
+    '''
+    same logic as 1, but treating the parents machines as queued
+    then popping last parent alternating between until done
+    '''
+    pass
+
+def cross_over4():
+    '''
+    Want to get quality info from parents
+
+    is only per machine packing useful?
+        if no what else?
+
+        only looking at two parents probably
+
+    way to reduce ignored symmetry?
+        is parent_machine the best index to assign the children programs 
+        each, or should different child indexing be done.
+            re-index from 1 or 
+            re-index through shuffle(1:n)
+            -> at least this way spreads over ignored
+
+    better data structs for just this sub problem
+        init cost worth?    
+    
+    
+
+    '''
