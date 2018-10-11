@@ -17,7 +17,6 @@ function [indiv_array, costs_shuffled, machines_shuffled] = ...
     k, jobs_array_aug)
     
     % Pick k distinct jobs
-%     jobs_shuffled = randi(num_jobs,1,k);
     jobs_shuffled = randperm(num_jobs,k); % without replacement
     
     % Log current machines

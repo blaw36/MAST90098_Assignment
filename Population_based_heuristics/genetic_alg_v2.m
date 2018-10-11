@@ -178,6 +178,7 @@ function [best_makespan, time_taken, init_makespan, best_output,...
 %             num_machines, num_jobs, init_pop_size); 
         
         % Crossover
+        tic;
         crossover_children = zeros(num_children, num_jobs);
         for i = 1:num_children 
             % Can we do this in batch?
@@ -211,6 +212,8 @@ function [best_makespan, time_taken, init_makespan, best_output,...
                     num_jobs, num_machines);
             end
         end
+        c_over_time = toc;
+        
 
         % Calculate cost per machine of children
         machine_cost_mat_children = calc_machine_costs(jobs_array_aug, ...
@@ -251,11 +254,13 @@ function [best_makespan, time_taken, init_makespan, best_output,...
         indivs_to_mutate = find(random_numbers <= prob_mutation_select)';
 
         % Mutate
+        tic;
         [combined_pop_mat, combined_machine_cost_mat] = ...
             mutate_population(indivs_to_mutate, combined_pop_mat, ...
             combined_machine_cost_mat, num_machines, num_jobs, ...
             jobs_array_aug, mutate_method, mutate_num_shuffles);
-
+        mutation_time = toc;
+        
         combined_makespan_mat = max(combined_machine_cost_mat,[],2);
 
         % Population culling
@@ -311,6 +316,8 @@ function [best_makespan, time_taken, init_makespan, best_output,...
             sum(parent_child_indicator == 1));
         fprintf("Num children survived: %d \n", ...
             sum(parent_child_indicator == 0));
+        fprintf("Crossover time: %2.6f\n", c_over_time);
+        fprintf("Mutation time: %2.6f\n", mutation_time);
         
         % Add to diagnostics table
         % Columns: Generation#, Best makespan in gen, Best makespan,
