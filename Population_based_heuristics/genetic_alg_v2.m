@@ -225,10 +225,8 @@ function [best_makespan, time_taken, init_makespan, best_output,...
         best_child = min(max(machine_cost_mat_children,[],2));
 
         % Combine children and parents for larger population
-        combined_pop_mat = zeros(init_pop_size + num_children, num_jobs);
         combined_pop_mat = [pop_mat; crossover_children];
 
-        combined_machine_cost_mat = zeros(init_pop_size + num_children, 1);
         combined_machine_cost_mat = [machine_cost_mat; machine_cost_mat_children];
         
         % 1 for parent, 0 for children
