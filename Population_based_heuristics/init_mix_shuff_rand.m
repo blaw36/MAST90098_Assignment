@@ -17,18 +17,19 @@ function [pop_mat, num_jobs, num_machines, jobs_array_aug] = ...
 
     % Shuffled - initiate shuffled with some random element swapped
     simple_indiv_mat = zeros(shuffled_simples_indiv, num_jobs);
+    
+    %Can have this out here as not changing each time
+    tmp = initialise_simple(input_array_aug, num_jobs, num_machines);
+    %[~, ~, ~, tmp] = gls(input_array_aug, 2, 'simple', true);
+    tmp = tmp(:,2)';
     for i = 1:shuffled_simples_indiv
-
-        tmp = initialise_simple(input_array_aug, num_jobs, num_machines);
-        % Keep in the 'input_array' order
-
         % Do random pairwise shuffling of some elements here otherwise
         % these solutions are all the same (as this method is not random)
         if shuff_method == "pair_swap"
-            indiv_array = shuffle_pair_swap(tmp(:,2)', num_machines, ...
+            indiv_array = shuffle_pair_swap(tmp, num_machines, ...
                 num_jobs);
         elseif shuff_method == "rndom_mach_chg"
-            indiv_array = shuffle_rndom_mach_chg(tmp(:,2)', num_machines, ...
+            indiv_array = shuffle_rndom_mach_chg(tmp, num_machines, ...
                 num_jobs, num_shuffles);
         end
 
