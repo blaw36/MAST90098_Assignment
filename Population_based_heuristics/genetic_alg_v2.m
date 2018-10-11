@@ -15,6 +15,9 @@
         % Jobs must be from different machines.
     % "rndom_mach_chg": take k different jobs, reassign them to new
         % machines.
+    % "rndom_mach_chg_load": like "rndom_mach_chg" but preferencing taking
+        % elements from loaded machines, and then preferencing putting them
+        % into less loaded machines.
 % ~~Crossover operations: to determine how the genes from two parents are
 % carried over/split into the children
     % "cutover_split" = simple cutover of two parents at one point (ie. all
@@ -165,6 +168,7 @@ function [best_makespan, time_taken, init_makespan, best_output,...
         parent_mat = generate_parents(prob_parent_select, ...
             parent_ratio, init_pop_size);
         num_children = size(parent_mat,1);
+        best_parent = min(max(machine_cost_mat(parent_mat,:),[],2));
 
         % Give some ordering to parent machine numbers so they are more
         % meaningful in crossover, rather than having 2 'identical'
@@ -218,6 +222,7 @@ function [best_makespan, time_taken, init_makespan, best_output,...
         % Calculate cost per machine of children
         machine_cost_mat_children = calc_machine_costs(jobs_array_aug, ...
             crossover_children, num_machines);
+        best_child = min(max(machine_cost_mat_children,[],2));
 
         % Combine children and parents for larger population
         combined_pop_mat = zeros(init_pop_size + num_children, num_jobs);
@@ -255,7 +260,8 @@ function [best_makespan, time_taken, init_makespan, best_output,...
 
         % Mutate
         tic;
-        [combined_pop_mat, combined_machine_cost_mat] = ...
+        [combined_pop_mat, combined_machine_cost_mat, ...
+            best_pre_mutate, best_post_mutate] = ...
             mutate_population(indivs_to_mutate, combined_pop_mat, ...
             combined_machine_cost_mat, num_machines, num_jobs, ...
             jobs_array_aug, mutate_method, mutate_num_shuffles);
@@ -318,6 +324,10 @@ function [best_makespan, time_taken, init_makespan, best_output,...
             sum(parent_child_indicator == 0));
         fprintf("Crossover time: %2.6f\n", c_over_time);
         fprintf("Mutation time: %2.6f\n", mutation_time);
+        fprintf("Best parent: %d\n", best_parent);
+        fprintf("Best child: %d\n", best_child);
+        fprintf("Best pre-mutate cand: %d\n", best_pre_mutate);
+        fprintf("Best post-mutate cand: %d\n", best_post_mutate);
         
         % Add to diagnostics table
         % Columns: Generation#, Best makespan in gen, Best makespan,
