@@ -36,7 +36,9 @@ function child_array = c_over_1(parent_pair, parent_genes, ...
     %Normalizes so can treat as prob
     fitness_ratio = fitness_ratio/sum(fitness_ratio);
     
-    while any(parent_indices <= num_machines)
+    child_machine = 1;
+    
+    while child_machine <= num_machines && any(parent_indices <= num_machines)
         done = false;
         parent_index = parent_indices(current_parent);
         while parent_index <= num_machines && ~done
@@ -64,21 +66,25 @@ function child_array = c_over_1(parent_pair, parent_genes, ...
 % %             if all(found_in_parent_loc)
 % % %             a = ismembc(un_assigned_jobs,parent_machine_jobs);
 %             if sum(a) == length(parent_machine_jobs)
-           if all(ismembc(parent_machine_jobs, un_assigned_jobs))
+           if ~isempty(parent_machine_jobs) && ...
+                all(ismembc(parent_machine_jobs, un_assigned_jobs))
 %                 if so, assign those jobs and mark being done
                 done = true;
 % %                 un_assigned_jobs(found_in_parent_loc) = [];
                 un_assigned_jobs = un_assigned_jobs(...
                         ~ismembc(un_assigned_jobs,parent_machine_jobs));
 % % %                 un_assigned_jobs = un_assigned_jobs(~a);
-                child_array(parent_machine_jobs) = parent_machine;
-                child_machine_cost(parent_machine) = ...
+
+                %Assign the child all of the jobs in the machine, but
+                %re-index the machines
+                %TODO: Maybe a random re-index would be better?
+                child_array(parent_machine_jobs) = child_machine;
+                child_machine_cost(child_machine) = ...
                     parent_machine_cost(current_parent, parent_machine);
+                child_machine = child_machine + 1;
            end
-            parent_index = parent_index + 1;
+           parent_index = parent_index + 1;
         end
-        %TODO: Could use fitness here to increase the chance of drawing
-        %from the more fit parent
         %Record current index
         parent_indices(current_parent) = parent_index;
         %Switch parent if rand numb exceeds fitness ratio
