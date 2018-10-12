@@ -144,9 +144,9 @@ function [best_makespan, time_taken, init_makespan, best_output,...
         % Columns: Generation#, Best makespan in gen, Best makespan,
         % AvgFit, MinFit, MaxFit NumParentsSurvive, NumChildrenSurvive
     gen_result = [generation_counter, new_gen_makespan, new_gen_makespan, ...
-        round(mean(makespan_mat)), ...
-        round(min(makespan_mat)), round(max(makespan_mat)), ...
-        init_pop_size, 0];
+                    round(mean(makespan_mat)), ...
+                    round(min(makespan_mat)), round(max(makespan_mat)), ...
+                    init_pop_size, 0];
     diags_array = [gen_result];
         
     
@@ -156,16 +156,16 @@ function [best_makespan, time_taken, init_makespan, best_output,...
             generation_counter <= max_gens_allowed
 
         start_gen_makespan = best_generation{3};
-
-        if parent_selection == "minMaxLinear"
-            prob_parent_select = fitness_minmaxLinear(makespan_mat);
-        elseif parent_selection == "neg_exp"
-            prob_parent_select = fitness_negexp(makespan_mat);
-        end
+        
+        %Use the fitness function to select the parents, with bias given to
+        %fitter parents
+        invert = false;
+        prob_parent_select = fitness_selection(makespan_mat,...
+                                                invert, parent_selection);
 
         % Generate parent pairings for crossover
         parent_mat = generate_parents(prob_parent_select, ...
-            parent_ratio, init_pop_size);
+                                        parent_ratio, init_pop_size);
         num_children = size(parent_mat,1);
         best_parent = min(max(machine_cost_mat(parent_mat,:),[],2));
 
@@ -184,18 +184,14 @@ function [best_makespan, time_taken, init_makespan, best_output,...
         
         % 1 for parent, 0 for children
         parent_child_indicator = [ones(size(pop_mat,1),1); ...
-            zeros(size(crossover_children,1),1)];
+                                    zeros(size(crossover_children,1),1)];
 
         combined_makespan_mat = max(combined_machine_cost_mat,[],2);
 
-        % Randomly select elements for mutation
-        if mutation_select_method == "minMaxLinear"
-            prob_mutation_select = fitness_minmaxLinear(...
-                combined_makespan_mat, true);
-        elseif parent_selection == "neg_exp"
-            prob_mutation_select = fitness_negexp(...
-                combined_makespan_mat, true);
-        end
+        %Select the elements for mutation, with a bias to mutating less fit
+        invert = true;
+        prob_mutation_select = fitness_selection(combined_makespan_mat,...
+                                        invert, mutation_select_method);
         
         % Convert to between 0 and 1
         % The problem here is the min gets allocated 0, and the max gets
@@ -213,35 +209,25 @@ function [best_makespan, time_taken, init_makespan, best_output,...
         tic;
         [combined_pop_mat, combined_machine_cost_mat, ...
             best_pre_mutate, best_post_mutate] = ...
-            mutate_population(indivs_to_mutate, combined_pop_mat, ...
-            combined_machine_cost_mat, num_machines, num_jobs, ...
-            jobs_array_aug, mutate_method, mutate_num_shuffles);
+                mutate_population(indivs_to_mutate, combined_pop_mat, ...
+                combined_machine_cost_mat, num_machines, num_jobs, ...
+                jobs_array_aug, mutate_method, mutate_num_shuffles);
         mutation_time = toc;
         
         combined_makespan_mat = max(combined_machine_cost_mat,[],2);
+        
+        %Cull the Population
+        survivors = perform_cull(combined_pop_mat,...
+                                    combined_makespan_mat, ...
+                                    init_pop_size, cull_prop, popn_cull);
+        
 
-        % Population culling
-        if popn_cull == "top"
-            indivs_to_keep = cull_top_n(combined_pop_mat, combined_makespan_mat, ...
-                init_pop_size);
-        elseif popn_cull == "top_and_bottom"
-            indivs_to_keep = cull_top_bottom_n(combined_pop_mat, combined_makespan_mat, ...
-                init_pop_size, cull_prop);
-            % Last number is a parameter which states that the top 80% of the new
-            % pop'n should be strictly by makespan, the remaining 20% are
-            % chosen from the worst individuals.
-        elseif popn_cull == "top_and_randsamp"
-            % Takes the top x%, rand sample from the rest
-            indivs_to_keep = cull_top_and_randsamp(combined_pop_mat, combined_makespan_mat, ...
-                init_pop_size, cull_prop);
-        end
-
-        pop_mat = combined_pop_mat(indivs_to_keep, :);
+        pop_mat = combined_pop_mat(survivors, :);
         %machine_cost_mat = combined_machine_cost_mat(indivs_to_keep, :);
         machine_cost_mat = calc_machine_costs(jobs_array_aug, pop_mat, ...
                                                 num_machines);
-        makespan_mat = combined_makespan_mat(indivs_to_keep, :);
-        parent_child_indicator = parent_child_indicator(indivs_to_keep, :);
+        makespan_mat = combined_makespan_mat(survivors, :);
+        parent_child_indicator = parent_child_indicator(survivors, :);
         [new_gen_makespan,indiv_indx] = min(makespan_mat);
 
         generation_counter = generation_counter + 1;
