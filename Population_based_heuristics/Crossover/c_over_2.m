@@ -1,10 +1,25 @@
 %% c_over_2.m
-% Same general idea as in c_over_1 but do it faster.
+% Pick an initial proportion of machines of both parents,
+% find all collisions of jobs between those machines,
+% remove the machines from the least fit parent that cause the collisions,
+% add as many machines as you can from the most fit parent that do not
+    % cause new collisions
+% Greedily place the remaining jobs
 
-% Can be vectorized better and inside --- probably improvable by a fair chunk---
-% p1_machines and p2_machines different sizes, maybe a partially empty
-% array is the best choice?...
-
+% Feels like it should be improveable
+% largest point of difficulty is that p1_machines and p2_machines are of
+% different sizes
+    % I tried, using partially empty matrices padded with 0s to store them, 
+        % but slicing by their true sizes, generated too much overhead.
+            % --Maybe if better way of getting values that some how ignored
+            % certain values (0s or some other flag) instead of slicing
+     % I tried, using structs eg p{2}.machines, p{1}.machines
+        % but too much overhead.
+    % Maybe the way it is written currently although it appears double the 
+        % length is actually fastest, if messy?
+% section in ---   --- also might have an easier way not sure
+% Also have some magic numbers floating around in props and rand, not sure
+    % if more sensible strats there
 
 function [child_array, child_machine_cost] = c_over_2(parent_genes, ...
                     parent_fitness, parent_machine_cost, jobs_array_aug,...
@@ -18,15 +33,14 @@ function [child_array, child_machine_cost] = c_over_2(parent_genes, ...
     all_jobs = 1:num_jobs;
     un_assigned_jobs = all_jobs;
     
+    %Find and record the least_fit_parent, occasionaly switch which parent
+    %is treated as which, for the sake of noise (Might be a better way to
+    %inject noise, or maybe shouldn't even be here)
     [~, least_fit_parent] = min(parent_fitness);
     if rand<0.1
         least_fit_parent = 1 + mod(least_fit_parent,2);
     end
     most_fit_parent = 1 + mod(least_fit_parent,2);
-    
-    
-    %Pick an initial random subset of machines from both parents, could do
-    %this based off fitness, but some fixed frac of each would also do.
     
     %Over-allocate to least fit parent, as remove from it later
     props = [1/3,1/3];
@@ -50,9 +64,10 @@ function [child_array, child_machine_cost] = c_over_2(parent_genes, ...
     least_fit_parent_collision_machines = ...
         unique(collisions.*parent_genes(least_fit_parent,:));
     
+    %Find all of the machines in the subset of the least fit parents
+    %machines that are not involved in collisions
     non_col_machines = least_fit_machines(...
-            ~ismembc(least_fit_machines,...
-                      least_fit_parent_collision_machines));
+        ~ismembc(least_fit_machines, least_fit_parent_collision_machines));
                   
     if 1 == least_fit_parent
         p1_machines = sort(non_col_machines);
@@ -65,8 +80,9 @@ function [child_array, child_machine_cost] = c_over_2(parent_genes, ...
     %----------------------------------------------------------------------
     %----------------------------------------------------------------------
     %TODO: Better faster way
+    
     %Add back in all the machines from most fit parent, that don't
-    %make any collisions
+    %make any new collisions
     
     %no collisions so can just add
     union_jobs = p1_job_vec + p2_job_vec;
@@ -88,7 +104,8 @@ function [child_array, child_machine_cost] = c_over_2(parent_genes, ...
     %----------------------------------------------------------------------
     %----------------------------------------------------------------------
     
-    %Assign the collision free parent machines to child
+    %Assign the collision free parent machines to child, removing them from
+    %unassigned
     for i = 1:length(p1_machines)
         parent_machine = p1_machines(i);
         parent_machine_jobs = sort(all_jobs(parent_genes(1,:)==parent_machine));

@@ -72,27 +72,8 @@
 	% num_gen_no_improve: max # of generations without improvement
     % max_gens_allowed: max # of generations allowed
 %% Outputs
-    % best_makespan:
-        % max, across all machines, of sum of jobs for a given machines
-    % time_taken:
-        % the time taken for the algorithm to run to completion
-    % init_makespan:
-        % the makespan after initiation
-    % best_output: best output of machine allocations to a sorted input job
-        % vector
-    % best_gen_num: generation which yielded the best output
-    % generation_counter: how many generations used in the process before
-        % it terminated
-    % diags_array: array of information which tracks the following metrics
-        % throughout the process:
-            % Generation number
-            % Best makespan in that generation
-            % Best makespan overall
-            % Average fitness of that generation
-            % Minimum fitness of that generation
-            % Maximum fitness of that generation
-            % Number of parents which survived in that generation
-            % Number of children which survived in that generation
+    %See genetic_alg_inner
+%%
 
 function [best_makespan, time_taken, init_makespan, best_output,...
     best_gen_num, generation_counter, diags_array] = ...
@@ -143,9 +124,19 @@ function [best_makespan, time_taken, init_makespan, best_output,...
     mutate_method = @mutate_population;
     mutate_args = {mutation_method, mutate_num_shuffles};
     
-    %TODO:
-    pop_cull_method = @perform_cull;
-    pop_cull_args = {cull_prop, popn_cull};
+    %Cull
+    if popn_cull == "top"
+        pop_cull_method = @cull_top_n;
+        pop_cull_args = {};
+    elseif popn_cull == "top_and_bottom"
+        pop_cull_method = @cull_top_bottom_n;
+        pop_cull_args = {cull_prop};
+    elseif popn_cull == "top_and_randsamp"
+        pop_cull_method = @cull_top_and_randsamp;
+        pop_cull_args = {cull_prop};
+    else
+        error("Invalid Culling Method");
+    end
     
     %Pass these all to the inner function
     [best_makespan, time_taken, init_makespan, best_output,...
