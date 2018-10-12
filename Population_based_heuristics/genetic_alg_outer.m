@@ -120,7 +120,7 @@ function [best_makespan, time_taken, init_makespan, best_output,...
         error("Invalid Fitness Selection Method");
     end
     
-    %TODO:
+    %TODO: Need refactor for this change as well
     mutate_method = @mutate_population;
     mutate_args = {mutation_method, mutate_num_shuffles};
     
