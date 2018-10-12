@@ -15,7 +15,7 @@
 % parents.
 
 
-function child_array = c_over_1(parent_pair, parent_genes, ...
+function [child_array, child_machine_cost] = c_over_1(parent_pair, parent_genes, ...
                     parent_fitness, parent_machine_cost, jobs_array_aug,...
                     num_jobs, num_machines)
 
@@ -98,10 +98,6 @@ function child_array = c_over_1(parent_pair, parent_genes, ...
     %Assign the remaining jobs
     % Leaving it as is corresponds to greedy,(due to how jobs have been 
     % sorted) seems the best
-    
-    %Shuffle had alright performance (could be better)
-    %un_assigned_jobs = un_assigned_jobs(randperm(length(un_assigned_jobs)));
-    
     for job = un_assigned_jobs
         [cost, loc] = min(child_machine_cost);
         child_array(job) = loc;

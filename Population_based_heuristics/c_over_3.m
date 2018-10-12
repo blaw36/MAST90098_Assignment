@@ -1,10 +1,19 @@
 %% c_over_3.m
-% Exact same idea as cover_3 but hopefully faster in general
+% Exact same idea as cover_1 but hopefully faster in general
 % Treat parents{}.order_m more or less as queues, (would be great to have a
 % fast native, queue implementation, cheers matlab)
 % Need to test/ opt further but committed to record progress
+%
+%                    WARNING: HAS A BUG 
+%                    WARNING: HAS A BUG 
+%                    WARNING: HAS A BUG 
+%                    WARNING: HAS A BUG 
+%      Total found makespan of genetic alg is below LB when used.
+%
+%      Not bothering to fix as does the same thing as c_over_1 but not opt
+%      for matrices so will probably remove later.
 
-function child_array = c_over_3(parent_pair, parent_genes, ...
+function [child_array, child_machine_cost] = c_over_3(parent_pair, parent_genes, ...
                     parent_fitness, parent_machine_cost, jobs_array_aug,...
                     num_jobs, num_machines)
     
