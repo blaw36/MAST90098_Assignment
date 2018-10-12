@@ -53,10 +53,10 @@ elseif strcmp(method,'Genetic')
         best_gen_num, generations, diags_array]...
         = genetic_alg_v2(a, 500, 0.1, ... %inits
         "rndom_mach_chg", floor(0.1*(size(a,2)-1)), ... %inits
-        "neg_exp", 2, "c_over_1", ... %crossover
-        "neg_exp", "rndom_mach_chg", floor(0.6*(size(a,2)-1)), ... %mutation
+        "neg_exp", 6, "c_over_2", ... %crossover
+        "neg_exp", "mutate_greedy_refactor", floor(0.2*(size(a,2)-1)), ... %mutation
         "top_and_randsamp", 0.8, ... %culling
-        10, 100); %termination
+        10, 20); %termination
     
     
     profile off

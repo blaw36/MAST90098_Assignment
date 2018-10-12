@@ -61,8 +61,12 @@ function [child_array, child_machine_cost] = c_over_2(parent_genes, ...
     
     collisions = p1_job_vec.*p2_job_vec; 
     %This also includes zero, but can just ignore this
-    least_fit_parent_collision_machines = ...
-        unique(collisions.*parent_genes(least_fit_parent,:));
+    
+    % https://stackoverflow.com/questions/8174578/faster-way-to-achieve-unique-in-matlab-if-assumed-1d-pre-sorted-vector
+    tmp = sort(collisions.*parent_genes(least_fit_parent,:));
+    least_fit_parent_collision_machines = tmp([true;diff(tmp(:))>0]);
+%     least_fit_parent_collision_machines = ...
+%         unique(collisions.*parent_genes(least_fit_parent,:));
     
     %Find all of the machines in the subset of the least fit parents
     %machines that are not involved in collisions
@@ -92,8 +96,12 @@ function [child_array, child_machine_cost] = c_over_2(parent_genes, ...
     a = (double(~union_jobs).*parent_genes(most_fit_parent,:));
     %b = all machines from most fit parent with at least one job in the
     %union
-    b = unique(union_jobs.*parent_genes(most_fit_parent,:));
-    added_machines = unique(a(~ismembc(a,b)));
+    tmp = sort(union_jobs.*parent_genes(most_fit_parent,:));
+    b = tmp([true;diff(tmp(:))>0]);
+%     b = unique(union_jobs.*parent_genes(most_fit_parent,:));
+    tmp = sort(a(~ismembc(a,b)));
+    added_machines = tmp([true;diff(tmp(:))>0]);
+%     added_machines = unique(a(~ismembc(a,b)));
     
     if most_fit_parent == 1
         p1_machines = sort([p1_machines,added_machines]);
