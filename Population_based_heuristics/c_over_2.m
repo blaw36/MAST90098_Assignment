@@ -6,7 +6,7 @@
 % array is the best choice?...
 
 
-function [child_array, child_machine_cost] = c_over_2(parent_pair, parent_genes, ...
+function [child_array, child_machine_cost] = c_over_2(parent_genes, ...
                     parent_fitness, parent_machine_cost, jobs_array_aug,...
                     num_jobs, num_machines)
                 
@@ -18,7 +18,6 @@ function [child_array, child_machine_cost] = c_over_2(parent_pair, parent_genes,
     all_jobs = 1:num_jobs;
     un_assigned_jobs = all_jobs;
     
-    %TODO: Could actually rand this selection a bit
     [~, least_fit_parent] = min(parent_fitness);
     if rand<0.1
         least_fit_parent = 1 + mod(least_fit_parent,2);
@@ -33,19 +32,18 @@ function [child_array, child_machine_cost] = c_over_2(parent_pair, parent_genes,
     props = [1/3,1/3];
     props(least_fit_parent) = 1/2;
     
-    p1_machines = randperm(num_machines,ceil(props(1)*num_machines));
-    p2_machines = randperm(num_machines,ceil(props(2)*num_machines));
+    p1_machines = sort(randperm(num_machines,ceil(props(1)*num_machines)));
+    p2_machines = sort(randperm(num_machines,ceil(props(2)*num_machines)));
     
     if least_fit_parent == 1
         least_fit_machines = p1_machines;
     else
         least_fit_machines = p2_machines;
     end
-    least_fit_machines = sort(least_fit_machines);
     
     %Find all jobs in each parent subset
-    p1_job_vec = double(ismembc(parent_genes(1,:),sort(p1_machines)));
-    p2_job_vec = double(ismembc(parent_genes(2,:),sort(p2_machines)));
+    p1_job_vec = double(ismembc(parent_genes(1,:),p1_machines));
+    p2_job_vec = double(ismembc(parent_genes(2,:),p2_machines));
     
     collisions = p1_job_vec.*p2_job_vec; 
     %This also includes zero, but can just ignore this
@@ -57,11 +55,11 @@ function [child_array, child_machine_cost] = c_over_2(parent_pair, parent_genes,
                       least_fit_parent_collision_machines));
                   
     if 1 == least_fit_parent
-        p1_machines = non_col_machines;
-        p1_job_vec = double(ismembc(parent_genes(1,:),sort(p1_machines)));
+        p1_machines = sort(non_col_machines);
+        p1_job_vec = double(ismembc(parent_genes(1,:),p1_machines));
     else
-        p2_machines = non_col_machines;
-        p2_job_vec = double(ismembc(parent_genes(2,:),sort(p2_machines)));
+        p2_machines = sort(non_col_machines);
+        p2_job_vec = double(ismembc(parent_genes(2,:),p2_machines));
     end
     
     %----------------------------------------------------------------------
@@ -73,12 +71,13 @@ function [child_array, child_machine_cost] = c_over_2(parent_pair, parent_genes,
     %no collisions so can just add
     union_jobs = p1_job_vec + p2_job_vec;
     
-%     p1 = parent_genes(1,:)
-%     p2 = parent_genes(2,:)
-%     most_fit_parent
-    a = unique((~union_jobs).*parent_genes(most_fit_parent,:));
+    %a = all machines from most fit parent with at least one job not in the
+    %union
+    a = (double(~union_jobs).*parent_genes(most_fit_parent,:));
+    %b = all machines from most fit parent with at least one job in the
+    %union
     b = unique(union_jobs.*parent_genes(most_fit_parent,:));
-    added_machines = a(~ismembc(a,b));
+    added_machines = unique(a(~ismembc(a,b)));
     
     if most_fit_parent == 1
         p1_machines = sort([p1_machines,added_machines]);

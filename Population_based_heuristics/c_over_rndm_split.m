@@ -6,7 +6,7 @@
 % determine which elements get carried over to the children. The number of
 % 1s (number of elements carried over) is equal to the parent's allocation.
 
-function child_array = c_over_rndm_split(parent_pair, parent_genes, ...
+function child_array = c_over_rndm_split(parent_genes, ...
     parent_fitness, num_jobs)
 
     child_array = zeros(1,num_jobs);
