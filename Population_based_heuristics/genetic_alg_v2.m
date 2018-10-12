@@ -170,12 +170,27 @@ function [best_makespan, time_taken, init_makespan, best_output,...
         best_parent = min(max(machine_cost_mat(parent_mat,:),[],2));
 
         % Crossover
-        [crossover_children, machine_cost_mat_children,...
-                            best_child, c_over_time] = ...
-                    crossover_population(num_children, num_machines,...
-                                        num_jobs, parent_mat, pop_mat,...
-                                        machine_cost_mat, makespan_mat, ...
-                                        jobs_array_aug, crossover_method);
+        if crossover_method == "cutover_split"
+            crossover_inner_method = @c_over_split;
+        elseif crossover_method == "rndm_split"
+            crossover_inner_method = @c_over_rndm_split;
+        elseif crossover_method == "c_over_1"
+            crossover_inner_method = @c_over_1;
+        elseif crossover_method == "c_over_2"
+            crossover_inner_method = @c_over_2;
+        else
+            error("Invalid Crossover Method");
+        end
+        no_args = {};
+            
+        tic;
+        [crossover_children, machine_cost_mat_children] = ...
+                crossover_population(num_children, num_machines,...
+                        num_jobs, parent_mat, pop_mat,...
+                        machine_cost_mat, makespan_mat, ...
+                        jobs_array_aug, crossover_inner_method, no_args);
+        c_over_time = toc;
+        best_child = min(max(machine_cost_mat_children,[],2));
 
         % Combine children and parents for larger population
         combined_pop_mat = [pop_mat; crossover_children];

@@ -10,8 +10,9 @@
 % Hence our crossover is taking machine allocations for jobs 1:cut from 
 % parent 1, and then allocations for jobs (cut+1):end from parent 2.
 
-function child_array = c_over_split(parent_genes, ...
-    parent_fitness, num_jobs)
+function [child_array, child_machine_cost] = c_over_split(parent_genes, ...
+                    parent_fitness, parent_machine_cost, jobs_array_aug,...
+                    num_jobs, num_machines)
 
     child_array = zeros(1,num_jobs);
     
@@ -40,5 +41,7 @@ function child_array = c_over_split(parent_genes, ...
             [parent_genes(1,1:cross_point), ...
             parent_genes(2,(cross_point + 1):num_jobs)];
     end
-
+    
+    child_machine_cost = calc_machine_costs(jobs_array_aug, ...
+            child_array, num_machines);
 end

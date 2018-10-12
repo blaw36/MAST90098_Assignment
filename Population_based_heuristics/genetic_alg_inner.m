@@ -3,23 +3,47 @@
 % makespan problem
 
 %% Inputs:
-    % input_array:
+    % input_array: an array of lengther number of jobs + 1, where the first
+        % n entries encode job sizes and the last entry, the number of
+        % machines
     % init_method:
-    % init_args:
+        % a handle to a function
+        % [pop_mat, num_jobs, num_machines, jobs_array_aug] = ...
+        %                        init_method(input_array_aug, init_args{:})
+        % which process, the input and returns the initial population
+    % init_args: additional optional arguments to the function above.
     % parent_selection_method:
-    % parent_selection_args:
+        % a handle to a function
+        % prob_parent_select = parent_selection_method(makespan_mat, ...
+        %                                        parent_selection_args{:});
+        % which computes the probability of selection of each member of the
+        % population, with a function of the makespan
+    % parent_selection_args: additional optional arguments to the function above.
     % cross_over_method:
-    % cross_over_args:
+    % a handle to a function
+        %[crossover_children, machine_cost_mat_children] = ...
+        %         cross_over_method(num_children, num_machines,...
+        %                           num_jobs, parent_mat, pop_mat,...
+        %                           machine_cost_mat, makespan_mat, ...
+        %                           jobs_array_aug, cross_over_args{:});
+        % which performs the crossover operation
+    % cross_over_args: additional optional arguments to the function above.
     % mutate_select_method:
-    % mutate_select_args:
+        % a handle to a function
+        % prob_mutation_select = mutate_select_method(combined_makespan_mat, ...
+        %                                        mutate_select_args{:});
+        % which computes the probability of selection of each member of the
+        % population, with a function of the makespan
+    % mutate_select_args: additional optional arguments to the function above.
     % mutate_method:
-    % mutate_args:
+    % mutate_args: additional optional arguments to the function above.
     % pop_cull_method:
-    % pop_cull_args:
+    % pop_cull_args: additional optional arguments to the function above.
     % init_pop_size:
     % parent_ratio:
     % num_gen_no_improve:
-    % max_gens_allowed
+    % max_gens_allowed:
+    % diagnose:
 
 %% Outputs
     % best_makespan:
@@ -54,14 +78,14 @@ function [best_makespan, time_taken, init_makespan, best_output,...
             mutate_method, mutate_args, ... %mutation
             pop_cull_method, pop_cull_args, ... %culling
             init_pop_size, parent_ratio, ...
-            num_gen_no_improve, max_gens_allowed) %other args
+            num_gen_no_improve, max_gens_allowed, diagnose) %other args
 
     start_time = tic;
 
     % wlog, shuffle input_array such that jobs arranged largest to smallest
     % (aligns with our simple initialisation also)
     input_array_aug = [sort(input_array(:,1:(end-1)), 'descend'), ...
-        input_array(end)];
+                        input_array(end)];
 
     % Generate initial population
     % Each row corresponds to an individual, each column corresponds to the machine
@@ -90,16 +114,20 @@ function [best_makespan, time_taken, init_makespan, best_output,...
     % Initialise best generation heuristics
     best_generation = {};
     best_generation = {generation_counter, pop_mat(indiv_indx,:), new_gen_makespan};
-
-    % Initialise diagnostics array
-    % Add to diagnostics table
-        % Columns: Generation#, Best makespan in gen, Best makespan,
-        % AvgFit, MinFit, MaxFit NumParentsSurvive, NumChildrenSurvive
-    gen_result = [generation_counter, new_gen_makespan, new_gen_makespan, ...
-                    round(mean(makespan_mat)), ...
-                    round(min(makespan_mat)), round(max(makespan_mat)), ...
-                    init_pop_size, 0];
-    diags_array = [gen_result];
+    
+    if diagnose
+        % Initialise diagnostics array
+        % Add to diagnostics table
+            % Columns: Generation#, Best makespan in gen, Best makespan,
+            % AvgFit, MinFit, MaxFit NumParentsSurvive, NumChildrenSurvive
+        gen_result = [generation_counter, new_gen_makespan, new_gen_makespan, ...
+                        round(mean(makespan_mat)), ...
+                        round(min(makespan_mat)), round(max(makespan_mat)), ...
+                        init_pop_size, 0];
+        diags_array = [gen_result];
+    else
+        diags_array = [];
+    end
         
     %TODO: Termination function?
     % Termination criteria: # generations with no improvement, max number
@@ -109,7 +137,7 @@ function [best_makespan, time_taken, init_makespan, best_output,...
 
         start_gen_makespan = best_generation{3};
         
-        %Select the parents
+        %Compute the probability of selecting the parents
         prob_parent_select = parent_selection_method(makespan_mat, ...
                                                 parent_selection_args{:});
 
@@ -120,13 +148,15 @@ function [best_makespan, time_taken, init_makespan, best_output,...
         best_parent = min(max(machine_cost_mat(parent_mat,:),[],2));
 
         % Crossover
-        [crossover_children, machine_cost_mat_children,...
-                            best_child, c_over_time] = ...
+        tic
+        [crossover_children, machine_cost_mat_children] = ...
                 cross_over_method(num_children, num_machines,...
                                     num_jobs, parent_mat, pop_mat,...
                                     machine_cost_mat, makespan_mat, ...
                                     jobs_array_aug, cross_over_args{:});
-
+        c_over_time = toc;
+        best_child = min(max(machine_cost_mat_children,[],2));
+        
         % Combine children and parents for larger population
         combined_pop_mat = [pop_mat; crossover_children];
 
@@ -156,17 +186,23 @@ function [best_makespan, time_taken, init_makespan, best_output,...
         indivs_to_mutate = find(random_numbers <= prob_mutation_select)';
 
         % Mutate
+        best_pre_mutate = min(max(combined_machine_cost_mat(...
+                                            indivs_to_mutate,:),[],2));
         tic;
-        [combined_pop_mat, combined_machine_cost_mat, ...
-            best_pre_mutate, best_post_mutate] = ...
+        
+        [combined_pop_mat, combined_machine_cost_mat] = ...
                 mutate_method(indivs_to_mutate, combined_pop_mat, ...
                 combined_machine_cost_mat, num_machines, num_jobs, ...
                 jobs_array_aug, mutate_args{:});
+        
         mutation_time = toc;
+        best_post_mutate = min(max(combined_machine_cost_mat(...
+                                                indivs_to_mutate,:),[],2));
         
         combined_makespan_mat = max(combined_machine_cost_mat,[],2);
         
         %Cull the Population
+        % TODO: Dynamic Culling, more or less pop over run time?
         survivors = pop_cull_method(combined_pop_mat,...
                                     combined_makespan_mat, ...
                                     init_pop_size, pop_cull_args{:});
@@ -196,36 +232,39 @@ function [best_makespan, time_taken, init_makespan, best_output,...
             best_gen_num = best_generation{1};
         end
         
-        clc
-        fprintf("Generation: %d \n", generation_counter);
-        fprintf("Best makespan in generation: %d \n", new_gen_makespan);
-%         fprintf("Best generation makespan: %d \n", best_generation{3});
-        fprintf("Best makespan: %d \n", best_makespan);
-        fprintf("Avg fitness: %d \n", round(mean(makespan_mat)));
-        fprintf("Min fitness: %d \n", round(min(makespan_mat)));
-        fprintf("Max fitness: %d \n", round(max(makespan_mat)));
-        fprintf("Num gens no improvement: %d \n", no_chg_generations);
-        fprintf("Num parents survived: %d \n", ...
-            sum(parent_child_indicator == 1));
-        fprintf("Num children survived: %d \n", ...
-            sum(parent_child_indicator == 0));
-        fprintf("Crossover time: %2.6f\n", c_over_time);
-        fprintf("Mutation time: %2.6f\n", mutation_time);
-        fprintf("Best parent: %d\n", best_parent);
-        fprintf("Best child: %d\n", best_child);
-        fprintf("Best pre-mutate cand: %d\n", best_pre_mutate);
-        fprintf("Best post-mutate cand: %d\n", best_post_mutate);
-        
-        % Add to diagnostics table
-        % Columns: Generation#, Best makespan in gen, Best makespan,
-        % AvgFit, MinFit, MaxFit NumParentsSurvive, NumChildrenSurvive
-        gen_result = [generation_counter, new_gen_makespan, best_makespan, ...
-            round(mean(makespan_mat)), ...
-            round(min(makespan_mat)), ...
-            round(max(makespan_mat)), ...
-            sum(parent_child_indicator == 1), ...
-            sum(parent_child_indicator == 0)];
-        diags_array = [diags_array; gen_result];
+        if diagnose
+            %Output Diagnostics
+            clc
+            fprintf("Generation: %d \n", generation_counter);
+            fprintf("Best makespan in generation: %d \n", new_gen_makespan);
+            %fprintf("Best generation makespan: %d \n", best_generation{3});
+            fprintf("Best makespan: %d \n", best_makespan);
+            fprintf("Avg fitness: %d \n", round(mean(makespan_mat)));
+            fprintf("Min fitness: %d \n", round(min(makespan_mat)));
+            fprintf("Max fitness: %d \n", round(max(makespan_mat)));
+            fprintf("Num gens no improvement: %d \n", no_chg_generations);
+            fprintf("Num parents survived: %d \n", ...
+                sum(parent_child_indicator == 1));
+            fprintf("Num children survived: %d \n", ...
+                sum(parent_child_indicator == 0));
+            fprintf("Crossover time: %2.6f\n", c_over_time);
+            fprintf("Mutation time: %2.6f\n", mutation_time);
+            fprintf("Best parent: %d\n", best_parent);
+            fprintf("Best child: %d\n", best_child);
+            fprintf("Best pre-mutate cand: %d\n", best_pre_mutate);
+            fprintf("Best post-mutate cand: %d\n", best_post_mutate);
+
+            % Add to diagnostics table
+            % Columns: Generation#, Best makespan in gen, Best makespan,
+            % AvgFit, MinFit, MaxFit NumParentsSurvive, NumChildrenSurvive
+            gen_result = [generation_counter, new_gen_makespan, best_makespan, ...
+                round(mean(makespan_mat)), ...
+                round(min(makespan_mat)), ...
+                round(max(makespan_mat)), ...
+                sum(parent_child_indicator == 1), ...
+                sum(parent_child_indicator == 0)];
+            diags_array = [diags_array; gen_result];
+        end
 
     end
 

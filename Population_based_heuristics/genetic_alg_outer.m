@@ -79,11 +79,13 @@ function [best_makespan, time_taken, init_makespan, best_output,...
     best_gen_num, generation_counter, diags_array] = ...
             genetic_alg_outer(input_array, init_pop_size, simple_prop, ... %inits
             init_mutate_method, init_mutate_num_shuffles, ... %inits
-            parent_selection, parent_ratio, crossover_method, ... %crossover
+            parent_selection, parent_ratio, cross_over_method, ... %crossover
             mutation_select_method, mutation_method, mutate_num_shuffles, ... %mutation
             popn_cull, cull_prop, ... %culling
             num_gen_no_improve, max_gens_allowed)
-
+    
+    %Move outside
+    diagnose = true;
 
     init_method = @init_mix_shuff_rand;
     init_args = {init_pop_size, simple_prop, init_mutate_method, ...
@@ -102,10 +104,21 @@ function [best_makespan, time_taken, init_makespan, best_output,...
         error("Invalid Fitness Selection Method");
     end
     
-    %TODO: These need to all give consistent outputs perform can replace
-    %here
+    %Cross_over function
+    cross_over_inner_args = {};
+    if cross_over_method == "cutover_split"
+        cross_over_inner_method = @c_over_split;
+    elseif cross_over_method == "rndm_split"
+        cross_over_inner_method = @c_over_rndm_split;
+    elseif cross_over_method == "c_over_1"
+        cross_over_inner_method = @c_over_1;
+    elseif cross_over_method == "c_over_2"
+        cross_over_inner_method = @c_over_2;
+    else
+        error("Invalid Crossover Method");
+    end
     cross_over_method = @crossover_population;
-    cross_over_args = {crossover_method};
+    cross_over_args = {cross_over_inner_method, cross_over_inner_args};
 
     %Use the fitness function to select the parents, with bias given to
     %fitter parents
@@ -149,5 +162,5 @@ function [best_makespan, time_taken, init_makespan, best_output,...
             mutate_method, mutate_args, ... %mutation
             pop_cull_method, pop_cull_args, ... %culling
             init_pop_size, parent_ratio, ...
-            num_gen_no_improve, max_gens_allowed);%other args
+            num_gen_no_improve, max_gens_allowed, diagnose);%other args
 end
