@@ -50,12 +50,11 @@ elseif strcmp(method,'Genetic')
     profile on
     [outputMakespan, time_taken, init_makespan, outputArray, ...
         best_gen_num, generations, diags_array]...
-        = genetic_alg_outer(a, 200, 0.1, ... %inits
-        "rndom_mach_chg", floor(0.1*(size(a,2)-1)), ... %inits
-        "neg_exp", 5, "c_over_2", 0.13, ... %crossover
+        = genetic_alg_outer(a, 100, 0.1, ... %inits
+        "neg_exp", 10, "c_over_2", 0.13, ... %crossover
         "neg_exp", "all_genes_rndom_shuffle", floor(0.4*(size(a,2)-1)), ... %mutation
         "top_and_randsamp", 0.8, ... %culling
-        10, 100, ...  %termination
+        10, 20, ...  %termination
         true, ... %verbose/diagnose
         true); %parallelisation
     

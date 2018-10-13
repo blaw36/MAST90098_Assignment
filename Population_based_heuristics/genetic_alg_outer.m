@@ -176,8 +176,15 @@ function [best_makespan, time_taken, init_makespan, best_output,...
     %After mutate as uses the same mutation methods
     %TODO: Extend to init_simple_grad_rand
     init_method = @init_mix_shuff_rand;
-    init_args = {init_pop_size, simple_prop, mutate_method, mutate_args};
-
+    
+    % If parallel, double the size of the initial population - will be
+    % split into two batches later.
+    if parallel
+        init_args = {init_pop_size * 2, simple_prop, mutate_method, mutate_args};
+    else
+        init_args = {init_pop_size, simple_prop, mutate_method, mutate_args};
+    end
+    
     %Cull
     if popn_cull == "top"
         pop_cull_method = @cull_top_n;

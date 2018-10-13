@@ -132,100 +132,63 @@ function [best_makespan, time_taken, init_makespan, best_output,...
     % of generations
     while no_chg_generations <= num_gen_no_improve && ...
             generation_counter <= max_gens_allowed
-
-        [pop_mat, machine_cost_mat, makespan_mat, parent_child_indicator, ...
-            c_over_time, mutation_time, best_parent, best_child, ...
-            best_pre_mutate, best_post_mutate] = ...
-            genetic_alg_iteration(best_generation, pop_mat, makespan_mat, ...
-            machine_cost_mat, jobs_array_aug, num_machines, num_jobs, ...
-            parent_selection_method, parent_selection_args,... %parent sel
-            cross_over_method, cross_over_args, ... %crossover
-            mutate_select_method, mutate_select_args, ...
-            mutate_method, mutate_args, ... %mutation
-            pop_cull_method, pop_cull_args, ... %culling
-            init_pop_size, parent_ratio);
         
-%         %%% START HERE
-%         start_gen_makespan = best_generation{3};
-%         
-%         %Compute the probability of selecting the parents
-%         prob_parent_select = parent_selection_method(makespan_mat, ...
-%                                                 parent_selection_args{:});
-% 
-%         % Generate parent pairings for crossover
-%         parent_mat = generate_parents(prob_parent_select, ...
-%                                         parent_ratio, init_pop_size);
-%         num_children = size(parent_mat,1);
-%         best_parent = min(max(machine_cost_mat(parent_mat,:),[],2));
-% 
-%         % Crossover
-%         tic;
-%         [crossover_children, machine_cost_mat_children] = ...
-%                 cross_over_method(num_children, num_machines,...
-%                                     num_jobs, parent_mat, pop_mat,...
-%                                     machine_cost_mat, makespan_mat, ...
-%                                     jobs_array_aug, cross_over_args{:});
-%         c_over_time = toc;
-%         best_child = min(max(machine_cost_mat_children,[],2));
-%         
-%         % Combine children and parents for larger population
-%         combined_pop_mat = [pop_mat; crossover_children];
-% 
-%         combined_machine_cost_mat = [machine_cost_mat; machine_cost_mat_children];
-%         
-%         % 1 for parent, 0 for children
-%         parent_child_indicator = [ones(size(pop_mat,1),1); ...
-%                                     zeros(size(crossover_children,1),1)];
-% 
-%         combined_makespan_mat = max(combined_machine_cost_mat,[],2);
-% 
-%         %Select the elements for mutation
-%         prob_mutation_select = mutate_select_method(combined_makespan_mat, ...
-%                                                 mutate_select_args{:});
-%         
-%         % TODO: Should probably be inside function
-%         % Convert to between 0 and 1
-%         % The problem here is the min gets allocated 0, and the max gets
-%         % allocated 1
-%         min_prob = min(prob_mutation_select);
-%         max_prob = max(prob_mutation_select);
-%         prob_mutation_select = ...
-%             (prob_mutation_select - min_prob)./...
-%             (max_prob - min_prob );
-%         
-%         random_numbers = rand(size(combined_makespan_mat,1),1);
-%         indivs_to_mutate = find(random_numbers <= prob_mutation_select)';
-% 
-%         % Mutate
-%         best_pre_mutate = min(max(combined_machine_cost_mat(...
-%                                             indivs_to_mutate,:),[],2));
-%         
-%         tic;
-%         [combined_pop_mat, combined_machine_cost_mat] = ...
-%                 mutate_method(indivs_to_mutate, combined_pop_mat, ...
-%                 combined_machine_cost_mat, num_machines, num_jobs, ...
-%                 jobs_array_aug, mutate_args{:});
-%         
-%         mutation_time = toc;
-%         best_post_mutate = min(max(combined_machine_cost_mat(...
-%                                                 indivs_to_mutate,:),[],2));
-%         
-%         combined_makespan_mat = max(combined_machine_cost_mat,[],2);
-%         
-%         %Cull the Population
-%         % TODO: Dynamic Culling, more or less pop over run time?
-%         survivors = pop_cull_method(combined_pop_mat,...
-%                                     combined_makespan_mat, ...
-%                                     init_pop_size, pop_cull_args{:});
-%         
-% 
-%         pop_mat = combined_pop_mat(survivors, :);
-%         %machine_cost_mat = combined_machine_cost_mat(indivs_to_keep, :);
-%         machine_cost_mat = calc_machine_costs(jobs_array_aug, pop_mat, ...
-%                                                 num_machines);
-%         makespan_mat = combined_makespan_mat(survivors, :);
-%         parent_child_indicator = parent_child_indicator(survivors, :);
-%         %%% STOP HERE
+        if parallel
+            % Split data into two even batches
+                b1 = logical(zeros(2*init_pop_size,1));
+                b2 = b1;
+                b1(randperm(2*init_pop_size,init_pop_size)) = 1;
+                b2 = logical(1 - b1);
+                b = [b1, b2];
+                for i = 1:2
+                    parallel_data(i).pop_mat = pop_mat(b(:,i),:);
+                    parallel_data(i).machine_cost_mat = ...
+                        machine_cost_mat(b(:,i),:);
+                    parallel_data(i).makespan_mat = makespan_mat(b(:,i),:);
+                    parallel_data(i).parent_child_indicator = {};
+                end
+            
+            parfor b = 1:2 % 2 processes
+                [parallel_data(b).pop_mat, ...
+                    parallel_data(b).machine_cost_mat, ...
+                    parallel_data(b).makespan_mat, ...
+                    parallel_data(b).parent_child_indicator] = ...
+                    genetic_alg_iteration(best_generation, ...
+                    parallel_data(b).pop_mat, ...
+                    parallel_data(b).makespan_mat, ...
+                    parallel_data(b).machine_cost_mat, ...
+                    jobs_array_aug, num_machines, num_jobs, ...
+                    parent_selection_method, parent_selection_args,... %parent sel
+                    cross_over_method, cross_over_args, ... %crossover
+                    mutate_select_method, mutate_select_args, ...
+                    mutate_method, mutate_args, ... %mutation
+                    pop_cull_method, pop_cull_args, ... %culling
+                    init_pop_size, parent_ratio);
+            end
+            
+            pop_mat = [parallel_data(1).pop_mat; parallel_data(2).pop_mat];
+            machine_cost_mat = [parallel_data(1).machine_cost_mat; ...
+                parallel_data(2).machine_cost_mat];
+            makespan_mat = [parallel_data(1).makespan_mat; ...
+                parallel_data(2).makespan_mat];
+            parent_child_indicator = [parallel_data(1).parent_child_indicator; ...
+                parallel_data(2).parent_child_indicator];
+            
+        else
+
+            [pop_mat, machine_cost_mat, makespan_mat, parent_child_indicator, ...
+                c_over_time, mutation_time, best_parent, best_child, ...
+                best_pre_mutate, best_post_mutate] = ...
+                genetic_alg_iteration(best_generation, pop_mat, makespan_mat, ...
+                machine_cost_mat, jobs_array_aug, num_machines, num_jobs, ...
+                parent_selection_method, parent_selection_args,... %parent sel
+                cross_over_method, cross_over_args, ... %crossover
+                mutate_select_method, mutate_select_args, ...
+                mutate_method, mutate_args, ... %mutation
+                pop_cull_method, pop_cull_args, ... %culling
+                init_pop_size, parent_ratio);
+        
+        end
         
         [new_gen_makespan,indiv_indx] = min(makespan_mat);
 
@@ -260,12 +223,15 @@ function [best_makespan, time_taken, init_makespan, best_output,...
                 sum(parent_child_indicator == 1));
             fprintf("Num children survived: %d \n", ...
                 sum(parent_child_indicator == 0));
-            fprintf("Crossover time: %2.6f\n", c_over_time);
-            fprintf("Mutation time: %2.6f\n", mutation_time);
-            fprintf("Best parent: %d\n", best_parent);
-            fprintf("Best child: %d\n", best_child);
-            fprintf("Best pre-mutate cand: %d\n", best_pre_mutate);
-            fprintf("Best post-mutate cand: %d\n", best_post_mutate);
+            
+            if ~parallel    
+                fprintf("Crossover time: %2.6f\n", c_over_time);
+                fprintf("Mutation time: %2.6f\n", mutation_time);
+                fprintf("Best parent: %d\n", best_parent);
+                fprintf("Best child: %d\n", best_child);
+                fprintf("Best pre-mutate cand: %d\n", best_pre_mutate);
+                fprintf("Best post-mutate cand: %d\n", best_post_mutate);
+            end
 
             % Add to diagnostics table
             % Columns: Generation#, Best makespan in gen, Best makespan,
