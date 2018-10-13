@@ -127,44 +127,31 @@ function [child_array, child_machine_cost] = c_over_2(parent_genes, ...
     %----------------------------------------------------------------------
     %----------------------------------------------------------------------
     
-    %Assign the collision free parent machines to child, removing them from
-    %unassigned
-    for i = 1:length(p1_machines)
-        parent_machine = p1_machines(i);
-        parent_machine_jobs = sort(all_jobs(parent_genes(1,:)==parent_machine));
-        if isempty(parent_machine_jobs)
-            continue
-        end
-        
-        child_array(parent_machine_jobs) = child_indices(child_machine);
-        child_machine_cost(child_indices(child_machine)) = ...
-                    parent_machine_cost(1, parent_machine);
-        child_machine = child_machine + 1;
-        
-        un_assigned_jobs = un_assigned_jobs(...
-                        ~ismembc(un_assigned_jobs,parent_machine_jobs));
-    end
+    %Can move this somewhere else later
+    p_machines = zeros(2, num_machines);
+    p_machines(1,p1_machines) = 1;
+    p_machines(2,p2_machines) = 1;
     
-    for i = 1:length(p2_machines)
-        if child_machine > num_machines
-            break
+    for j = 1:2
+        for i = 1:num_machines
+            if ~p_machines(j,i)
+                continue
+            end
+            parent_machine = i;
+            parent_machine_jobs = sort(all_jobs(parent_genes(j,:)==parent_machine));
+            if isempty(parent_machine_jobs)
+                continue
+            end
+
+            child_array(parent_machine_jobs) = child_indices(child_machine);
+            child_machine_cost(child_indices(child_machine)) = ...
+                        parent_machine_cost(j, parent_machine);
+            child_machine = child_machine + 1;
         end
-        
-        parent_machine = p2_machines(i);
-        parent_machine_jobs = sort(all_jobs(parent_genes(2,:)==parent_machine));
-        if isempty(parent_machine_jobs)
-            continue
-        end
-        
-        child_array(parent_machine_jobs) = child_indices(child_machine);
-        child_machine_cost(child_indices(child_machine)) = ...
-                    parent_machine_cost(2, parent_machine);
-        child_machine = child_machine + 1;
-        
-       un_assigned_jobs = un_assigned_jobs(...
-                        ~ismembc(un_assigned_jobs,parent_machine_jobs));
     end
-    
+    %Check which jobs still need to be assigned
+    un_assigned_jobs = all_jobs(~child_array);
+                      
     % Assign the remaining jobs
     % Leaving it as is corresponds to greedy,(due to how jobs have been 
     % sorted) seems the best    
