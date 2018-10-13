@@ -98,6 +98,7 @@ function [child_array, child_machine_cost] = c_over_2(parent_genes, ...
     
     %no collisions so can just add
     union_jobs = p1_job_vec + p2_job_vec;
+    parent_genes(most_fit_parent,:);
     
     %a = all machines from most fit parent with at least one job not in the
     %union
@@ -109,7 +110,12 @@ function [child_array, child_machine_cost] = c_over_2(parent_genes, ...
     b = tmp([true;diff(tmp(:))>0]);
 %     b = unique(union_jobs.*parent_genes(most_fit_parent,:));
     tmp = sort(a(~ismembc(a,b)));
-    added_machines = tmp([true;diff(tmp(:))>0]);
+    if ~isempty(tmp)
+        added_machines = tmp([true;diff(tmp(:))>0]);
+    else
+        added_machines = [];
+    end
+    
 %     added_machines = unique(a(~ismembc(a,b)));
     
     if most_fit_parent == 1
