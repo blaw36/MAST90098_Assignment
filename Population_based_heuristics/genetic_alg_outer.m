@@ -78,18 +78,10 @@
 function [best_makespan, time_taken, init_makespan, best_output,...
     best_gen_num, generation_counter, diags_array] = ...
             genetic_alg_outer(input_array, init_pop_size, simple_prop, ... %inits
-            init_mutate_method, init_mutate_num_shuffles, ... %inits
             parent_selection, parent_ratio, cross_over_method, less_fit_c_over_machs, ... %crossover
             mutation_select_method, mutation_method, mutate_num_shuffles, ... %mutation
             popn_cull, cull_prop, ... %culling
             num_gen_no_improve, max_gens_allowed, diagnose)
-    
-    %Move outside
-%     diagnose = true;
-
-    init_method = @init_mix_shuff_rand;
-    init_args = {init_pop_size, simple_prop, init_mutate_method, ...
-                init_mutate_num_shuffles};
    
     %Use the fitness function to select the parents, with bias given to
     %fitter parents
@@ -175,6 +167,11 @@ function [best_makespan, time_taken, init_makespan, best_output,...
         mutate_method = @all_genes_rndom_shuffle;
         mutate_args = {mutate_num_shuffles};
     end
+    
+    %After mutate as uses the same mutation methods
+    %TODO: Extend to init_simple_grad_rand
+    init_method = @init_mix_shuff_rand;
+    init_args = {init_pop_size, simple_prop, mutate_method, mutate_args};
 
     %Cull
     if popn_cull == "top"

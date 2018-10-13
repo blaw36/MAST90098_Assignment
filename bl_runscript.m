@@ -48,9 +48,8 @@ elseif strcmp(method,'Genetic')
     % it with 0s to keep in line with the outputs from GLS and VDS.
     [outputMakespan, time_taken, init_makespan, outputArray, ...
         best_gen_num, generations, diags_array]...
-        = genetic_alg_outer(a, 500, 0.1, ... %inits
-        "rndom_mach_chg", floor(0.1*(size(a,2)-1)), ... %inits
-        "neg_exp", 2, "c_over_2", 0.25,... %crossover
+        = genetic_alg_outer(a, 150, 0.1, ... %inits
+        "neg_exp", 8, "c_over_2", 0.25,... %crossover
         "neg_exp", "all_genes_rndom_shuffle", floor(0.6*(size(a,2)-1)), ... %mutation
         "top_and_randsamp", 0.7, ... %culling
         10, 100, true); %termination
