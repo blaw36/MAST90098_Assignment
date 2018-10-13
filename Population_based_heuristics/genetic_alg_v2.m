@@ -114,13 +114,12 @@ function [best_makespan, time_taken, init_makespan, best_output,...
     % Each row corresponds to an individual, each column corresponds to the machine
     % allocated to that job (job order same as in input_array_aug, for all
     % individuals)
-    [pop_mat, num_jobs, num_machines, jobs_array_aug] = init_mix_shuff_rand(...
-        input_array_aug, init_pop_size, simple_prop,...
-        init_mutate_method, init_mutate_num_shuffles);
+    [pop_mat, machine_cost_mat, num_jobs, num_machines, jobs_array_aug] =...
+        init_mix_shuff_rand(...
+                            input_array_aug, init_pop_size, simple_prop,...
+                            init_mutate_method, init_mutate_num_shuffles);
 
     % Calculate cost per machine for each individual, as well as makespan
-    machine_cost_mat = calc_machine_costs(jobs_array_aug, pop_mat, ...
-        num_machines);
     makespan_mat = max(machine_cost_mat,[],2);
 
     % Begin iterations
@@ -221,13 +220,44 @@ function [best_makespan, time_taken, init_makespan, best_output,...
         indivs_to_mutate = find(random_numbers <= prob_mutation_select)';
 
         % Mutate
+        
+        % Hard to justify improvements on mutation, and all seem to
+        % provide enough randomness. Main driver of performance is probably in
+        % the crossover. This method was originally designed to increase
+        % mutation amount on less fit individuals, but hard to see the
+        % difference. Shuffle_mat is a matrix of probabilities, and these would
+        % be multiplied by the 'num_shuffles' for each i in genes_to_mutate to
+        % get a new mutation amount for each mutation candidate.
+        %     % Mutation length for each gene - lower makespan, lower number
+        %     shuffle_mat = fitness_minmaxLinear(...
+        %         max(combined_machine_cost_mat,[],2));
+        if mutate_method == "mutate_greedy"
+            mutate_method_inner = @mutate_greedy;
+            mutate_method_inner_args = {mutate_num_shuffles};
+        % Pick mutation method for each gene
+        elseif mutate_method == "pair_swap"
+            mutate_method_inner = @shuffle_pair_swap;
+            mutate_method_inner_args = {};
+        elseif mutate_method == "rndom_mach_chg"
+            mutate_method_inner = @shuffle_rndom_mach_chg;
+            mutate_method_inner_args = {mutate_num_shuffles};
+        elseif mutate_method == "shuffle_rndom_mach_chg_load"
+            mutate_method_inner = @shuffle_rndom_mach_chg;
+            mutate_method_inner_args = {mutate_num_shuffles};
+        else
+            error("Invalid Mutation Method");
+        end
+        
+        best_pre_mutate = min(max(combined_machine_cost_mat(...
+                                            indivs_to_mutate,:),[],2));
         tic;
-        [combined_pop_mat, combined_machine_cost_mat, ...
-            best_pre_mutate, best_post_mutate] = ...
+        [combined_pop_mat, combined_machine_cost_mat] = ...
                 mutate_population(indivs_to_mutate, combined_pop_mat, ...
                 combined_machine_cost_mat, num_machines, num_jobs, ...
-                jobs_array_aug, mutate_method, mutate_num_shuffles);
+                jobs_array_aug, mutate_method_inner, mutate_method_inner_args);
         mutation_time = toc;
+        best_post_mutate = min(max(combined_machine_cost_mat(...
+                                                indivs_to_mutate,:),[],2));
         
         combined_makespan_mat = max(combined_machine_cost_mat,[],2);
         

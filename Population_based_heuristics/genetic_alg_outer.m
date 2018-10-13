@@ -133,9 +133,36 @@ function [best_makespan, time_taken, init_makespan, best_output,...
         error("Invalid Fitness Selection Method");
     end
     
-    %TODO: Need refactor for this change as well
+    % Mutate
+        
+    % Hard to justify improvements on mutation, and all seem to
+    % provide enough randomness. Main driver of performance is probably in
+    % the crossover. This method was originally designed to increase
+    % mutation amount on less fit individuals, but hard to see the
+    % difference. Shuffle_mat is a matrix of probabilities, and these would
+    % be multiplied by the 'num_shuffles' for each i in genes_to_mutate to
+    % get a new mutation amount for each mutation candidate.
+    %     % Mutation length for each gene - lower makespan, lower number
+    %     shuffle_mat = fitness_minmaxLinear(...
+    %         max(combined_machine_cost_mat,[],2));
+    if mutation_method == "mutate_greedy"
+        mutate_method_inner = @mutate_greedy;
+        mutate_method_inner_args = {mutate_num_shuffles};
+    % Pick mutation method for each gene
+    elseif mutation_method == "pair_swap"
+        mutate_method_inner = @shuffle_pair_swap;
+        mutate_method_inner_args = {};
+    elseif mutation_method == "rndom_mach_chg"
+        mutate_method_inner = @shuffle_rndom_mach_chg;
+        mutate_method_inner_args = {mutate_num_shuffles};
+    elseif mutation_method == "shuffle_rndom_mach_chg_load"
+        mutate_method_inner = @shuffle_rndom_mach_chg;
+        mutate_method_inner_args = {mutate_num_shuffles};
+    else
+        error("Invalid Mutation Method");
+    end
     mutate_method = @mutate_population;
-    mutate_args = {mutation_method, mutate_num_shuffles};
+    mutate_args = {mutate_method_inner, mutate_method_inner_args};
     
     %Cull
     if popn_cull == "top"

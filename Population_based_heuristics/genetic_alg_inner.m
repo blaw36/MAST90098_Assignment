@@ -91,12 +91,10 @@ function [best_makespan, time_taken, init_makespan, best_output,...
     % Each row corresponds to an individual, each column corresponds to the machine
     % allocated to that job (job order same as in input_array_aug, for all
     % individuals)
-    [pop_mat, num_jobs, num_machines, jobs_array_aug] = ...
+    [pop_mat, machine_cost_mat, num_jobs, num_machines, jobs_array_aug] = ...
                                 init_method(input_array_aug, init_args{:});
 
-    % Calculate cost per machine for each individual, as well as makespan
-    machine_cost_mat = calc_machine_costs(jobs_array_aug, pop_mat, ...
-                                                            num_machines);
+    % Calculate makespan
     makespan_mat = max(machine_cost_mat,[],2);
 
     % Begin iterations

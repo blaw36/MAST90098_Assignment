@@ -4,12 +4,12 @@
 % Do it such that more loaded machines are more likely to have stuff
 % removed, less loaded more likely to have stuff allocated
 
-function [indiv_array, costs_shuffled, machines_shuffled] = ...
+function [indiv_array, machine_cost_mat] = ...
     shuffle_rndom_mach_chg_load(indiv_array, num_machines, num_jobs, ...
-    k, indiv_costs, jobs_array_aug)
-    
+                                machine_cost_mat, jobs_array_aug, k)
+                                
     % Pick k distinct jobs - higher cost, higher prob
-    increasing_probs = fitness_negexp(indiv_costs, true);
+    increasing_probs = fitness_negexp(machine_cost_mat, true);
     % Alter the indiv_costs array so they reflect probs of the machine
     % numbers
     indiv_array_inc_probs = increasing_probs(indiv_array);
@@ -22,7 +22,7 @@ function [indiv_array, costs_shuffled, machines_shuffled] = ...
     
     % Reassign machines make sure each is assigned to a new machine
     % Probabilities go the other way this time
-    decreasing_probs = fitness_negexp(indiv_costs, false);
+    decreasing_probs = fitness_negexp(machine_cost_mat, false);
     new_assign = randsample(1:num_machines,k,true,decreasing_probs);
     
     % Preventing matches here may be difficult - disregard
@@ -46,4 +46,12 @@ function [indiv_array, costs_shuffled, machines_shuffled] = ...
     
     costs_shuffled = jobs_array_aug(jobs_shuffled)';
     
+    % Update Costs
+    changes = zeros(size(costs_shuffled,1),num_machines);
+        for j = 1:size(machines_shuffled,1)
+            changes(j,machines_shuffled(j,:)) = ...
+                [-costs_shuffled(j,:), costs_shuffled(j,:)];
+        end
+    changes = sum(changes, 1);
+    machine_cost_mat = machine_cost_mat + changes;
 end

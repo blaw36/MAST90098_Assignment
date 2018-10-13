@@ -2,9 +2,9 @@
 % initialises GA population by using a mix of (slightly) shuffled simples
 % and random to a ratio
 
-function [pop_mat, num_jobs, num_machines, jobs_array_aug] = ...
+function [pop_mat, machine_cost_mat, num_jobs, num_machines, jobs_array_aug] = ...
     init_mix_shuff_rand(input_array_aug, init_pop_size, shuff_prop, ...
-    shuff_method,num_shuffles)
+                        shuff_method,num_shuffles)
 
     shuffled_simples_indiv = round(shuff_prop*init_pop_size);
     random_indiv = init_pop_size - shuffled_simples_indiv;
@@ -22,15 +22,18 @@ function [pop_mat, num_jobs, num_machines, jobs_array_aug] = ...
     tmp = initialise_simple(input_array_aug, num_jobs, num_machines);
     %[~, ~, ~, tmp] = gls(input_array_aug, 2, 'simple', true);
     tmp = tmp(:,2)';
+    
+    tmp_cost_mat = calc_machine_costs(jobs_array_aug, tmp, num_machines);
+    
     for i = 1:shuffled_simples_indiv
         % Do random pairwise shuffling of some elements here otherwise
         % these solutions are all the same (as this method is not random)
         if shuff_method == "pair_swap"
             indiv_array = shuffle_pair_swap(tmp, num_machines, ...
-                num_jobs);
+                num_jobs, tmp_cost_mat, jobs_array_aug);
         elseif shuff_method == "rndom_mach_chg"
             indiv_array = shuffle_rndom_mach_chg(tmp, num_machines, ...
-                num_jobs, num_shuffles);
+                num_jobs, tmp_cost_mat, jobs_array_aug, num_shuffles);
         end
 
         simple_indiv_mat(i,:) = indiv_array ;
@@ -47,5 +50,6 @@ function [pop_mat, num_jobs, num_machines, jobs_array_aug] = ...
     end
 
     pop_mat = [simple_indiv_mat; random_indiv_mat];
-    
+    machine_cost_mat = calc_machine_costs(jobs_array_aug, pop_mat, ...
+        num_machines);
 end

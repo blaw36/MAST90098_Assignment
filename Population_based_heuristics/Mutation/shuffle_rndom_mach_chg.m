@@ -12,9 +12,9 @@
 % mentions machine from and machine to.
 % costs_shuffled is cost of the jobs which have been shuffled (k x 1)
 
-function [indiv_array, costs_shuffled, machines_shuffled] = ...
+function [indiv_array, machine_cost_mat] = ...
     shuffle_rndom_mach_chg(indiv_array, num_machines, num_jobs, ...
-    k, jobs_array_aug)
+                           machine_cost_mat, jobs_array_aug, k)
     
     % Pick k distinct jobs
     jobs_shuffled = randperm(num_jobs,k); % without replacement
@@ -43,4 +43,12 @@ function [indiv_array, costs_shuffled, machines_shuffled] = ...
     
     costs_shuffled = jobs_array_aug(jobs_shuffled)';
     
+    % Update Costs
+    changes = zeros(size(costs_shuffled,1),num_machines);
+        for j = 1:size(machines_shuffled,1)
+            changes(j,machines_shuffled(j,:)) = ...
+                [-costs_shuffled(j,:), costs_shuffled(j,:)];
+        end
+    changes = sum(changes, 1);
+    machine_cost_mat = machine_cost_mat + changes;
 end
