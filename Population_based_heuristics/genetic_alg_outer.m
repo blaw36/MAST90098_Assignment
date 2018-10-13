@@ -145,25 +145,30 @@ function [best_makespan, time_taken, init_makespan, best_output,...
     %     % Mutation length for each gene - lower makespan, lower number
     %     shuffle_mat = fitness_minmaxLinear(...
     %         max(combined_machine_cost_mat,[],2));
-    if mutation_method == "mutate_greedy"
-        mutate_method_inner = @mutate_greedy;
-        mutate_method_inner_args = {mutate_num_shuffles};
-    % Pick mutation method for each gene
-    elseif mutation_method == "pair_swap"
-        mutate_method_inner = @shuffle_pair_swap;
-        mutate_method_inner_args = {};
-    elseif mutation_method == "rndom_mach_chg"
-        mutate_method_inner = @shuffle_rndom_mach_chg;
-        mutate_method_inner_args = {mutate_num_shuffles};
-    elseif mutation_method == "shuffle_rndom_mach_chg_load"
-        mutate_method_inner = @shuffle_rndom_mach_chg;
-        mutate_method_inner_args = {mutate_num_shuffles};
+    if mutation_method~= "all_genes_rndom_shuffle"
+        if mutation_method == "mutate_greedy"
+            mutate_method_inner = @mutate_greedy;
+            mutate_method_inner_args = {mutate_num_shuffles};
+        % Pick mutation method for each gene
+        elseif mutation_method == "pair_swap"
+            mutate_method_inner = @shuffle_pair_swap;
+            mutate_method_inner_args = {};
+        elseif mutation_method == "rndom_mach_chg"
+            mutate_method_inner = @shuffle_rndom_mach_chg;
+            mutate_method_inner_args = {mutate_num_shuffles};
+        elseif mutation_method == "shuffle_rndom_mach_chg_load"
+            mutate_method_inner = @shuffle_rndom_mach_chg;
+            mutate_method_inner_args = {mutate_num_shuffles};
+        else
+            error("Invalid Mutation Method");
+        end
+        mutate_method = @mutate_population;
+        mutate_args = {mutate_method_inner, mutate_method_inner_args};
     else
-        error("Invalid Mutation Method");
+        mutate_method = @all_genes_rndom_shuffle;
+        mutate_args = {mutate_num_shuffles};
     end
-    mutate_method = @mutate_population;
-    mutate_args = {mutate_method_inner, mutate_method_inner_args};
-    
+
     %Cull
     if popn_cull == "top"
         pop_cull_method = @cull_top_n;

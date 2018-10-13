@@ -1,4 +1,4 @@
-%% shuffle_rndom_mach_chg
+%% shuffle_rndom_mach_chg.m
 % pick k elements of the machine array
 % generate a new machine number for it
 
