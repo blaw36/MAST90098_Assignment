@@ -82,7 +82,9 @@ function [best_makespan, time_taken, init_makespan, best_output,...
             parent_selection, parent_ratio, cross_over_method, less_fit_c_over_machs, ... %crossover
             mutation_select_method, mutation_method, mutate_num_shuffles, ... %mutation
             popn_cull, cull_prop, ... %culling
-            num_gen_no_improve, max_gens_allowed, diagnose)
+            num_gen_no_improve, max_gens_allowed, ... %termination
+            diagnose, ... %verbose/diagnose
+            parallel)
     
     %Move outside
 %     diagnose = true;
@@ -201,5 +203,6 @@ function [best_makespan, time_taken, init_makespan, best_output,...
             mutate_method, mutate_args, ... %mutation
             pop_cull_method, pop_cull_args, ... %culling
             init_pop_size, parent_ratio, ...
-            num_gen_no_improve, max_gens_allowed, diagnose);%other args
+            num_gen_no_improve, max_gens_allowed, ... %termination
+            diagnose, parallel);%other args
 end
