@@ -86,6 +86,9 @@ function [child_array, child_machine_cost] = c_over_2_simplified(parent_genes, .
     
     for j = 1:2
         for i = 1:num_machines
+            if child_machine>num_machines
+                break
+            end
             if ~p_machines(j,i)
                 continue
             end
