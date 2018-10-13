@@ -36,7 +36,15 @@ function [child_array, child_machine_cost] = c_over_2(parent_genes, ...
     %Find and record the least_fit_parent, occasionaly switch which parent
     %is treated as which, for the sake of noise (Might be a better way to
     %inject noise, or maybe shouldn't even be here)
-    [~, least_fit_parent] = min(parent_fitness);
+    
+     % Faster than 'min' function in this case, for two parents
+    if parent_fitness(1) < parent_fitness(2)
+        least_fit_parent = 1;
+    else
+        least_fit_parent = 2;
+    end
+%     [~, least_fit_parent] = min(parent_fitness);
+
     if rand<0.1
         least_fit_parent = 1 + mod(least_fit_parent,2);
     end
@@ -93,7 +101,8 @@ function [child_array, child_machine_cost] = c_over_2(parent_genes, ...
     
     %a = all machines from most fit parent with at least one job not in the
     %union
-    a = (double(~union_jobs).*parent_genes(most_fit_parent,:));
+    a = ((1-union_jobs).*parent_genes(most_fit_parent,:));
+%     a = (double(~union_jobs).*parent_genes(most_fit_parent,:));
     %b = all machines from most fit parent with at least one job in the
     %union
     tmp = sort(union_jobs.*parent_genes(most_fit_parent,:));

@@ -1,4 +1,4 @@
-%% genetic_alg_inner.m
+%% genetic_alg_outer.m
 % uses a genetic algorithm population heuristic method for solving the
 % makespan problem
 
@@ -79,13 +79,13 @@ function [best_makespan, time_taken, init_makespan, best_output,...
     best_gen_num, generation_counter, diags_array] = ...
             genetic_alg_outer(input_array, init_pop_size, simple_prop, ... %inits
             init_mutate_method, init_mutate_num_shuffles, ... %inits
-            parent_selection, parent_ratio, cross_over_method, ... %crossover
+            parent_selection, parent_ratio, cross_over_method, less_fit_c_over_machs, ... %crossover
             mutation_select_method, mutation_method, mutate_num_shuffles, ... %mutation
             popn_cull, cull_prop, ... %culling
-            num_gen_no_improve, max_gens_allowed)
+            num_gen_no_improve, max_gens_allowed, diagnose)
     
     %Move outside
-    diagnose = true;
+%     diagnose = true;
 
     init_method = @init_mix_shuff_rand;
     init_args = {init_pop_size, simple_prop, init_mutate_method, ...
@@ -108,12 +108,19 @@ function [best_makespan, time_taken, init_makespan, best_output,...
     cross_over_inner_args = {};
     if cross_over_method == "cutover_split"
         cross_over_inner_method = @c_over_split;
+        cross_over_inner_args = {};
     elseif cross_over_method == "rndm_split"
         cross_over_inner_method = @c_over_rndm_split;
+        cross_over_inner_args = {};
     elseif cross_over_method == "c_over_1"
         cross_over_inner_method = @c_over_1;
+        cross_over_inner_args = {};
     elseif cross_over_method == "c_over_2"
         cross_over_inner_method = @c_over_2;
+        cross_over_inner_args = {};
+    elseif cross_over_method == "c_over_2_simplified"
+        cross_over_inner_method = @c_over_2_simplified;
+        cross_over_inner_args = {less_fit_c_over_machs};
     else
         error("Invalid Crossover Method");
     end

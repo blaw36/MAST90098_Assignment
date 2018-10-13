@@ -48,16 +48,18 @@ elseif strcmp(method,'Genetic')
     % it with 0s to keep in line with the outputs from GLS and VDS.
     
     profile on
-    
+    for i = 1:5
     [outputMakespan, time_taken, init_makespan, outputArray, ...
         best_gen_num, generations, diags_array]...
-        = genetic_alg_v2(a, 500, 0.1, ... %inits
+        = genetic_alg_outer(a, 100, 0.1, ... %inits
         "rndom_mach_chg", floor(0.1*(size(a,2)-1)), ... %inits
-        "neg_exp", 6, "c_over_2", ... %crossover
-        "neg_exp", "mutate_greedy_refactor", floor(0.2*(size(a,2)-1)), ... %mutation
+        "neg_exp", 16, "c_over_2", 0.25, ... %crossover
+        "neg_exp", "mutate_greedy", floor(0.2*(size(a,2)-1)), ... %mutation
         "top_and_randsamp", 0.8, ... %culling
-        10, 20); %termination
-    
+        10, 20, false); %termination
+    fprintf("mspan: %d; time: %2.4f \n", outputMakespan, time_taken);
+%     fprintf("time: %2.4f \n", time_taken);
+    end
     
     profile off
     profile viewer
