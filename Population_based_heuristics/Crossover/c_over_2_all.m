@@ -17,12 +17,13 @@ function [children, children_machine_cost] = c_over_2_all(...
     %parents_fitness = zeros(num_children, 2);
     parents_fitness = makespan_mat(parent_mat);
     %Find the least_fit_parents
+    %TODOL Shouldn't this be max
     [~, least_fit_parents] = max(parents_fitness,[],2);
-    %TODO: Inject some NOISE
-    
-    %TODO: Do this via vector bases addition
-    [~, most_fit_parents] = max(parents_fitness,[],2);
-    
+    %Inject a little bit of noise
+    rand_logical_indices = rand(1,num_children)<0.1;
+    least_fit_parents(rand_logical_indices) = ...
+                    1 + mod(least_fit_parents(rand_logical_indices),2);
+
     %parents_genes = zeros(num_children, num_jobs, 2);
     %parents_machine_cost = zeros(num_children, num_machines, 2);
     
@@ -43,6 +44,7 @@ function [children, children_machine_cost] = c_over_2_all(...
     tmp = parents_machine_cost(least_fit_parents~=1,:,1);
     parents_machine_cost(least_fit_parents~=1,:,1) = parents_machine_cost(least_fit_parents~=1,:,2);
     parents_machine_cost(least_fit_parents~=1,:,2) = tmp;
+    
     %----------------------------------------------------------------------
     %p_machines = zeros(num_children, num_machines, 2);
     
@@ -50,13 +52,14 @@ function [children, children_machine_cost] = c_over_2_all(...
     p_machines(:,:,2) = rand(num_children, num_machines)<1/3;
     p_machines(:,:,1) = rand(num_children, num_machines)<1/2;
     
+    %Find all of the jobs which are carried by these machines
     %job_inclusion_matrix = zeros(num_children, num_jobs,2);    
     %From 
     %https://au.mathworks.com/matlabcentral/answers/333359-using-a-matrix-as-an-index-to-another-matrix
     job_inclusion_matrix = zeros(num_children, num_jobs,2);
     for p = 1:2
-        for r = 1:num_children
-            job_inclusion_matrix(r, :, p) = p_machines(r, parents_genes(r,:,p), p);
+        for c = 1:num_children
+            job_inclusion_matrix(c, :, p) = p_machines(c, parents_genes(c,:,p), p);
         end
     end
     
@@ -64,18 +67,14 @@ function [children, children_machine_cost] = c_over_2_all(...
 %     parents_genes
 %     job_inclusion_matrix
 %     
-%     parents_genes(1,:,1)
-%     p_machines(1,:,1)
-%     p_machines(1,3,1)
-%     job_inclusion_matrix(1,:,1)
+%     temp1 = p_machines(1,:,1)
+%     temp2 = temp1(parents_genes(1,:,1))
 %     
-%     p_machines(1,parents_genes(1,:,1),1)
+%     pause
     
-    %Compute the collisions
-    
+    %Compute the collisions    
     
     %First find all jobs collisions
-    job_inclusion_matrix;
     jobs_collision_matrix = job_inclusion_matrix(:,:,1).*job_inclusion_matrix(:,:,2);
     
     %Next find which machines in the least fit machine cause these
@@ -84,73 +83,53 @@ function [children, children_machine_cost] = c_over_2_all(...
     tmp = sort(jobs_collision_matrix.*parents_genes(:,:,1),2);
     
     least_fit_machines_collision_matrix = zeros(num_children, num_machines);
-    for r = 1:num_children
-        row_tmp = tmp(r,[true,diff(tmp(r,:))>0]);
+    for c = 1:num_children
+        row_tmp = tmp(c,[true,diff(tmp(c,:))>0]);
         row_tmp(row_tmp==0) = [];
-        least_fit_machines_collision_matrix(r, row_tmp) = 1;
+        least_fit_machines_collision_matrix(c, row_tmp) = 1;
     end
-    
+
     %Remove the collision machines from the least fit machine
     p_machines(:,:,1) = p_machines(:,:,1)-least_fit_machines_collision_matrix;
     
     %Update the job_inclusion_matrix
-    for r = 1:num_children
-        job_inclusion_matrix(r, :, 1) = p_machines(r, parents_genes(r,:,1), 1);
+    for c = 1:num_children
+        job_inclusion_matrix(c, :, 1) = p_machines(c, parents_genes(c,:,1), 1);
     end
     
     %----------------------------------------------------------------------
+    %Want to now add every machine we can from the most fit parent such
+    %that no collisions are produced.
     
-%     %----------------------------------------------------------------------
-%     %----------------------------------------------------------------------
-%     %TODO: Better faster way
-%     
-%     %Add back in all the machines from most fit parent, that don't
-%     %make any new collisions
-%     
-%     %no collisions so can just add
-%     union_jobs = p1_job_vec + p2_job_vec;
-%     parent_genes(most_fit_parent,:);
-%     
-%     %a = all machines from most fit parent with at least one job not in the
-%     %union
-%     a = ((1-union_jobs).*parent_genes(most_fit_parent,:));
-% %     a = (double(~union_jobs).*parent_genes(most_fit_parent,:));
-%     %b = all machines from most fit parent with at least one job in the
-%     %union
-%     tmp = sort(union_jobs.*parent_genes(most_fit_parent,:));
-%     b = tmp([true;diff(tmp(:))>0]);
-% %     b = unique(union_jobs.*parent_genes(most_fit_parent,:));
-%     tmp = sort(a(~ismembc(a,b)));
-%     if ~isempty(tmp)
-%         added_machines = tmp([true;diff(tmp(:))>0]);
-%     else
-%         added_machines = [];
-%     end
-%     
-% %     added_machines = unique(a(~ismembc(a,b)));
-%     
-%     if most_fit_parent == 1
-%         p1_machines = sort([p1_machines,added_machines]);
-%     else
-%         p2_machines = sort([p2_machines,added_machines]);
-%     end
+    %Find all jobs that are currently covered, 
+    %   no collisions so can just add
+    union_jobs = job_inclusion_matrix(:,:,1)+job_inclusion_matrix(:,:,2);
+    %a = all machines from most fit parent with at least one job not in the
+    %union
+    a = (1-union_jobs).*parents_genes(:,:,2);
     
-    %----------------------------------------------------------------------
-    %----------------------------------------------------------------------
-                    
+    %b = all machines from most fit parent with at least one job in the
+    %union
+    b = sort(union_jobs.*parents_genes(:,:,2),2);
+    for c = 1:num_children
+        row_b = b(c, [true,diff(b(c,:))>0]);
+        can_add = a(c,(~ismembc(a(c,:),row_b)));
+        p_machines(c,can_add(can_add>0),2) = 1;
+    end
+    
+    %----------------------------------------------------------------------  
     children = zeros(num_children,num_jobs);
     children_machine_cost = zeros(num_children,num_machines);
-    children_machine = ones(1, num_children); %Probs don't need if doing correctly
-    %children_indices = randperm(num_machines,num_machines);
     [~, temp] = sort(rand(num_machines, num_children));
     children_indices = temp';
     
     all_jobs = 1:num_jobs;
     
     for c = 1:num_children
+        child_machine = 1;
         for p = 1:2
             for k = 1:num_machines
-                if children_machine(c)>num_machines
+                if child_machine>num_machines
                     break
                 end
                 if ~p_machines(c,k,p)
@@ -162,10 +141,10 @@ function [children, children_machine_cost] = c_over_2_all(...
                     continue
                 end
 
-                children(c,parent_machine_jobs) = children_indices(c,(children_machine(c)));
-                children_machine_cost(c, children_indices(c,(children_machine(c)))) = ...
+                children(c,parent_machine_jobs) = children_indices(c,child_machine);
+                children_machine_cost(c, children_indices(c,child_machine)) = ...
                             parents_machine_cost(c, parent_machine, p);
-                children_machine(c) = children_machine(c) + 1;
+                child_machine = child_machine + 1;
             end
         end
         %Check which jobs still need to be assigned
@@ -175,14 +154,15 @@ function [children, children_machine_cost] = c_over_2_all(...
         % Leaving it as is corresponds to greedy,(due to how jobs have been 
         % sorted) seems the best    
         for job = un_assigned_jobs
-            [cost, loc] = min(children_machine_cost(c));
+            [cost, loc] = min(children_machine_cost(c,:));
             children(c,job) = loc;
             children_machine_cost(c, loc) = cost + jobs_array_aug(job); 
         end
     end
     
-    
-    function y = helper(x)
-        y = x([true;diff(x(:))>0]);
-    end
+%     parents_genes
+%     p_machines
+%     children
+%     children_machine_cost
+%     pause
 end
