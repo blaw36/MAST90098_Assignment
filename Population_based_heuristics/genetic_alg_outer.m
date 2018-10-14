@@ -206,16 +206,15 @@ function [best_makespan, time_taken, init_makespan, best_output,...
 %         init_args = {init_pop_size, simple_prop, mutate_method, mutate_args};
 %     end
 
-    %After mutate as uses the same mutation methods
-    %TODO: Extend to init_simple_grad_rand
-%     init_method = @init_mix_shuff_rand;
+    % After mutate as uses the same mutation methods
     init_inner_args = {};
     if init_method == "init_mix_shuff_rand"
         init_method = @init_mix_shuff_rand;
         init_inner_args = {simple_prop, mutate_method, mutate_args};
-    elseif init_method == "init_simple_grad_rand"
-        init_method = @init_simple_grad_rand;
-        init_inner_args = {simple_prop, mutate_method, mutate_args};
+        %TODO: Extend to init_simple_grad_rand
+%     elseif init_method == "init_simple_grad_rand"
+%         init_method = @init_simple_grad_rand;
+%         init_inner_args = {simple_prop, mutate_method, mutate_args};
     elseif init_method == "init_rand_greedy"
         init_method = @init_rand_greedy;
         init_inner_args = {init_k};
