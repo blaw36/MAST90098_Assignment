@@ -108,41 +108,45 @@ diagnostics = {};
 machine_prop = 0.4;
 for n = 100:100:500
     m = n*machine_prop;
-    for j = 1:5
+    for j = 1:2
         a = generate_ms_instances(n, m, hard);
         [outputMakespan, time_taken, init_makespan, outputArray, ...
             best_gen_num, generations, diags_array]...
             = genetic_alg_outer(a, ...
-                 200, "init_rand_greedy", 0.02, 0.6, 20, ... %inits
+                 100, "init_mix_shuff_rand", 0.02, 0.6, 20, ... %inits
                 "neg_exp", 3, ... %selection
-                5, "c_over_2_all", ...
+                8, "c_over_2_all", ...
                 1/2, 1/3, 0.1, ... %crossover
                 "all_genes_rndom_shuffle", 0.4, ... %mutation
                 "top_and_randsamp", 0.8, ... %culling
                 10, 200, ...  %termination
-                true, ... %verbose/diagnose
+                false, ... %verbose/diagnose
                 false); %parallelisation
+            
+        fprintf("Genetic 1: %d, %f\n", outputMakespan, time_taken)
         
         [outputMakespan_b, time_taken_b, init_makespan_b, outputArray, ...
             best_gen_num_b, generations_b, diags_array]...
             = genetic_alg_outer(a, ...
-                 200, "init_rand_greedy", 0.02, 0.6, 20, ... %inits
+                100, "init_mix_shuff_rand", 0.02, 0.6, 20, ... %inits
                 "neg_exp", 3, ... %selection
-                5, "c_over_2_all", ...
+                8, "c_over_2_all", ...
                 1/2, 1/3, 0.1, ... %crossover
                 "all_genes_rndom_shuffle", 0.4, ... %mutation
                 "top_and_randsamp", 0.8, ... %culling
                 10, 200, ...  %termination
-                true, ... %verbose/diagnose
-                false); %parallelisation
-       
-%         [outputMakespan_gls, time_taken_gls, init_makespan_gls, outputArray, num_exchanges] = ...
-%             gls(a, k, 'simple', true);
-%         fprintf("gls: %d\n", outputMakespan_gls)
-%         
-%         [outputMakespan_vds, time_taken_vds, init_makespan_vds, outputArray, num_exchanges, ...
-%             num_transformations] = vds(a, k, 'simple', true);
-%         fprintf("vds: %d\n", outputMakespan_vds)
+                false, ... %verbose/diagnose
+                true); %parallelisation
+        
+        fprintf("Genetic 2: %d, %f\n", outputMakespan_b, time_taken_b)
+                
+        [outputMakespan_gls, time_taken_gls, init_makespan_gls, outputArray, num_exchanges] = ...
+            gls(a, k, 'simple', true);
+        fprintf("gls: %d, %f\n", outputMakespan_gls, time_taken_gls)
+        
+        [outputMakespan_vds, time_taken_vds, init_makespan_vds, outputArray, num_exchanges, ...
+            num_transformations] = vds(a, k, 'simple', true);
+        fprintf("vds: %d, %f\n", outputMakespan_vds, time_taken_vds)
         
         lower_bound = lower_bound_makespan(a);
         
@@ -150,9 +154,9 @@ for n = 100:100:500
             best_gen_num, generations, ...
             outputMakespan_b, init_makespan_b, time_taken_b, ...
             best_gen_num_b, generations_b, ...
-            n, m, lower_bound]]; 
-%             outputMakespan_gls, init_makespan_gls, time_taken_gls, ...
-%             outputMakespan_vds, init_makespan_vds, time_taken_vds, ...
-%             lower_bound]];
+            n, m, lower_bound, ...
+            outputMakespan_gls, init_makespan_gls, time_taken_gls, ...
+            outputMakespan_vds, init_makespan_vds, time_taken_vds, ...
+            lower_bound]];
     end
 end
