@@ -5,7 +5,7 @@
 
 function [child_array, child_machine_cost] = c_over_2_simplified(parent_genes, ...
                     parent_fitness, parent_machine_cost, jobs_array_aug,...
-                    num_jobs, num_machines, less_fit_c_over_machs)
+                    num_jobs, num_machines, less_fit_prop)
 
     
     %Least fit parent is on left
@@ -20,9 +20,8 @@ function [child_array, child_machine_cost] = c_over_2_simplified(parent_genes, .
     % Allocate some arbitrary amount to least fit parent first, then
     % allocate all non-collisions to the most fit out of the remaining
     % machines
-    props = [1/3,1/3];
-    props(least_fit_parent) = less_fit_c_over_machs;
-    props(most_fit_parent) = 1;
+    props = [1,1];
+    props(least_fit_parent) = less_fit_prop;
     
     most_fit_machines = sort(randperm(num_machines,...
         ceil(props(most_fit_parent)*num_machines)));

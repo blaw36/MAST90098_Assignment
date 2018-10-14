@@ -4,7 +4,8 @@
 function [children, children_machine_cost] = c_over_2_all(...
                             num_children, num_machines, num_jobs, ...
                             parent_mat, pop_mat, machine_cost_mat,...
-                            makespan_mat, jobs_array_aug)
+                            makespan_mat, jobs_array_aug,...
+                            least_fit_proportion, most_fit_proportion)
     
     % Store all of the parents to be crossed 'side' by side
     % Retrieve and store all the parent information in a comparable data
@@ -39,8 +40,8 @@ function [children, children_machine_cost] = c_over_2_all(...
     %p_machines = zeros(num_children, num_machines, 2);
     
     %Over-allocate to least fit parent, as remove from it later
-    p_machines(:,:,2) = rand(num_children, num_machines)<1/3;
-    p_machines(:,:,1) = rand(num_children, num_machines)<1/2;
+    p_machines(:,:,2) = rand(num_children, num_machines)<most_fit_proportion;
+    p_machines(:,:,1) = rand(num_children, num_machines)<least_fit_proportion;
     
     %Find all of the jobs which are carried by these machines
     %job_inclusion_matrix = zeros(num_children, num_jobs,2);    

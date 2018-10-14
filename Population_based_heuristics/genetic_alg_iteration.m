@@ -85,14 +85,12 @@ function [pop_mat, machine_cost_mat, makespan_mat, parent_child_indicator, ...
     %Cull the Population
     % TODO: Dynamic Culling, more or less pop over run time?
     survivors = pop_cull_method(combined_pop_mat,...
-        combined_makespan_mat, ...
-        init_pop_size, pop_cull_args{:});
-
+                                combined_makespan_mat, ...
+                                init_pop_size, pop_cull_args{:});
 
     pop_mat = combined_pop_mat(survivors, :);
-    %machine_cost_mat = combined_machine_cost_mat(indivs_to_keep, :);
-    machine_cost_mat = calc_machine_costs(jobs_array_aug, pop_mat, ...
-        num_machines);
+    machine_cost_mat = combined_machine_cost_mat(survivors, :);
+
     makespan_mat = combined_makespan_mat(survivors, :);
     parent_child_indicator = parent_child_indicator(survivors, :);
     %%% STOP HERE
