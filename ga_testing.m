@@ -55,11 +55,11 @@ elseif strcmp(method,'Genetic')
         "neg_exp", ... %selection
         8, "c_over_2_all", ...
         1/2, 1/3, ... %crossover
-        "all_genes_rndom_shuffle", floor(0.4*(size(a,2)-1)), ... %mutation
+        "all_genes_rndom_shuffle", 0.4, ... %mutation
         "top_and_randsamp", 0.8, ... %culling
         10, 200, ...  %termination
         true, ... %verbose/diagnose
-        true); %parallelisation
+        false); %parallelisation
     
     profile off
     profile viewer

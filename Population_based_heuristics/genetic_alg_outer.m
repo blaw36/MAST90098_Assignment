@@ -70,7 +70,8 @@
 	% mutation_select_method: fitness operation used to generate
         % probabilities of mutating any given individual
 	% mutate_method: mutation operation performed on selected individuals
-    % mutate_num_shuffles: number of elements to grab and reassign
+    % mutate_proportion: the proportion of jobs to mutate for each chosen
+        % individual
         % machines to (at initiation) - unused by 'pair_swap' mutation 
 % ~~Population culling:        
 	% popn_cull: The population culling operation to reduce population back
@@ -91,7 +92,7 @@ function [best_makespan, time_taken, init_makespan, best_output,...
             selection_method, ... %selection
             parent_ratio, cross_over_method, ...
             least_fit_proportion, most_fit_proportion, ... %crossover
-            mutation_method, mutate_num_shuffles, ... %mutation
+            mutation_method, mutate_proportion, ... %mutation
             popn_cull, cull_prop, ... %culling
             num_gen_no_improve, max_gens_allowed, ... %termination
             diagnose, ... %verbose/diagnose
@@ -161,6 +162,7 @@ function [best_makespan, time_taken, init_makespan, best_output,...
     %     % Mutation length for each gene - lower makespan, lower number
     %     shuffle_mat = fitness_minmaxLinear(...
     %         max(combined_machine_cost_mat,[],2));
+    mutate_num_shuffles = floor(mutate_proportion*(size(input_array,2)-1));
     if mutation_method~= "all_genes_rndom_shuffle"
         % if individual based mutation method, then
         % 1) assign the method
