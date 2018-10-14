@@ -54,7 +54,7 @@ elseif strcmp(method,'Genetic')
         100, "init_rand_greedy", 0.02, 0.6, 20, ... %inits
         "neg_exp", ... %selection
         8, "c_over_2_all", ...
-        1/2, 1/3, ... %crossover
+        1/2, 1/3, 0.2,... %crossover
         "all_genes_rndom_shuffle", 0.4, ... %mutation
         "top_and_randsamp", 0.8, ... %culling
         10, 200, ...  %termination

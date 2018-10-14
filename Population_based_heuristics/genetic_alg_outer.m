@@ -91,7 +91,8 @@ function [best_makespan, time_taken, init_makespan, best_output,...
             init_pop_size, init_method, simple_prop, init_k, num_tiers, ... %inits
             selection_method, ... %selection
             parent_ratio, cross_over_method, ...
-            least_fit_proportion, most_fit_proportion, ... %crossover
+            least_fit_proportion, most_fit_proportion, ...
+            prop_switch_parent_fitness, ... %crossover
             mutation_method, mutate_proportion, ... %mutation
             popn_cull, cull_prop, ... %culling
             num_gen_no_improve, max_gens_allowed, ... %termination
@@ -136,10 +137,12 @@ function [best_makespan, time_taken, init_makespan, best_output,...
         elseif cross_over_method == "c_over_2"
             cross_over_inner_method = @c_over_2;
             cross_over_inner_args = {least_fit_proportion, ...
-                                     most_fit_proportion};
+                                     most_fit_proportion,...
+                                     prop_switch_parent_fitness};
         elseif cross_over_method == "c_over_2_simplified"
             cross_over_inner_method = @c_over_2_simplified;
-            cross_over_inner_args = {least_fit_proportion};
+            cross_over_inner_args = {least_fit_proportion,...
+                                    prop_switch_parent_fitness};
         else
             error("Invalid Crossover Method");
         end
@@ -147,7 +150,8 @@ function [best_makespan, time_taken, init_makespan, best_output,...
         cross_over_args = {cross_over_inner_method, cross_over_inner_args};
     else
         cross_over_method = @c_over_2_all;
-        cross_over_args = {least_fit_proportion, most_fit_proportion};
+        cross_over_args = {least_fit_proportion, most_fit_proportion,...
+                            prop_switch_parent_fitness};
     end
     
     % Mutate
