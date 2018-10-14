@@ -15,8 +15,8 @@ rmpath('Not_in_use');
 rng(10);
 
 %% Parameters
-n = 200; % # jobs
-m = 80; % # machines
+n = 10; % # jobs
+m = 4; % # machines
 hard = false;
 a = generate_ms_instances(n, m, hard); % Generate makespan input vector
 k = 2; % # of exchanges (k-exch)
@@ -48,11 +48,13 @@ elseif strcmp(method,'Genetic')
     % it with 0s to keep in line with the outputs from GLS and VDS.
     [outputMakespan, time_taken, init_makespan, outputArray, ...
         best_gen_num, generations, diags_array]...
-        = genetic_alg_outer(a, 150, 0.1, ... %inits
-        "neg_exp", 8, "c_over_2", 0.25,... %crossover
-        "neg_exp", "all_genes_rndom_shuffle", floor(0.6*(size(a,2)-1)), ... %mutation
-        "top_and_randsamp", 0.7, ... %culling
-        10, 100, true); %termination
+        = genetic_alg_outer(a, 5, 0.1, ... %inits
+        "neg_exp", 2, "c_over_2_all", 0.13, ... %crossover
+        "neg_exp", "all_genes_rndom_shuffle", floor(0.4*(size(a,2)-1)), ... %mutation
+        "top_and_randsamp", 0.8, ... %culling
+        10, 20, ...  %termination
+        true, ... %verbose/diagnose
+        false); %parallelisation
 end
 
 outputMakespan

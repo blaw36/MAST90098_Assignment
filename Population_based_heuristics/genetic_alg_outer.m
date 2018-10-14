@@ -103,26 +103,31 @@ function [best_makespan, time_taken, init_makespan, best_output,...
     
     %Cross_over function
     cross_over_inner_args = {};
-    if cross_over_method == "cutover_split"
-        cross_over_inner_method = @c_over_split;
-        cross_over_inner_args = {};
-    elseif cross_over_method == "rndm_split"
-        cross_over_inner_method = @c_over_rndm_split;
-        cross_over_inner_args = {};
-    elseif cross_over_method == "c_over_1"
-        cross_over_inner_method = @c_over_1;
-        cross_over_inner_args = {};
-    elseif cross_over_method == "c_over_2"
-        cross_over_inner_method = @c_over_2;
-        cross_over_inner_args = {};
-    elseif cross_over_method == "c_over_2_simplified"
-        cross_over_inner_method = @c_over_2_simplified;
-        cross_over_inner_args = {less_fit_c_over_machs};
+    if cross_over_method ~= "c_over_2_all"
+        if cross_over_method == "cutover_split"
+            cross_over_inner_method = @c_over_split;
+            cross_over_inner_args = {};
+        elseif cross_over_method == "rndm_split"
+            cross_over_inner_method = @c_over_rndm_split;
+            cross_over_inner_args = {};
+        elseif cross_over_method == "c_over_1"
+            cross_over_inner_method = @c_over_1;
+            cross_over_inner_args = {};
+        elseif cross_over_method == "c_over_2"
+            cross_over_inner_method = @c_over_2;
+            cross_over_inner_args = {};
+        elseif cross_over_method == "c_over_2_simplified"
+            cross_over_inner_method = @c_over_2_simplified;
+            cross_over_inner_args = {less_fit_c_over_machs};
+        else
+            error("Invalid Crossover Method");
+        end
+        cross_over_method = @crossover_population;
+        cross_over_args = {cross_over_inner_method, cross_over_inner_args};
     else
-        error("Invalid Crossover Method");
+        cross_over_method = @c_over_2_all;
+        cross_over_args = {};
     end
-    cross_over_method = @crossover_population;
-    cross_over_args = {cross_over_inner_method, cross_over_inner_args};
 
     %Use the fitness function to select the parents, with bias given to
     %fitter parents
