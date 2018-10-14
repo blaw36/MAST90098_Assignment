@@ -219,11 +219,13 @@ function [best_makespan, time_taken, init_makespan, best_output,...
     else
         error("Invalid Initiation method")
     end
-    if parallel
-        init_args = {init_pop_size * 2, init_inner_args{:}};
-    else
-        init_args = {init_pop_size, init_inner_args{:}};
-    end
+    init_args = {init_pop_size, init_inner_args{:}};
+    % Parallel now moved over to crossover bit
+%     if parallel
+%         init_args = {init_pop_size * 2, init_inner_args{:}};
+%     else
+%         init_args = {init_pop_size, init_inner_args{:}};
+%     end
     
     
     %Cull
