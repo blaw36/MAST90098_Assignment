@@ -122,13 +122,13 @@ function [child_array, child_machine_cost] = c_over_2(parent_genes, ...
     p_machines(2,p2_machines) = 1;
     
     for p = 1:2
-        for i = 1:num_machines
-            if ~p_machines(p,i)
+        for m = 1:num_machines
+            if ~p_machines(p,m)
                 continue
             end
 
-            child_array(parent_genes(p,:)==i) = child_machine;
-            child_machine_cost(child_machine) = parent_machine_cost(p, i);
+            child_array(parent_genes(p,:)==m) = child_machine;
+            child_machine_cost(child_machine) = parent_machine_cost(p, m);
             child_machine = child_machine + 1;
             
             if child_machine>num_machines
