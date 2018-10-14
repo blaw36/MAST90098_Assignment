@@ -33,40 +33,40 @@ function [pop_mat, machine_cost_mat, makespan_mat, parent_child_indicator, ...
     tic;
     
     % Split into batches if parallel
-    if parallel
-        num_parent_pairs = size(parent_mat,1);
-        crossover_batches(1).rows = zeros(num_parent_pairs,1);
-        crossover_batches(2).rows = crossover_batches(1).rows;
-        crossover_batches(1).rows(1:floor(num_parent_pairs/2),:) = 1;
-        crossover_batches(2).rows((floor(num_parent_pairs/2) + 1):...
-            num_parent_pairs,:) = 1;
-        crossover_batches(1).rows = logical(crossover_batches(1).rows);
-        crossover_batches(2).rows = logical(crossover_batches(2).rows);
-        
-        for i = 1:2
-            crossover_batches(i).parent_mat = ...
-                parent_mat(crossover_batches(i).rows,:);
-            crossover_batches(i).crossover_children = [];
-            crossover_batches(i).machine_cost_mat_children = [];
-        end
-        
-        parfor b = 1:2
-            [crossover_batches(b).crossover_children, ...
-                crossover_batches(b).machine_cost_mat_children] = ...
-                cross_over_method(num_children/2, num_machines,...
-                num_jobs, crossover_batches(b).parent_mat, pop_mat,...
-                machine_cost_mat, makespan_mat, ...
-                jobs_array_aug, cross_over_args{:});
-        end       
-        crossover_children = [crossover_batches(1).crossover_children; ...
-            crossover_batches(2).crossover_children];
-        machine_cost_mat_children = ...
-            [crossover_batches(1).machine_cost_mat_children; ...
-            crossover_batches(2).machine_cost_mat_children];
-        c_over_time = toc;
-        best_child = min(max(machine_cost_mat_children,[],2));
-        
-    else
+%     if parallel
+%         num_parent_pairs = size(parent_mat,1);
+%         crossover_batches(1).rows = zeros(num_parent_pairs,1);
+%         crossover_batches(2).rows = crossover_batches(1).rows;
+%         crossover_batches(1).rows(1:floor(num_parent_pairs/2),:) = 1;
+%         crossover_batches(2).rows((floor(num_parent_pairs/2) + 1):...
+%             num_parent_pairs,:) = 1;
+%         crossover_batches(1).rows = logical(crossover_batches(1).rows);
+%         crossover_batches(2).rows = logical(crossover_batches(2).rows);
+%         
+%         for i = 1:2
+%             crossover_batches(i).parent_mat = ...
+%                 parent_mat(crossover_batches(i).rows,:);
+%             crossover_batches(i).crossover_children = [];
+%             crossover_batches(i).machine_cost_mat_children = [];
+%         end
+%         
+%         parfor b = 1:2
+%             [crossover_batches(b).crossover_children, ...
+%                 crossover_batches(b).machine_cost_mat_children] = ...
+%                 cross_over_method(num_children/2, num_machines,...
+%                 num_jobs, crossover_batches(b).parent_mat, pop_mat,...
+%                 machine_cost_mat, makespan_mat, ...
+%                 jobs_array_aug, cross_over_args{:});
+%         end       
+%         crossover_children = [crossover_batches(1).crossover_children; ...
+%             crossover_batches(2).crossover_children];
+%         machine_cost_mat_children = ...
+%             [crossover_batches(1).machine_cost_mat_children; ...
+%             crossover_batches(2).machine_cost_mat_children];
+%         c_over_time = toc;
+%         best_child = min(max(machine_cost_mat_children,[],2));
+%         
+%     else
         [crossover_children, machine_cost_mat_children] = ...
             cross_over_method(num_children, num_machines,...
             num_jobs, parent_mat, pop_mat,...
@@ -75,7 +75,7 @@ function [pop_mat, machine_cost_mat, makespan_mat, parent_child_indicator, ...
         c_over_time = toc;
         best_child = min(max(machine_cost_mat_children,[],2));
         
-    end
+%     end
 
     % Combine children and parents for larger population
     combined_pop_mat = [pop_mat; crossover_children];

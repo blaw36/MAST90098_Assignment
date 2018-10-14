@@ -81,6 +81,12 @@ function [best_makespan, time_taken, init_makespan, best_output,...
             num_gen_no_improve, max_gens_allowed, ... %termination
             diagnose, parallel) %other args
 
+    num_inner_gens = 5;
+    
+    if ~parallel
+        num_inner_gens = 1;
+    end
+        
     start_time = tic;
 
     % wlog, shuffle input_array such that jobs arranged largest to smallest
@@ -133,70 +139,72 @@ function [best_makespan, time_taken, init_makespan, best_output,...
     while no_chg_generations <= num_gen_no_improve && ...
             generation_counter <= max_gens_allowed
         
-%         if parallel
-%             % Split data into two even batches
-%                 b1 = logical(zeros(2*init_pop_size,1));
-%                 b2 = b1;
-%                 b1(randperm(2*init_pop_size,init_pop_size)) = 1;
-%                 b2 = logical(1 - b1);
-%                 b = [b1, b2];
-%                 for i = 1:2
-%                     parallel_data(i).pop_mat = pop_mat(b(:,i),:);
-%                     parallel_data(i).machine_cost_mat = ...
-%                         machine_cost_mat(b(:,i),:);
-%                     parallel_data(i).makespan_mat = makespan_mat(b(:,i),:);
-%                     parallel_data(i).parent_child_indicator = {};
-%                 end
-%             
-%             parfor b = 1:2 % 2 processes
-%                 [parallel_data(b).pop_mat, ...
-%                     parallel_data(b).machine_cost_mat, ...
-%                     parallel_data(b).makespan_mat, ...
-%                     parallel_data(b).parent_child_indicator] = ...
-%                     genetic_alg_iteration(best_generation, ...
-%                     parallel_data(b).pop_mat, ...
-%                     parallel_data(b).makespan_mat, ...
-%                     parallel_data(b).machine_cost_mat, ...
-%                     jobs_array_aug, num_machines, num_jobs, ...
-%                     parent_selection_method, parent_selection_args,... %parent sel
-%                     cross_over_method, cross_over_args, ... %crossover
-%                     mutate_select_method, mutate_select_args, ...
-%                     mutate_method, mutate_args, ... %mutation
-%                     pop_cull_method, pop_cull_args, ... %culling
-%                     init_pop_size, parent_ratio);
-%             end
-%             
-%             pop_mat = [parallel_data(1).pop_mat; parallel_data(2).pop_mat];
-%             machine_cost_mat = [parallel_data(1).machine_cost_mat; ...
-%                 parallel_data(2).machine_cost_mat];
-%             makespan_mat = [parallel_data(1).makespan_mat; ...
-%                 parallel_data(2).makespan_mat];
-%             parent_child_indicator = [parallel_data(1).parent_child_indicator; ...
-%                 parallel_data(2).parent_child_indicator];
-%             
-%         else
-
-            [pop_mat, machine_cost_mat, makespan_mat, parent_child_indicator, ...
-                c_over_time, mutation_time, best_parent, best_child, ...
-                best_pre_mutate, best_post_mutate] = ...
-                genetic_alg_iteration(best_generation, pop_mat, makespan_mat, ...
-                machine_cost_mat, jobs_array_aug, num_machines, num_jobs, ...
-                parent_selection_method, parent_selection_args,... %parent sel
-                cross_over_method, cross_over_args, ... %crossover
-                mutate_select_method, mutate_select_args, ...
-                mutate_method, mutate_args, ... %mutation
-                pop_cull_method, pop_cull_args, ... %culling
-                init_pop_size, parent_ratio, ...
-                parallel);
-        
-%         end
+        if parallel
+            % Split data into two even batches
+                parallel_pop_size = 1/2*init_pop_size;
+                b1 = logical(zeros(init_pop_size,1));
+                b1(randperm(init_pop_size,parallel_pop_size)) = 1;
+                b2 = logical(1 - b1);
+                b = [b1, b2];
+                for i = 2:-1:1
+                    parallel_data(i).pop_mat = pop_mat(b(:,i),:);
+                    parallel_data(i).machine_cost_mat = ...
+                        machine_cost_mat(b(:,i),:);
+                    parallel_data(i).makespan_mat = makespan_mat(b(:,i),:);
+                    parallel_data(i).parent_child_indicator = {};
+                end
+            
+            parfor b = 1:2 % 2 processes
+                for i = 1:num_inner_gens
+                    [parallel_data(b).pop_mat, ...
+                        parallel_data(b).machine_cost_mat, ...
+                        parallel_data(b).makespan_mat, ...
+                        parallel_data(b).parent_child_indicator] = ...
+                            genetic_alg_iteration(best_generation, ...
+                            parallel_data(b).pop_mat, ...
+                            parallel_data(b).makespan_mat, ...
+                            parallel_data(b).machine_cost_mat, ...
+                            jobs_array_aug, num_machines, num_jobs, ...
+                            parent_selection_method, parent_selection_args,... %parent sel
+                            cross_over_method, cross_over_args, ... %crossover
+                            mutate_select_method, mutate_select_args, ...
+                            mutate_method, mutate_args, ... %mutation
+                            pop_cull_method, pop_cull_args, ... %culling
+                            parallel_pop_size, parent_ratio);
+                end
+            end
+            
+            pop_mat = [parallel_data(1).pop_mat; parallel_data(2).pop_mat];
+            machine_cost_mat = [parallel_data(1).machine_cost_mat; ...
+                parallel_data(2).machine_cost_mat];
+            makespan_mat = [parallel_data(1).makespan_mat; ...
+                parallel_data(2).makespan_mat];
+            parent_child_indicator = [parallel_data(1).parent_child_indicator; ...
+                parallel_data(2).parent_child_indicator];
+            
+        else
+            for i = 1:num_inner_gens
+                [pop_mat, machine_cost_mat, makespan_mat, parent_child_indicator, ...
+                    c_over_time, mutation_time, best_parent, best_child, ...
+                    best_pre_mutate, best_post_mutate] = ...
+                        genetic_alg_iteration(best_generation, pop_mat, makespan_mat, ...
+                        machine_cost_mat, jobs_array_aug, num_machines, num_jobs, ...
+                        parent_selection_method, parent_selection_args,... %parent sel
+                        cross_over_method, cross_over_args, ... %crossover
+                        mutate_select_method, mutate_select_args, ...
+                        mutate_method, mutate_args, ... %mutation
+                        pop_cull_method, pop_cull_args, ... %culling
+                        init_pop_size, parent_ratio, ...
+                        parallel);
+            end
+         end
         
         [new_gen_makespan,indiv_indx] = min(makespan_mat);
 
-        generation_counter = generation_counter + 1;
+        generation_counter = generation_counter + num_inner_gens;
 
         if (new_gen_makespan - best_generation{3}) >= 0
-            no_chg_generations = no_chg_generations + 1;
+            no_chg_generations = no_chg_generations + num_inner_gens;
         elseif (new_gen_makespan - best_generation{3}) < 0
             no_chg_generations = 0;
             best_generation = {generation_counter, pop_mat(indiv_indx,:), new_gen_makespan};
@@ -227,14 +235,14 @@ function [best_makespan, time_taken, init_makespan, best_output,...
             fprintf("Num children survived: %d \n", ...
                 sum(parent_child_indicator == 0));
             
-%             if ~parallel    
+            if ~parallel    
                 fprintf("Crossover time: %2.6f\n", c_over_time);
                 fprintf("Mutation time: %2.6f\n", mutation_time);
                 fprintf("Best parent: %d\n", best_parent);
                 fprintf("Best child: %d\n", best_child);
                 fprintf("Best pre-mutate cand: %d\n", best_pre_mutate);
                 fprintf("Best post-mutate cand: %d\n", best_post_mutate);
-%             end
+            end
 
             % Add to diagnostics table
             % Columns: Generation#, Best makespan in gen, Best makespan,

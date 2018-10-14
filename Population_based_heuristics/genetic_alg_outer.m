@@ -99,9 +99,6 @@ function [best_makespan, time_taken, init_makespan, best_output,...
             diagnose, ... %verbose/diagnose
             parallel)
     
-    %Move outside
-%     diagnose = true;
-   
     %Use the fitness function to select the parents, with bias given to
     %fitter parents
     invert = false;
