@@ -79,12 +79,10 @@ function [best_makespan, time_taken, init_makespan, best_output,...
             pop_cull_method, pop_cull_args, ... %culling
             init_pop_size, parent_ratio, ...
             num_gen_no_improve, max_gens_allowed, ... %termination
-            diagnose, parallel) %other args
+            diagnose, parallel, num_split_gens) %other args
 
-    num_inner_gens = 5;
-    
     if ~parallel
-        num_inner_gens = 1;
+        num_split_gens = 1;
     end
         
     start_time = tic;
@@ -155,7 +153,7 @@ function [best_makespan, time_taken, init_makespan, best_output,...
                 end
             
             parfor b = 1:2 % 2 processes
-                for i = 1:num_inner_gens
+                for i = 1:num_split_gens
                     [parallel_data(b).pop_mat, ...
                         parallel_data(b).machine_cost_mat, ...
                         parallel_data(b).makespan_mat, ...
@@ -183,7 +181,7 @@ function [best_makespan, time_taken, init_makespan, best_output,...
                 parallel_data(2).parent_child_indicator];
             
         else
-            for i = 1:num_inner_gens
+            for i = 1:num_split_gens
                 [pop_mat, machine_cost_mat, makespan_mat, parent_child_indicator, ...
                     c_over_time, mutation_time, best_parent, best_child, ...
                     best_pre_mutate, best_post_mutate] = ...
@@ -201,10 +199,10 @@ function [best_makespan, time_taken, init_makespan, best_output,...
         
         [new_gen_makespan,indiv_indx] = min(makespan_mat);
 
-        generation_counter = generation_counter + num_inner_gens;
+        generation_counter = generation_counter + num_split_gens;
 
         if (new_gen_makespan - best_generation{3}) >= 0
-            no_chg_generations = no_chg_generations + num_inner_gens;
+            no_chg_generations = no_chg_generations + num_split_gens;
         elseif (new_gen_makespan - best_generation{3}) < 0
             no_chg_generations = 0;
             best_generation = {generation_counter, pop_mat(indiv_indx,:), new_gen_makespan};

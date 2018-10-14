@@ -59,7 +59,7 @@ elseif strcmp(method,'Genetic')
         "top_and_randsamp", 0.8, ... %culling
         10, 200, ...  %termination
         true, ... %verbose/diagnose
-        false); %parallelisation
+        false, 5); %parallelisation
     
     profile off
     profile viewer
@@ -125,7 +125,7 @@ for n = [100,1000, 2000]
                 "top_and_randsamp", 0.8, ... %culling
                 10, 200, ...  %termination
                 false, ... %verbose/diagnose
-                false); %parallelisation
+                false, 5); %parallelisation
             
         fprintf("Genetic 1: %d, %f\n", outputMakespan, time_taken)
         
@@ -140,7 +140,7 @@ for n = [100,1000, 2000]
                 "top_and_randsamp", 0.8, ... %culling
                 10, 200, ...  %termination
                 false, ... %verbose/diagnose
-                true); %parallelisation
+                true, 5); %parallelisation
         
         fprintf("Genetic 2: %d, %f\n", outputMakespan_b, time_taken_b)
                 

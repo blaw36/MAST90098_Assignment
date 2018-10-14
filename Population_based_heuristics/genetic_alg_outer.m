@@ -97,7 +97,7 @@ function [best_makespan, time_taken, init_makespan, best_output,...
             popn_cull, cull_prop, ... %culling
             num_gen_no_improve, max_gens_allowed, ... %termination
             diagnose, ... %verbose/diagnose
-            parallel)
+            parallel, num_split_gens)
     
     %Use the fitness function to select the parents, with bias given to
     %fitter parents
@@ -259,5 +259,5 @@ function [best_makespan, time_taken, init_makespan, best_output,...
             pop_cull_method, pop_cull_args, ... %culling
             init_pop_size, parent_ratio, ...
             num_gen_no_improve, max_gens_allowed, ... %termination
-            diagnose, parallel);%other args
+            diagnose, parallel, num_split_gens);%other args
 end

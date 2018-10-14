@@ -57,7 +57,7 @@ elseif strcmp(method,'Genetic')
         "top_and_randsamp", 0.8, ... %culling
         10, 200, ...  %termination
         true, ... %verbose/diagnose
-        true); %parallelisation
+        true, 5); %parallelisation
 end
 
 outputMakespan
