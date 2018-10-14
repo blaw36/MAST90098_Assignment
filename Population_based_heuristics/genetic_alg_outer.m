@@ -88,9 +88,10 @@ function [best_makespan, time_taken, init_makespan, best_output,...
     best_gen_num, generation_counter, diags_array] = ...
             genetic_alg_outer(input_array, ...
             init_pop_size, init_method, simple_prop, init_k, ... %inits
-            parent_selection, parent_ratio, cross_over_method, ...
+            selection_method, ... %selection
+            parent_ratio, cross_over_method, ...
             least_fit_proportion, most_fit_proportion, ... %crossover
-            mutation_select_method, mutation_method, mutate_num_shuffles, ... %mutation
+            mutation_method, mutate_num_shuffles, ... %mutation
             popn_cull, cull_prop, ... %culling
             num_gen_no_improve, max_gens_allowed, ... %termination
             diagnose, ... %verbose/diagnose
@@ -104,13 +105,20 @@ function [best_makespan, time_taken, init_makespan, best_output,...
     invert = false;
     parent_selection_args = {invert};
     
-    if parent_selection == "minMaxLinear"
+    if selection_method == "minMaxLinear"
         parent_selection_method = @fitness_minmaxLinear;
-    elseif parent_selection == "neg_exp"
+    elseif selection_method == "neg_exp"
         parent_selection_method = @fitness_negexp;
     else
         error("Invalid Fitness Selection Method");
     end
+    
+    % Use the same, function but invert the probs so less fit indivduals
+    % have a higher chance of being mutated.
+    %fitter parents
+    invert = true;
+    mutate_select_args = {invert};
+    mutate_select_method = parent_selection_method;
     
     %Cross_over function
     cross_over_inner_args = {};
@@ -139,19 +147,6 @@ function [best_makespan, time_taken, init_makespan, best_output,...
     else
         cross_over_method = @c_over_2_all;
         cross_over_args = {least_fit_proportion, most_fit_proportion};
-    end
-
-    %Use the fitness function to select the parents, with bias given to
-    %fitter parents
-    invert = true;
-    mutate_select_args = {invert};
-    
-    if mutation_select_method == "minMaxLinear"
-        mutate_select_method = @fitness_minmaxLinear;
-    elseif mutation_select_method == "neg_exp"
-        mutate_select_method = @fitness_negexp;
-    else
-        error("Invalid Fitness Selection Method");
     end
     
     % Mutate
