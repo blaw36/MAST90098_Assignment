@@ -23,7 +23,8 @@
 
 function [child_array, child_machine_cost] = c_over_2(parent_genes, ...
                     parent_fitness, parent_machine_cost, jobs_array_aug,...
-                    num_jobs, num_machines)
+                    num_jobs, num_machines, ...
+                    least_fit_proportion, most_fit_proportion)
     
     %Least fit parent is on left
     least_fit_parent = 1;
@@ -35,8 +36,8 @@ function [child_array, child_machine_cost] = c_over_2(parent_genes, ...
     most_fit_parent = 1 + mod(least_fit_parent,2);
     
     %Over-allocate to least fit parent, as remove from it later
-    props = [1/3,1/3];
-    props(least_fit_parent) = 1/2;
+    props = [most_fit_proportion,most_fit_proportion];
+    props(least_fit_parent) = least_fit_proportion;
     
     p1_machines = sort(randperm(num_machines,ceil(props(1)*num_machines)));
     p2_machines = sort(randperm(num_machines,ceil(props(2)*num_machines)));
