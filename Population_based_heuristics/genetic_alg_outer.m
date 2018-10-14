@@ -3,6 +3,15 @@
 % makespan problem
 
 %% Methods:
+% ~~Initiation method:
+    % "init_mix_shuff_rand": Initiates a certain proportion with simple
+        % greedy algo, plus mutation and a mutation factor to add some
+        % noise to this deterministic process
+    % "init_simple_grad_rand": Does as above, except creates several
+        % cohorts of simple solutions, with an increasing rates of mutation
+        % between each cohort (a graduated mutation)
+    % "init_mix_rand_greedy": Randomly assigns first k jobs to a machine,
+        % then does greedy assignment for the rest.
 % ~~Fitness calculation: (used to select crossover parents, mutation
 % candidates)
     % "minMaxLinear": scale makespans to 1 (min makespan) or 0 
@@ -77,7 +86,8 @@
 
 function [best_makespan, time_taken, init_makespan, best_output,...
     best_gen_num, generation_counter, diags_array] = ...
-            genetic_alg_outer(input_array, init_pop_size, simple_prop, ... %inits
+            genetic_alg_outer(input_array, ...
+            init_pop_size, init_method, simple_prop, init_k, ... %inits
             parent_selection, parent_ratio, cross_over_method, less_fit_c_over_machs, ... %crossover
             mutation_select_method, mutation_method, mutate_num_shuffles, ... %mutation
             popn_cull, cull_prop, ... %culling
@@ -155,6 +165,8 @@ function [best_makespan, time_taken, init_makespan, best_output,...
     %     shuffle_mat = fitness_minmaxLinear(...
     %         max(combined_machine_cost_mat,[],2));
     if mutation_method~= "all_genes_rndom_shuffle"
+        % if individual based mutation method, then
+        % 1) assign the method
         if mutation_method == "mutate_greedy"
             mutate_method_inner = @mutate_greedy;
             mutate_method_inner_args = {mutate_num_shuffles};
@@ -171,24 +183,49 @@ function [best_makespan, time_taken, init_makespan, best_output,...
         else
             error("Invalid Mutation Method");
         end
-        mutate_method = @mutate_population;
+        mutate_method = @mutate_population; % 2) Assign the wrapper
         mutate_args = {mutate_method_inner, mutate_method_inner_args};
     else
+        % if whole population-at-once mutation
         mutate_method = @all_genes_rndom_shuffle;
         mutate_args = {mutate_num_shuffles};
     end
     
+%     %After mutate as uses the same mutation methods
+%     %TODO: Extend to init_simple_grad_rand
+% %     init_method = @init_mix_shuff_rand;
+%     init_method = @init_mix_rand_greedy;
+% 
+%     % If parallel, double the size of the initial population - will be
+%     % split into two batches later.
+%     if parallel
+%         init_args = {init_pop_size * 2, simple_prop, mutate_method, mutate_args};
+%     else
+%         init_args = {init_pop_size, simple_prop, mutate_method, mutate_args};
+%     end
+
     %After mutate as uses the same mutation methods
     %TODO: Extend to init_simple_grad_rand
-    init_method = @init_mix_shuff_rand;
-    
-    % If parallel, double the size of the initial population - will be
-    % split into two batches later.
-    if parallel
-        init_args = {init_pop_size * 2, simple_prop, mutate_method, mutate_args};
+%     init_method = @init_mix_shuff_rand;
+    init_inner_args = {};
+    if init_method == "init_mix_shuff_rand"
+        init_method = @init_mix_shuff_rand;
+        init_inner_args = {simple_prop, mutate_method, mutate_args};
+    elseif init_method == "init_simple_grad_rand"
+        init_method = @init_simple_grad_rand;
+        init_inner_args = {simple_prop, mutate_method, mutate_args};
+    elseif init_method == "init_rand_greedy"
+        init_method = @init_rand_greedy;
+        init_inner_args = {init_k};
     else
-        init_args = {init_pop_size, simple_prop, mutate_method, mutate_args};
+        error("Invalid Initiation method")
     end
+    if parallel
+        init_args = {init_pop_size * 2, init_inner_args{:}};
+    else
+        init_args = {init_pop_size, init_inner_args{:}};
+    end
+    
     
     %Cull
     if popn_cull == "top"

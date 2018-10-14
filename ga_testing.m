@@ -50,11 +50,12 @@ elseif strcmp(method,'Genetic')
     profile on
     [outputMakespan, time_taken, init_makespan, outputArray, ...
         best_gen_num, generations, diags_array]...
-        = genetic_alg_outer(a, 100, 0.1, ... %inits
-        "neg_exp", 10, "c_over_2", 0.13, ... %crossover
+        = genetic_alg_outer(a, ...
+        100, "init_rand_greedy", 0.02, 0.4, ... %inits
+        "neg_exp", 8, "c_over_2", 0.13, ... %crossover
         "neg_exp", "all_genes_rndom_shuffle", floor(0.4*(size(a,2)-1)), ... %mutation
         "top_and_randsamp", 0.8, ... %culling
-        10, 20, ...  %termination
+        10, 200, ...  %termination
         true, ... %verbose/diagnose
         true); %parallelisation
     
@@ -109,19 +110,20 @@ for n = 100:100:500
         a = generate_ms_instances(n, m, hard);
         [outputMakespan, time_taken, init_makespan, outputArray, ...
             best_gen_num, generations, diags_array]...
-            = genetic_alg_v2(a, 2000, 0.1, ... %inits
-            "rndom_mach_chg", floor(0.1*(size(a,2)-1)), ... %inits
-            "neg_exp", 5, "rndm_split", ... %crossover
-            "neg_exp", "rndom_mach_chg", floor(0.3*(size(a,2)-1)), ... %mutation
-            "top_and_bottom", ... %culling
-            10, 100); %termination
+            = genetic_alg_outer(a, 100, 0.1, ... %inits
+            "neg_exp", 10, "c_over_2", 0.13, ... %crossover
+            "neg_exp", "all_genes_rndom_shuffle", floor(0.4*(size(a,2)-1)), ... %mutation
+            "top_and_randsamp", 0.8, ... %culling
+            10, 100, ...  %termination
+            true, ... %verbose/diagnose
+            true); %parallelisation
         
         [outputMakespan_gls, time_taken_gls, init_makespan_gls, outputArray, num_exchanges] = ...
-            gls(a, k, 'simple', k2_opt);
+            gls(a, k, 'simple', true);
         fprintf("gls: %d\n", outputMakespan_gls)
         
         [outputMakespan_vds, time_taken_vds, init_makespan_vds, outputArray, num_exchanges, ...
-            num_transformations] = vds(a, k, 'simple', k2_opt);
+            num_transformations] = vds(a, k, 'simple', true);
         fprintf("vds: %d\n", outputMakespan_vds)
         
         results = [results; [outputMakespan, init_makespan, time_taken, ...
