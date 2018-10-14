@@ -126,13 +126,17 @@ function [child, child_machine_cost] = compute_child(num_machines, num_jobs, ...
     child_machine = 1;
     child = zeros(1,num_jobs);
     child_machine_cost = zeros(1,num_machines);
+    child_machine_indices = randperm(num_machines,num_machines);
+    
+    
     for p = 1:2
         for m = 1:num_machines
             if ~parent_machines(m,p)
                 continue
             end
-            child(parent_genes(:,p)==m) = child_machine;
-            child_machine_cost(child_machine) = parent_machine_cost(m, p);
+            child(parent_genes(:,p)==m) = child_machine_indices(child_machine);
+            child_machine_cost(child_machine_indices(child_machine)) = ...
+                                                parent_machine_cost(m, p);
             child_machine = child_machine + 1; 
 
             if child_machine>num_machines

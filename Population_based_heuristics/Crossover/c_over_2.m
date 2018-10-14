@@ -114,6 +114,7 @@ function [child_array, child_machine_cost] = c_over_2(parent_genes, ...
     %----------------------------------------------------------------------
     child_array = zeros(1,num_jobs);
     child_machine_cost = zeros(1,num_machines);
+    child_machine_indices = randperm(num_machines,num_machines);
     child_machine = 1;
     all_jobs = 1:num_jobs;
     
@@ -129,8 +130,8 @@ function [child_array, child_machine_cost] = c_over_2(parent_genes, ...
                 continue
             end
 
-            child_array(parent_genes(p,:)==m) = child_machine;
-            child_machine_cost(child_machine) = parent_machine_cost(p, m);
+            child_array(parent_genes(p,:)==m) = child_machine_indices(child_machine);
+            child_machine_cost(child_machine_indices(child_machine)) = parent_machine_cost(p, m);
             child_machine = child_machine + 1;
             
             if child_machine>num_machines
