@@ -66,7 +66,6 @@ function [child_array, child_machine_cost] = c_over_2_simplified(parent_genes, .
     child_array = zeros(1,num_jobs);
     child_machine_cost = zeros(1,num_machines);
     child_machine = 1;
-    child_indices = randperm(num_machines,num_machines);
     all_jobs = 1:num_jobs;
     
     %Can move this somewhere else later
@@ -74,24 +73,19 @@ function [child_array, child_machine_cost] = c_over_2_simplified(parent_genes, .
     p_machines(1,p1_machines) = 1;
     p_machines(2,p2_machines) = 1;
     
-    for j = 1:2
+    for p = 1:2
         for i = 1:num_machines
-            if child_machine>num_machines
-                break
-            end
-            if ~p_machines(j,i)
-                continue
-            end
-            parent_machine = i;
-            parent_machine_jobs = all_jobs(parent_genes(j,:)==parent_machine);
-            if isempty(parent_machine_jobs)
+            if ~p_machines(p,i)
                 continue
             end
 
-            child_array(parent_machine_jobs) = child_indices(child_machine);
-            child_machine_cost(child_indices(child_machine)) = ...
-                        parent_machine_cost(j, parent_machine);
+            child_array(parent_genes(p,:)==i) = child_machine;
+            child_machine_cost(child_machine) = parent_machine_cost(p, i);
             child_machine = child_machine + 1;
+            
+            if child_machine>num_machines
+                break
+            end
         end
     end
     %Check which jobs still need to be assigned

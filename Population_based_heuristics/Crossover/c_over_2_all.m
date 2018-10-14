@@ -110,34 +110,32 @@ function [children, children_machine_cost] = c_over_2_all(...
     
     %----------------------------------------------------------------------  
     children = zeros(num_children,num_jobs);
-    children_machine_cost = zeros(num_children,num_machines);
-    [~, temp] = sort(rand(num_machines, num_children));
-    children_indices = temp';
-    
+    children_machine_cost = zeros(num_children,num_machines);    
     all_jobs = 1:num_jobs;
+    
+    %Ideally would do parent_machine_jobs in one comp
+    %parent_machine_jobs = zeros(num_children, num_machines
     
     for c = 1:num_children
         child_machine = 1;
         for p = 1:2
             for k = 1:num_machines
-                if child_machine>num_machines
-                    break
-                end
                 if ~p_machines(c,k,p)
                     continue
                 end
-                parent_machine = k;
-                parent_machine_jobs = all_jobs(parents_genes(c,:,p)==parent_machine);
-                if isempty(parent_machine_jobs)
-                    continue
+                %TODO: is there a way to assign all children at once
+                children(c,parents_genes(c,:,p)==k) = child_machine;
+                children_machine_cost(c, child_machine) = ...
+                            parents_machine_cost(c, k, p);
+                child_machine = child_machine + 1; 
+                
+                if child_machine>num_machines
+                    break
                 end
-
-                children(c,parent_machine_jobs) = children_indices(c,child_machine);
-                children_machine_cost(c, children_indices(c,child_machine)) = ...
-                            parents_machine_cost(c, parent_machine, p);
-                child_machine = child_machine + 1;
             end
         end
+    end
+    for c = 1:num_children
         %Check which jobs still need to be assigned
         un_assigned_jobs = all_jobs(~children(c,:));
 
