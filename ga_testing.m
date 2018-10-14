@@ -106,14 +106,18 @@ legend(p, {'parent surv','child surv'}, 'Location','Best')
 results = [];
 diagnostics = {};
 machine_prop = 0.4;
-for n = 100:100:500
+for n = [100,1000, 2000]
     m = n*machine_prop;
-    for j = 1:2
+    %Set the seed so that the same test cases are repeated between script
+    %runs
+    rng(mod(m*n,2^32));
+    fprintf("Num jobs: %d, num_machines : %d\n", n,m);
+    for j = 1:1
         a = generate_ms_instances(n, m, hard);
         [outputMakespan, time_taken, init_makespan, outputArray, ...
             best_gen_num, generations, diags_array]...
             = genetic_alg_outer(a, ...
-                 200, "init_mix_shuff_rand", 0.02, 0.6, 20, ... %inits
+                100, "init_mix_shuff_rand", 0.02, 0.6, 20, ... %inits
                 "neg_exp", 3, ... %selection
                 8, "c_over_2_all", ...
                 1/2, 1/3, 0.1, ... %crossover
@@ -128,7 +132,7 @@ for n = 100:100:500
         [outputMakespan_b, time_taken_b, init_makespan_b, outputArray, ...
             best_gen_num_b, generations_b, diags_array]...
             = genetic_alg_outer(a, ...
-                200, "init_mix_shuff_rand", 0.02, 0.6, 20, ... %inits
+                100, "init_mix_shuff_rand", 0.02, 0.6, 20, ... %inits
                 "neg_exp", 3, ... %selection
                 8, "c_over_2_all", ...
                 1/2, 1/3, 0.1, ... %crossover
