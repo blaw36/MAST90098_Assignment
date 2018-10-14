@@ -24,13 +24,14 @@
 function [child_array, child_machine_cost] = c_over_2(parent_genes, ...
                     parent_fitness, parent_machine_cost, jobs_array_aug,...
                     num_jobs, num_machines, ...
-                    least_fit_proportion, most_fit_proportion)
+                    least_fit_proportion, most_fit_proportion,...
+                    prop_switch_parent_fitness)
     
     %Least fit parent is on left
     least_fit_parent = 1;
     
     %Inject a little bit of noise
-    if rand<0.1
+    if rand<prop_switch_parent_fitness
         least_fit_parent = 2;
     end
     most_fit_parent = 1 + mod(least_fit_parent,2);

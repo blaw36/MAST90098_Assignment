@@ -70,7 +70,8 @@
 	% mutation_select_method: fitness operation used to generate
         % probabilities of mutating any given individual
 	% mutate_method: mutation operation performed on selected individuals
-    % mutate_num_shuffles: number of elements to grab and reassign
+    % mutate_proportion: the proportion of jobs to mutate for each chosen
+        % individual
         % machines to (at initiation) - unused by 'pair_swap' mutation 
 % ~~Population culling:        
 	% popn_cull: The population culling operation to reduce population back
@@ -88,10 +89,11 @@ function [best_makespan, time_taken, init_makespan, best_output,...
     best_gen_num, generation_counter, diags_array] = ...
             genetic_alg_outer(input_array, ...
             init_pop_size, init_method, simple_prop, init_k, num_tiers, ... %inits
-            selection_method, ... %selection
+            selection_method, a, ... %selection
             parent_ratio, cross_over_method, ...
-            least_fit_proportion, most_fit_proportion, ... %crossover
-            mutation_method, mutate_num_shuffles, ... %mutation
+            least_fit_proportion, most_fit_proportion, ...
+            prop_switch_parent_fitness, ... %crossover
+            mutation_method, mutate_proportion, ... %mutation
             popn_cull, cull_prop, ... %culling
             num_gen_no_improve, max_gens_allowed, ... %termination
             diagnose, ... %verbose/diagnose
@@ -103,12 +105,13 @@ function [best_makespan, time_taken, init_makespan, best_output,...
     %Use the fitness function to select the parents, with bias given to
     %fitter parents
     invert = false;
-    parent_selection_args = {invert};
     
     if selection_method == "minMaxLinear"
         parent_selection_method = @fitness_minmaxLinear;
+        parent_selection_args = {invert};
     elseif selection_method == "neg_exp"
         parent_selection_method = @fitness_negexp;
+        parent_selection_args = {invert, a};
     else
         error("Invalid Fitness Selection Method");
     end
@@ -117,7 +120,8 @@ function [best_makespan, time_taken, init_makespan, best_output,...
     % have a higher chance of being mutated.
     %fitter parents
     invert = true;
-    mutate_select_args = {invert};
+    mutate_select_args = parent_selection_args;
+    mutate_select_args{1} = invert;
     mutate_select_method = parent_selection_method;
     
     %Cross_over function
@@ -135,10 +139,12 @@ function [best_makespan, time_taken, init_makespan, best_output,...
         elseif cross_over_method == "c_over_2"
             cross_over_inner_method = @c_over_2;
             cross_over_inner_args = {least_fit_proportion, ...
-                                     most_fit_proportion};
+                                     most_fit_proportion,...
+                                     prop_switch_parent_fitness};
         elseif cross_over_method == "c_over_2_simplified"
             cross_over_inner_method = @c_over_2_simplified;
-            cross_over_inner_args = {least_fit_proportion};
+            cross_over_inner_args = {least_fit_proportion,...
+                                    prop_switch_parent_fitness};
         else
             error("Invalid Crossover Method");
         end
@@ -146,7 +152,8 @@ function [best_makespan, time_taken, init_makespan, best_output,...
         cross_over_args = {cross_over_inner_method, cross_over_inner_args};
     else
         cross_over_method = @c_over_2_all;
-        cross_over_args = {least_fit_proportion, most_fit_proportion};
+        cross_over_args = {least_fit_proportion, most_fit_proportion,...
+                            prop_switch_parent_fitness};
     end
     
     % Mutate
@@ -161,6 +168,7 @@ function [best_makespan, time_taken, init_makespan, best_output,...
     %     % Mutation length for each gene - lower makespan, lower number
     %     shuffle_mat = fitness_minmaxLinear(...
     %         max(combined_machine_cost_mat,[],2));
+    mutate_num_shuffles = floor(mutate_proportion*(size(input_array,2)-1));
     if mutation_method~= "all_genes_rndom_shuffle"
         % if individual based mutation method, then
         % 1) assign the method

@@ -22,7 +22,7 @@
 % 0 and 1, as we use randsample later, which can deal with an array of
 % relative likelihoods.
 
-function makespan_prob = fitness_negexp(makespan_mat, invert)
+function makespan_prob = fitness_negexp(makespan_mat, invert, a)
 
     if nargin == 1
         % 'invert' = TRUE is for mutation, It means that we require 
@@ -41,10 +41,10 @@ function makespan_prob = fitness_negexp(makespan_mat, invert)
         % Otherwise, continue with approach
         if invert
             % Higher makespan, higher probability (mutation selection)
-            makespan_prob = exp((1/3)*makespan_mat/max_pop_fit);
+            makespan_prob = exp((1/a)*makespan_mat/max_pop_fit);
         else
             % Lower makespan, higher probability (parent selection)
-            makespan_prob = exp(-3*makespan_mat/max_pop_fit);
+            makespan_prob = exp(-a*makespan_mat/max_pop_fit);
         end
         
 end
