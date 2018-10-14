@@ -11,18 +11,9 @@ function [children, children_machine_cost] = c_over_2_all(...
     % Retrieve and store all the parent information in a comparable data
     % structure, 
     % TODO: flow of data might be able to be optimised further
-    % TODO: Don't need to do temp switching, can pass parent mat to
-    % crossover ordered by fitness
     
-    %parents_fitness = zeros(num_children, 2);
-    parents_fitness = makespan_mat(parent_mat);
-    %Find the least_fit_parents
-    %TODOL Shouldn't this be max
-    [~, least_fit_parents] = max(parents_fitness,[],2);
     %Inject a little bit of noise
-    rand_logical_indices = rand(1,num_children)<0.1;
-    least_fit_parents(rand_logical_indices) = ...
-                    1 + mod(least_fit_parents(rand_logical_indices),2);
+    switch_indices = rand(1,num_children)<0.1;
 
     %parents_genes = zeros(num_children, num_jobs, 2);
     %parents_machine_cost = zeros(num_children, num_machines, 2);
@@ -32,18 +23,18 @@ function [children, children_machine_cost] = c_over_2_all(...
     parents_genes(:,:,1) = pop_mat(parent_mat(:,1),:);
     
     %Make it so parent 1 is the least fit parent
-    tmp = parents_genes(least_fit_parents~=1,:,1);
-    parents_genes(least_fit_parents~=1,:,1) = parents_genes(least_fit_parents~=1,:,2);
-    parents_genes(least_fit_parents~=1,:,2) = tmp;
+    tmp = parents_genes(switch_indices,:,1);
+    parents_genes(switch_indices,:,1) = parents_genes(switch_indices,:,2);
+    parents_genes(switch_indices,:,2) = tmp;
     
     %Retrieve the parent costs
     parents_machine_cost(:,:,2) = machine_cost_mat(parent_mat(:,2),:);
     parents_machine_cost(:,:,1) = machine_cost_mat(parent_mat(:,1),:);
     
     %Make it so parent 1 is the least fit parent
-    tmp = parents_machine_cost(least_fit_parents~=1,:,1);
-    parents_machine_cost(least_fit_parents~=1,:,1) = parents_machine_cost(least_fit_parents~=1,:,2);
-    parents_machine_cost(least_fit_parents~=1,:,2) = tmp;
+    tmp = parents_machine_cost(switch_indices,:,1);
+    parents_machine_cost(switch_indices,:,1) = parents_machine_cost(switch_indices,:,2);
+    parents_machine_cost(switch_indices,:,2) = tmp;
     
     %----------------------------------------------------------------------
     %p_machines = zeros(num_children, num_machines, 2);
@@ -136,7 +127,7 @@ function [children, children_machine_cost] = c_over_2_all(...
                     continue
                 end
                 parent_machine = k;
-                parent_machine_jobs = sort(all_jobs(parents_genes(c,:,p)==parent_machine));
+                parent_machine_jobs = all_jobs(parents_genes(c,:,p)==parent_machine);
                 if isempty(parent_machine_jobs)
                     continue
                 end

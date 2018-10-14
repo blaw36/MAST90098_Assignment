@@ -7,28 +7,13 @@ function [child_array, child_machine_cost] = c_over_2_simplified(parent_genes, .
                     parent_fitness, parent_machine_cost, jobs_array_aug,...
                     num_jobs, num_machines, less_fit_c_over_machs)
 
-    child_array = zeros(1,num_jobs);
-    child_machine_cost = zeros(1,num_machines);
-    child_machine = 1;
-    child_indices = randperm(num_machines,num_machines);
     
-    all_jobs = 1:num_jobs;
-    un_assigned_jobs = all_jobs;
+    %Least fit parent is on left
+    least_fit_parent = 1;
     
-    %Find and record the least_fit_parent, occasionaly switch which parent
-    %is treated as which, for the sake of noise (Might be a better way to
-    %inject noise, or maybe shouldn't even be here)
-    
-     % Faster than 'min' function in this case, for two parents
-    if parent_fitness(1) < parent_fitness(2)
-        least_fit_parent = 1;
-    else
-        least_fit_parent = 2;
-    end
-%     [~, least_fit_parent] = min(parent_fitness);
-
+    %Inject a little bit of noise
     if rand<0.1
-        least_fit_parent = 1 + mod(least_fit_parent,2);
+        least_fit_parent = 2;
     end
     most_fit_parent = 1 + mod(least_fit_parent,2);
     
@@ -78,6 +63,11 @@ function [child_array, child_machine_cost] = c_over_2_simplified(parent_genes, .
 
     %----------------------------------------------------------------------
     %----------------------------------------------------------------------
+    child_array = zeros(1,num_jobs);
+    child_machine_cost = zeros(1,num_machines);
+    child_machine = 1;
+    child_indices = randperm(num_machines,num_machines);
+    all_jobs = 1:num_jobs;
     
     %Can move this somewhere else later
     p_machines = zeros(2, num_machines);
@@ -93,7 +83,7 @@ function [child_array, child_machine_cost] = c_over_2_simplified(parent_genes, .
                 continue
             end
             parent_machine = i;
-            parent_machine_jobs = sort(all_jobs(parent_genes(j,:)==parent_machine));
+            parent_machine_jobs = all_jobs(parent_genes(j,:)==parent_machine);
             if isempty(parent_machine_jobs)
                 continue
             end
