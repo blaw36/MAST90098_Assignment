@@ -103,10 +103,7 @@ function [best_makespan, time_taken, init_makespan, best_output,...
     %fitter parents
     invert = false;
     
-    if selection_method == "minMaxLinear"
-        parent_selection_method = @fitness_minmaxLinear;
-        parent_selection_args = {invert};
-    elseif selection_method == "neg_exp"
+    if selection_method == "neg_exp"
         parent_selection_method = @fitness_negexp;
         parent_selection_args = {invert,alpha_parent};
     else
@@ -117,10 +114,7 @@ function [best_makespan, time_taken, init_makespan, best_output,...
     % have a higher chance of being mutated, and also use a different
     % params
     invert = true;
-    if selection_method == "minMaxLinear"
-        mutate_select_method = @fitness_minmaxLinear;
-        mutate_select_args = {invert};
-    elseif selection_method == "neg_exp"
+    if selection_method == "neg_exp"
         mutate_select_method = @fitness_negexp;
         mutate_select_args = {invert, alpha_mutation};
     else
@@ -130,10 +124,7 @@ function [best_makespan, time_taken, init_makespan, best_output,...
     %Cross_over function
     cross_over_inner_args = {};
     if cross_over_method ~= "c_over_2_all"
-        if cross_over_method == "cutover_split"
-            cross_over_inner_method = @c_over_split;
-            cross_over_inner_args = {};
-        elseif cross_over_method == "rndm_split"
+        if cross_over_method == "rndm_split"
             cross_over_inner_method = @c_over_rndm_split;
             cross_over_inner_args = {};
         elseif cross_over_method == "c_over_1"
@@ -144,10 +135,6 @@ function [best_makespan, time_taken, init_makespan, best_output,...
             cross_over_inner_args = {least_fit_proportion, ...
                                      most_fit_proportion,...
                                      prop_switch_parent_fitness};
-        elseif cross_over_method == "c_over_2_simplified"
-            cross_over_inner_method = @c_over_2_simplified;
-            cross_over_inner_args = {least_fit_proportion,...
-                                    prop_switch_parent_fitness};
         else
             error("Invalid Crossover Method");
         end
@@ -174,18 +161,11 @@ function [best_makespan, time_taken, init_makespan, best_output,...
     mutate_num_shuffles = floor(mutate_proportion*(size(input_array,2)-1));
     if mutation_method~= "all_genes_rndom_shuffle"
         % if individual based mutation method, then
-        % 1) assign the method
+        % 1) assign the method for each individual
         if mutation_method == "mutate_greedy"
             mutate_method_inner = @mutate_greedy;
             mutate_method_inner_args = {mutate_num_shuffles};
-        % Pick mutation method for each gene
-        elseif mutation_method == "pair_swap"
-            mutate_method_inner = @shuffle_pair_swap;
-            mutate_method_inner_args = {};
         elseif mutation_method == "rndom_mach_chg"
-            mutate_method_inner = @shuffle_rndom_mach_chg;
-            mutate_method_inner_args = {mutate_num_shuffles};
-        elseif mutation_method == "shuffle_rndom_mach_chg_load"
             mutate_method_inner = @shuffle_rndom_mach_chg;
             mutate_method_inner_args = {mutate_num_shuffles};
         else
@@ -217,16 +197,9 @@ function [best_makespan, time_taken, init_makespan, best_output,...
     if init_method == "init_mix_shuff_rand"
         init_method = @init_mix_shuff_rand;
         init_inner_args = {simple_prop, mutate_method, mutate_args};
-        %TODO: Extend to init_simple_grad_rand
-%     elseif init_method == "init_simple_grad_rand"
-%         init_method = @init_simple_grad_rand;
-%         init_inner_args = {simple_prop, mutate_method, mutate_args};
     elseif init_method == "init_rand_greedy"
         init_method = @init_rand_greedy;
         init_inner_args = {init_prop_random};
-    elseif init_method == "init_rand_greedy_tiered"
-        init_method = @init_rand_greedy_tiered;
-        init_inner_args = {num_tiers};
     else
         error("Invalid Initiation method")
     end
@@ -240,10 +213,7 @@ function [best_makespan, time_taken, init_makespan, best_output,...
     
     
     %Cull
-    if popn_cull == "top"
-        pop_cull_method = @cull_top_n;
-        pop_cull_args = {};
-    elseif popn_cull == "top_and_bottom"
+    if popn_cull == "top_and_bottom"
         pop_cull_method = @cull_top_bottom_n;
         pop_cull_args = {keep_prop};
     elseif popn_cull == "top_and_randsamp"
