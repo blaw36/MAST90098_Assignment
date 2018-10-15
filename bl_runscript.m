@@ -46,8 +46,8 @@ elseif strcmp(method,'Genetic')
     % is the array of jobs sorted in descending cost order.
     % Note that the third column output is meaningless - i've just filled
     % it with 0s to keep in line with the outputs from GLS and VDS.
-    [outputMakespan_b, time_taken_b, init_makespan_b, outputArray, ...
-            best_gen_num_b, generations_b, diags_array]...
+    [outputMakespan, time_taken, init_makespan, outputArray, ...
+            best_gen_num, generations, diags_array]...
             = genetic_alg_outer(a, ...
                 400, "init_rand_greedy", 0.02, 0.6, 20, ... %inits
                 "neg_exp", 2, 1, ... %selection
@@ -56,7 +56,7 @@ elseif strcmp(method,'Genetic')
                 "all_genes_rndom_shuffle", 0.4, ... %mutation
                 "top_and_randsamp", 0.8, ... %culling
                 10, 1000, ...  %termination
-                false, ... %verbose/diagnose
+                true, ... %verbose/diagnose
                 true, 4); %parallelisation
 end
 
@@ -65,7 +65,7 @@ outputMakespan
 lower_bound = lower_bound_makespan(a);
 ratio_vs_lb = outputMakespan/lower_bound
 time_taken
-return
+
 
 %% Graphing and analysis
 % Sort the output for presentation
