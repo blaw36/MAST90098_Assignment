@@ -46,5 +46,9 @@ function makespan_prob = fitness_negexp(makespan_mat, invert, a)
             % Lower makespan, higher probability (parent selection)
             makespan_prob = exp(-a*makespan_mat/max_pop_fit);
         end
-        
+    end
+     
+    min_prob = min(makespan_prob);
+    max_prob = max(makespan_prob);
+    makespan_prob = (makespan_prob - min_prob)./(max_prob - min_prob );
 end

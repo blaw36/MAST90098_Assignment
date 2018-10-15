@@ -49,15 +49,15 @@ elseif strcmp(method,'Genetic')
     [outputMakespan, time_taken, init_makespan, outputArray, ...
         best_gen_num, generations, diags_array]...
         = genetic_alg_outer(a, ...
-         200, "init_rand_greedy", 0.02, 0.6, 20, ... %inits
-        "neg_exp", 3, ... %selection
-        5, "c_over_2_all", ...
-        1/2, 1/3, 0.1, ... %crossover
-        "all_genes_rndom_shuffle", 0.4, ... %mutation
-        "top_and_randsamp", 0.8, ... %culling
-        10, 200, ...  %termination
-        true, ... %verbose/diagnose
-        true, 4); %parallelisation
+             100, "init_rand_greedy", 0.02, 0.6, 20, ... %inits
+            "neg_exp", 2, 1, ... %selection
+            1, "c_over_2_all", ...
+            1/2, 1/3, 0.1, ... %crossover
+            "all_genes_rndom_shuffle", 0.4, ... %mutation
+            "top_and_randsamp", 0.8, ... %culling
+            5, 200, ...  %termination
+            true, ... %verbose/diagnose
+            false, 4); %parallelisation
 end
 
 outputMakespan

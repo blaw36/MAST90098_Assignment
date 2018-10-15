@@ -15,8 +15,8 @@ rmpath('Not_in_use');
 rng(10);
 
 %% Parameters
-n = 100; % # jobs
-m = 40; % # machines
+n = 1000; % # jobs
+m = 400; % # machines
 hard = false;
 a = generate_ms_instances(n, m, hard); % Generate makespan input vector
 k = 2; % # of exchanges (k-exch)
@@ -51,18 +51,18 @@ elseif strcmp(method,'Genetic')
     [outputMakespan, time_taken, init_makespan, outputArray, ...
         best_gen_num, generations, diags_array]...
         = genetic_alg_outer(a, ...
-         200, "init_rand_greedy", 0.02, 0.6, 20, ... %inits
-        "neg_exp", 3, ... %selection
-        5, "c_over_2_all", ...
-        1/2, 1/3, 0.1, ... %crossover
-        "all_genes_rndom_shuffle", 0.4, ... %mutation
-        "top_and_randsamp", 0.8, ... %culling
-        10, 200, ...  %termination
-        true, ... %verbose/diagnose
-        true, 4); %parallelisation
+             100, "init_rand_greedy", 0.02, 0.6, 20, ... %inits
+            "neg_exp", 2, 1, ... %selection
+            1, "c_over_2_all", ...
+            1/2, 1/3, 0.1, ... %crossover
+            "all_genes_rndom_shuffle", 0.4, ... %mutation
+            "top_and_randsamp", 0.8, ... %culling
+            5, 200, ...  %termination
+            true, ... %verbose/diagnose
+            true, 4); %parallelisation
     
     profile off
-    profile viewer
+    %profile viewer
 end
 
 outputMakespan
@@ -101,12 +101,13 @@ xlabel('Generation #') % x-axis label
 ylabel('Survival %') % y-axis label
 legend(p, {'parent surv','child surv'}, 'Location','Best')
 
+return
 
 %% Batch experiments
 results = [];
 diagnostics = {};
 machine_prop = 0.4;
-for n = [600, 800]
+for n = [300, 600]
     m = n*machine_prop;
     %Set the seed so that the same test cases are repeated between script
     %runs
@@ -124,7 +125,7 @@ for n = [600, 800]
 %                 1/2, 1/3, 0.05, ... %crossover
 %                 "all_genes_rndom_shuffle", 0.4, ... %mutation
 %                 "top_and_randsamp", 0.8, ... %culling
-%                 11, 200, ...  %termination
+%                 5, 200, ...  %termination
 %                 false, ... %verbose/diagnose
 %                 true, 4); %parallelisation
 %             
@@ -133,13 +134,13 @@ for n = [600, 800]
         [outputMakespan_b, time_taken_b, init_makespan_b, outputArray, ...
             best_gen_num_b, generations_b, diags_array]...
             = genetic_alg_outer(a, ...
-                200, "init_rand_greedy", 0.02, 0.6, 20, ... %inits
-                "neg_exp", 3, ... %selection
-                5, "c_over_2_all", ...
+                100, "init_rand_greedy", 0.02, 0.6, 20, ... %inits
+                "neg_exp", 2, 1, ... %selection
+                1, "c_over_2_all", ...
                 1/2, 1/3, 0.1, ... %crossover
                 "all_genes_rndom_shuffle", 0.4, ... %mutation
                 "top_and_randsamp", 0.8, ... %culling
-                10, 200, ...  %termination
+                5, 200, ...  %termination
                 false, ... %verbose/diagnose
                 true, 4); %parallelisation
         

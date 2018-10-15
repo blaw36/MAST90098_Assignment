@@ -78,7 +78,7 @@ function [best_makespan, time_taken, init_makespan, best_output,...
             mutate_method, mutate_args, ... %mutation
             pop_cull_method, pop_cull_args, ... %culling
             init_pop_size, parent_ratio, ...
-            num_gen_no_improve, max_gens_allowed, ... %termination
+            num_inner_gen_no_improve, max_gens_allowed, ... %termination
             diagnose, parallel, num_split_gens) %other args
 
     if ~parallel
@@ -112,7 +112,7 @@ function [best_makespan, time_taken, init_makespan, best_output,...
 
     % Initialise generation counter
     generation_counter = 0;
-    no_chg_generations = 0;
+    no_chg_inner_generations = 0;
 
     % Initialise best generation heuristics
     best_generation = {};
@@ -134,7 +134,7 @@ function [best_makespan, time_taken, init_makespan, best_output,...
         
     % Termination criteria: # generations with no improvement, max number
     % of generations
-    while no_chg_generations <= num_gen_no_improve && ...
+    while no_chg_inner_generations <= num_inner_gen_no_improve && ...
             generation_counter <= max_gens_allowed
         
         if parallel
@@ -202,9 +202,9 @@ function [best_makespan, time_taken, init_makespan, best_output,...
         generation_counter = generation_counter + num_split_gens;
 
         if (new_gen_makespan - best_generation{3}) >= 0
-            no_chg_generations = no_chg_generations + num_split_gens;
+            no_chg_inner_generations = no_chg_inner_generations + 1;
         elseif (new_gen_makespan - best_generation{3}) < 0
-            no_chg_generations = 0;
+            no_chg_inner_generations = 0;
             best_generation = {generation_counter, pop_mat(indiv_indx,:), new_gen_makespan};
         end
         
@@ -227,7 +227,7 @@ function [best_makespan, time_taken, init_makespan, best_output,...
             fprintf("Avg fitness: %d \n", round(mean(makespan_mat)));
             fprintf("Min fitness: %d \n", round(min(makespan_mat)));
             fprintf("Max fitness: %d \n", round(max(makespan_mat)));
-            fprintf("Num gens no improvement: %d \n", no_chg_generations);
+            fprintf("Num inner gens no improvement: %d \n", no_chg_inner_generations);
             fprintf("Num parents survived: %d \n", ...
                 sum(parent_child_indicator == 1));
             fprintf("Num children survived: %d \n", ...

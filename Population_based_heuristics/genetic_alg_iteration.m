@@ -92,16 +92,6 @@ function [pop_mat, machine_cost_mat, makespan_mat, parent_child_indicator, ...
     prob_mutation_select = mutate_select_method(combined_makespan_mat, ...
         mutate_select_args{:});
 
-    % TODO: Should probably be inside function
-    % Convert to between 0 and 1
-    % The problem here is the min gets allocated 0, and the max gets
-    % allocated 1
-    min_prob = min(prob_mutation_select);
-    max_prob = max(prob_mutation_select);
-    prob_mutation_select = ...
-        (prob_mutation_select - min_prob)./...
-        (max_prob - min_prob );
-
     random_numbers = rand(size(combined_makespan_mat,1),1);
     indivs_to_mutate = find(random_numbers <= prob_mutation_select)';
 

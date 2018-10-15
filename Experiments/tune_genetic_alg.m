@@ -4,17 +4,29 @@
 
 %Can drop some of these args if we use certain methods
 %x0
-x0= [100, ... %pop_size
+
+%Possibly dropable depending on function
+%num_tiers
+
+%What can we rationalise away?
+
+%   as we use en 'elitist' culling method can afford to have a high
+%       mutation proportion, so can probs have tighter bounds on mutation
+
+%These were found on last run, terminated the search early so no means a
+%complete search of the
+x0= [96, ... %pop_size
     0.02, ... %simple_prop
     0.6, ... %init_prop_random
     20, ...num_tiers
-    3, ... %alpha
-    8, ... %parent_ratio
+    2, ... %alpha_parent
+    1, ... %alpha_mutation
+    1, ... %parent_ratio
     1/2, ... %least_fit_proportion
     1/3, ... %most_fit_proportion
     0.1, ... %parent_switch_prob
     0.4, ... %mutation proportion
-    0.8, ... %cull_prop
+    0.8, ... %keep_prop
     4 ... %num_inner
 ];
 %Upper and lower bounds for each param
@@ -25,26 +37,28 @@ lb = [10, ... %pop_size
     0.005, ... %simple_prop
     0.1, ... %init_prop_random
     5, ...num_tiers
-    1, ... %alpha
+    0.1, ... %alpha_parent
+    0.1, ... %alpha_mutation
     1, ... %parent_ratio
     0.1, ... %least_fit_proportion
     0.1, ... %most_fit_proportion
     0, ... %parent_switch_prob
     0.1, ... %mutation proportion
-    0.1, ... %cull_prop
+    0.5, ... %keep_prop
     1 ... %num_inner;
     ];
 ub = [1000, ... %pop_size
-    0.9, ... %simple_prop
+    0.5, ... %simple_prop
     0.9, ... %init_prop_random
     20, ...num_tiers
-    100, ... %alpha
+    100, ... %alpha_parent
+    100, ... %alpha_mutation
     50, ... %parent_ratio
     1, ... %least_fit_proportion
     1, ... %most_fit_proportion
-    0.5, ... %parent_switch_prob
+    0.2, ... %parent_switch_prob
     0.9, ... %mutation proportion
-    0.9, ... %cull_prop
+    0.9, ... %keep_prop
     25 ... %num_inner
 ];
 %TODO: Constraints, has to beat/equal vds's lower bound on the same range
@@ -68,7 +82,7 @@ function cost = tuning_function(x)
     
     %Define a suitable range
     programs_range = 100:200:700;
-    num_trials = 1;
+    num_trials = 5;
     %Just do it on a fixed proportion
     machines_denom_iterator = 1;
     machines_proportion = 0.4;
@@ -83,7 +97,7 @@ function cost = tuning_function(x)
     culling_method = "top_and_randsamp";
 
     %Fixed parameters
-    num_gen_no_improve = 10;
+    num_inner_gen_no_improve = 5;
     max_gens_allowed = 200;
     diagnose = false;
     parallel = true;
@@ -95,7 +109,8 @@ function cost = tuning_function(x)
         simple_prop, ...
         init_prop_random, ...
         num_tiers, ...
-        alpha, ...
+        alpha_parent, ...
+        alpha_mutation, ...
         parent_ratio, ...
         least_fit_prop, ...
         most_fit_prop, ...
@@ -113,12 +128,12 @@ function cost = tuning_function(x)
     
     alg1_args = {
             pop_size, init_alg, simple_prop, init_prop_random, num_tiers, ... %inits
-            selection_method, alpha, ... %selection
+            selection_method, alpha_parent, alpha_mutation, ... %selection
             parent_ratio, cross_over_method, ...
             least_fit_prop, most_fit_prop, parent_switch_prob, ... %crossover
             mutation_method, mutation_prop, ... %mutation
             culling_method, cull_pop, ... %culling
-            num_gen_no_improve, max_gens_allowed, ...  %termination
+            num_inner_gen_no_improve, max_gens_allowed, ...  %termination
             diagnose, ... %verbose/diagnose
             parallel, num_inner %parallelisation
             };
@@ -141,7 +156,7 @@ function cost = tuning_function(x)
     
     %1 alg, 1 machine prop, 3rd metric (ratio to lb)
     average_lb_ratio = mean(results(1,:,1,3));
-    lb_ratio_penalty = ((1-average_lb_ratio)*10)^3;
+    lb_ratio_penalty = ((average_lb_ratio-1)*10)^3;
     cost = total_average_time*lb_ratio_penalty;
     
     %cost = time_cost;

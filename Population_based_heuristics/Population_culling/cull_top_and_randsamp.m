@@ -3,8 +3,6 @@
 % the rest
 % output should be some array of rows to grab from the large pop_mat.
 
-
-
 function indivs_to_keep = cull_top_and_randsamp(pop_mat, makespan_mat, ...
     init_pop_size, top_prop)
 

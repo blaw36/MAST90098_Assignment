@@ -89,12 +89,12 @@ function [best_makespan, time_taken, init_makespan, best_output,...
     best_gen_num, generation_counter, diags_array] = ...
             genetic_alg_outer(input_array, ...
             init_pop_size, init_method, simple_prop, init_prop_random, num_tiers, ... %inits
-            selection_method, a, ... %selection
+            selection_method, alpha_parent, alpha_mutation, ... %selection
             parent_ratio, cross_over_method, ...
             least_fit_proportion, most_fit_proportion, ...
             prop_switch_parent_fitness, ... %crossover
             mutation_method, mutate_proportion, ... %mutation
-            popn_cull, cull_prop, ... %culling
+            popn_cull, keep_prop, ... %culling
             num_gen_no_improve, max_gens_allowed, ... %termination
             diagnose, ... %verbose/diagnose
             parallel, num_split_gens)
@@ -108,18 +108,24 @@ function [best_makespan, time_taken, init_makespan, best_output,...
         parent_selection_args = {invert};
     elseif selection_method == "neg_exp"
         parent_selection_method = @fitness_negexp;
-        parent_selection_args = {invert, a};
+        parent_selection_args = {invert,alpha_parent};
     else
         error("Invalid Fitness Selection Method");
     end
     
     % Use the same, function but invert the probs so less fit indivduals
-    % have a higher chance of being mutated.
-    %fitter parents
+    % have a higher chance of being mutated, and also use a different
+    % params
     invert = true;
-    mutate_select_args = parent_selection_args;
-    mutate_select_args{1} = invert;
-    mutate_select_method = parent_selection_method;
+    if selection_method == "minMaxLinear"
+        mutate_select_method = @fitness_minmaxLinear;
+        mutate_select_args = {invert};
+    elseif selection_method == "neg_exp"
+        mutate_select_method = @fitness_negexp;
+        mutate_select_args = {invert, alpha_mutation};
+    else
+        error("Invalid Fitness Selection Method");
+    end
     
     %Cross_over function
     cross_over_inner_args = {};
@@ -239,10 +245,10 @@ function [best_makespan, time_taken, init_makespan, best_output,...
         pop_cull_args = {};
     elseif popn_cull == "top_and_bottom"
         pop_cull_method = @cull_top_bottom_n;
-        pop_cull_args = {cull_prop};
+        pop_cull_args = {keep_prop};
     elseif popn_cull == "top_and_randsamp"
         pop_cull_method = @cull_top_and_randsamp;
-        pop_cull_args = {cull_prop};
+        pop_cull_args = {keep_prop};
     else
         error("Invalid Culling Method");
     end
