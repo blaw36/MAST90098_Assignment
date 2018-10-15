@@ -129,6 +129,11 @@ function [child_array, child_machine_cost] = c_over_2(parent_genes, ...
             if ~p_machines(p,m)
                 continue
             end
+            
+            %If we encounter a machine with no jobs in it don't add it
+            if ~parent_machine_cost(p, m)
+                continue
+            end
 
             child_array(parent_genes(p,:)==m) = child_machine_indices(child_machine);
             child_machine_cost(child_machine_indices(child_machine)) = parent_machine_cost(p, m);

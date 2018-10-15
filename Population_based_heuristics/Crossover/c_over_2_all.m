@@ -134,6 +134,12 @@ function [child, child_machine_cost] = compute_child(num_machines, num_jobs, ...
             if ~parent_machines(m,p)
                 continue
             end
+
+            %If we encounter a machine with no jobs in it don't add it
+            if ~parent_machine_cost(m, p)
+                continue
+            end
+            
             child(parent_genes(:,p)==m) = child_machine_indices(child_machine);
             child_machine_cost(child_machine_indices(child_machine)) = ...
                                                 parent_machine_cost(m, p);

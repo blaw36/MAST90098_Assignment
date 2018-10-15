@@ -22,7 +22,7 @@ function parent_mat = generate_parents(prob_parent_select, ...
     parent_mat = reshape(parent_ids,[],2);
     
     %Place the most probable parent on the right of each pair
-    [a,id] = sort( prob_parent_select(parent_mat),2);
+    [~,id] = sort( prob_parent_select(parent_mat),2);
     rev_rows = id(:,1) == 2;
     parent_mat(rev_rows,:) = parent_mat(rev_rows,2:-1:1);
 end
