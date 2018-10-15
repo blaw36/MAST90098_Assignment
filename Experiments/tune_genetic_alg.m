@@ -2,23 +2,13 @@
 % sub algorithms
 %%
 
-%Can drop some of these args if we use certain methods
 %x0
-
-%Possibly dropable depending on function
-%num_tiers
-
-%What can we rationalise away?
-
-%   as we use en 'elitist' culling method can afford to have a high
-%       mutation proportion, so can probs have tighter bounds on mutation
 
 %These were found on last run, terminated the search early so no means a
 %complete search of the
 x0= [96, ... %pop_size
     0.02, ... %simple_prop
     0.6, ... %init_prop_random
-    20, ...num_tiers
     2, ... %alpha_parent
     1, ... %alpha_mutation
     1, ... %parent_ratio
@@ -30,36 +20,32 @@ x0= [96, ... %pop_size
     4 ... %num_inner
 ];
 %Upper and lower bounds for each param
-%TODO: tighter?
-%num_tiers?
 
 lb = [10, ... %pop_size
     0.005, ... %simple_prop
     0.1, ... %init_prop_random
-    5, ...num_tiers
     0.1, ... %alpha_parent
     0.1, ... %alpha_mutation
-    1, ... %parent_ratio
+    0.5, ... %parent_ratio
     0.1, ... %least_fit_proportion
     0.1, ... %most_fit_proportion
     0, ... %parent_switch_prob
-    0.1, ... %mutation proportion
+    0.05, ... %mutation proportion
     0.5, ... %keep_prop
-    1 ... %num_inner;
+    2 ... %num_inner;
     ];
 ub = [1000, ... %pop_size
     0.5, ... %simple_prop
     0.9, ... %init_prop_random
-    20, ...num_tiers
     100, ... %alpha_parent
     100, ... %alpha_mutation
     50, ... %parent_ratio
     1, ... %least_fit_proportion
     1, ... %most_fit_proportion
-    0.2, ... %parent_switch_prob
-    0.9, ... %mutation proportion
-    0.9, ... %keep_prop
-    25 ... %num_inner
+    1, ... %parent_switch_prob
+    0.95, ... %mutation proportion
+    0.95, ... %keep_prop
+    10 ... %num_inner
 ];
 %TODO: Constraints, has to beat/equal vds's lower bound on the same range
 % so run vds once on the same range (test instances stay constant between
@@ -101,6 +87,7 @@ function cost = tuning_function(x)
     max_gens_allowed = 200;
     diagnose = false;
     parallel = true;
+    num_tiers = 20; %Param not used by methods
     
     %Unpack the varying parameters
     x_cells = num2cell(x);
@@ -108,7 +95,6 @@ function cost = tuning_function(x)
     [   pop_size,...
         simple_prop, ...
         init_prop_random, ...
-        num_tiers, ...
         alpha_parent, ...
         alpha_mutation, ...
         parent_ratio, ...
@@ -116,15 +102,14 @@ function cost = tuning_function(x)
         most_fit_prop, ...
         parent_switch_prob, ...
         mutation_prop, ...
-        cull_pop, ...
+        keep_prop, ...
         num_inner, ...
         ] = x_cells{:}
     
     %Approximating int problem
     pop_size = floor(pop_size);
-    pop_size = pop_size - mod(pop_size,2);
-    num_tiers = floor(num_tiers);
-    parent_ratio = floor(parent_ratio);
+    pop_size = pop_size - mod(pop_size,2);%make sure divisble by 2 for par
+    num_inner = floor(num_inner);
     
     alg1_args = {
             pop_size, init_alg, simple_prop, init_prop_random, num_tiers, ... %inits
@@ -132,7 +117,7 @@ function cost = tuning_function(x)
             parent_ratio, cross_over_method, ...
             least_fit_prop, most_fit_prop, parent_switch_prob, ... %crossover
             mutation_method, mutation_prop, ... %mutation
-            culling_method, cull_pop, ... %culling
+            culling_method, keep_prop, ... %culling
             num_inner_gen_no_improve, max_gens_allowed, ...  %termination
             diagnose, ... %verbose/diagnose
             parallel, num_inner %parallelisation
