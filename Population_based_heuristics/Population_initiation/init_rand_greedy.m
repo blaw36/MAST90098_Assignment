@@ -3,7 +3,7 @@
 % machines, then doing a greedy (simple) on the rest
 
 function [pop_mat, machine_cost_mat, num_jobs, num_machines, jobs_array_aug] = ...
-    init_rand_greedy(input_array_aug, init_pop_size, k)
+    init_rand_greedy(input_array_aug, init_pop_size, init_prop_random)
 
     length_of_input = length(input_array_aug);
     num_jobs = length_of_input - 1;
@@ -13,12 +13,12 @@ function [pop_mat, machine_cost_mat, num_jobs, num_machines, jobs_array_aug] = .
     jobs_array_aug = input_array_aug(1:(end-1));
     
     % Num jobs to assign randomly:
-    if k < 0
-        k = 0;
-    elseif k > 1
-        k = 1;
+    if init_prop_random<0
+        init_prop_random = 0;
+    elseif init_prop_random>1
+        init_prop_random = 1;
     end
-    jobs_rndm = floor(num_jobs * k);
+    jobs_rndm = floor(num_jobs * init_prop_random);
 
     % Assign first k jobs to random machines
     pop_mat = zeros(init_pop_size, num_jobs);

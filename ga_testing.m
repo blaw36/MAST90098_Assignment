@@ -59,7 +59,7 @@ elseif strcmp(method,'Genetic')
         "top_and_randsamp", 0.8, ... %culling
         10, 200, ...  %termination
         true, ... %verbose/diagnose
-        false, 5); %parallelisation
+        true, 4); %parallelisation
     
     profile off
     profile viewer
@@ -106,47 +106,48 @@ legend(p, {'parent surv','child surv'}, 'Location','Best')
 results = [];
 diagnostics = {};
 machine_prop = 0.4;
-for n = [100,1000, 2000]
+for n = [600, 800]
     m = n*machine_prop;
     %Set the seed so that the same test cases are repeated between script
     %runs
     rng(mod(m*n,2^32));
     fprintf("Num jobs: %d, num_machines : %d\n", n,m);
-    for j = 1:1
+    for j = 1:10
+        fprintf("\n");
         a = generate_ms_instances(n, m, hard);
-        [outputMakespan, time_taken, init_makespan, outputArray, ...
-            best_gen_num, generations, diags_array]...
-            = genetic_alg_outer(a, ...
-                100, "init_mix_shuff_rand", 0.02, 0.6, 20, ... %inits
-                "neg_exp", 3, ... %selection
-                8, "c_over_2_all", ...
-                1/2, 1/3, 0.1, ... %crossover
-                "all_genes_rndom_shuffle", 0.4, ... %mutation
-                "top_and_randsamp", 0.8, ... %culling
-                10, 200, ...  %termination
-                false, ... %verbose/diagnose
-                false, 5); %parallelisation
-            
-        fprintf("Genetic 1: %d, %f\n", outputMakespan, time_taken)
+%         [outputMakespan, time_taken, init_makespan, outputArray, ...
+%             best_gen_num, generations, diags_array]...
+%             = genetic_alg_outer(a, ...
+%                 100, "init_mix_shuff_rand", 0.02, 0.6, 20, ... %inits
+%                 "neg_exp", 3, ... %selection
+%                 8, "c_over_2_all", ...
+%                 1/2, 1/3, 0.05, ... %crossover
+%                 "all_genes_rndom_shuffle", 0.4, ... %mutation
+%                 "top_and_randsamp", 0.8, ... %culling
+%                 11, 200, ...  %termination
+%                 false, ... %verbose/diagnose
+%                 true, 4); %parallelisation
+%             
+%         fprintf("Genetic 1: %d, %f\n", outputMakespan, time_taken)
         
         [outputMakespan_b, time_taken_b, init_makespan_b, outputArray, ...
             best_gen_num_b, generations_b, diags_array]...
             = genetic_alg_outer(a, ...
-                100, "init_mix_shuff_rand", 0.02, 0.6, 20, ... %inits
+                200, "init_rand_greedy", 0.02, 0.6, 20, ... %inits
                 "neg_exp", 3, ... %selection
-                8, "c_over_2_all", ...
+                5, "c_over_2_all", ...
                 1/2, 1/3, 0.1, ... %crossover
                 "all_genes_rndom_shuffle", 0.4, ... %mutation
                 "top_and_randsamp", 0.8, ... %culling
                 10, 200, ...  %termination
                 false, ... %verbose/diagnose
-                true, 5); %parallelisation
+                true, 4); %parallelisation
         
-        fprintf("Genetic 2: %d, %f\n", outputMakespan_b, time_taken_b)
+        fprintf("Genetic: %d, %f\n", outputMakespan_b, time_taken_b)
                 
         [outputMakespan_gls, time_taken_gls, init_makespan_gls, outputArray, num_exchanges] = ...
             gls(a, k, 'simple', true);
-        fprintf("gls: %d, %f\n", outputMakespan_gls, time_taken_gls)
+%         fprintf("gls: %d, %f\n", outputMakespan_gls, time_taken_gls)
         
         [outputMakespan_vds, time_taken_vds, init_makespan_vds, outputArray, num_exchanges, ...
             num_transformations] = vds(a, k, 'simple', true);

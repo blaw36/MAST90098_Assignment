@@ -1,41 +1,52 @@
 % A script used to tune the parameters of the genetic alg for given fixed
 % sub algorithms
 %%
-[outputMakespan, time_taken, init_makespan, outputArray, ...
-    best_gen_num, generations, diags_array]...
-        = genetic_alg_outer(a, ...
-        100, "init_rand_greedy", 0.02, 0.4, ... %inits
-        "neg_exp", ... %selection
-        8, "c_over_2_all", ...
-        1/2, 1/3, ... %crossover
-        "all_genes_rndom_shuffle", floor(0.4*(size(a,2)-1)), ... %mutation
-        "top_and_randsamp", 0.8, ... %culling
-        10, 200, ...  %termination
-        true, ... %verbose/diagnose
-        false); %parallelisation
 
-%TODO: Fixed algorithms
-init_alg = "init_rand_greedy";
-selection_method = "neg_exp";
-cross_over_method = "c_over_2_all";
-mutation_method = "all_genes_rndom_shuffle";
-culling_method = "top_and_randsamp";
-
-%TODO: x0
-x0=[100, ... %pop_size
+%Can drop some of these args if we use certain methods
+%x0
+x0= [100, ... %pop_size
     0.02, ... %simple_prop
-    0.04, ... %init_k
+    0.6, ... %init_prop_random
+    20, ...num_tiers
+    3, ... %alpha
     8, ... %parent_ratio
     1/2, ... %least_fit_proportion
     1/3, ... %most_fit_proportion
-    floor(0.4*(size(a,2)-1)), ... %mutate_num_shuffles do 0.4 param -> 
+    0.1, ... %parent_switch_prob
+    0.4, ... %mutation proportion
     0.8, ... %cull_prop
-    10, ...  %max_gen_no improv
-    200 %max_gens_allowed
-]
-%TODO: Upper and lower bounds for each param
-lb = [];
-ub = [];
+    4 ... %num_inner
+];
+%Upper and lower bounds for each param
+%TODO: tighter?
+%num_tiers?
+
+lb = [10, ... %pop_size
+    0.005, ... %simple_prop
+    0.1, ... %init_prop_random
+    5, ...num_tiers
+    1, ... %alpha
+    1, ... %parent_ratio
+    0.1, ... %least_fit_proportion
+    0.1, ... %most_fit_proportion
+    0, ... %parent_switch_prob
+    0.1, ... %mutation proportion
+    0.1, ... %cull_prop
+    1 ... %num_inner;
+    ];
+ub = [1000, ... %pop_size
+    0.9, ... %simple_prop
+    0.9, ... %init_prop_random
+    20, ...num_tiers
+    100, ... %alpha
+    50, ... %parent_ratio
+    1, ... %least_fit_proportion
+    1, ... %most_fit_proportion
+    0.5, ... %parent_switch_prob
+    0.9, ... %mutation proportion
+    0.9, ... %cull_prop
+    25 ... %num_inner
+];
 %TODO: Constraints, has to beat/equal vds's lower bound on the same range
 % so run vds once on the same range (test instances stay constant between
 % runs) to get bounds
@@ -56,26 +67,63 @@ function cost = tuning_function(x)
                 generate_ms_instances(num_programs, num_machines, hard);
     
     %Define a suitable range
-    programs_range = 200:200:1000;
-    num_trials = 5;
+    programs_range = 100:200:700;
+    num_trials = 1;
     %Just do it on a fixed proportion
     machines_denom_iterator = 1;
     machines_proportion = 0.4;
 
-    alg1 = @(input_array, args) genetic_outer(input_array, args{:});
+    alg1 = @(input_array, args) genetic_alg_outer(input_array, args{:});
     
-    %Process x and the function args above into a suitable format 
+    %Process x and the function args above into a suitable format
+    init_alg = "init_rand_greedy";
+    selection_method = "neg_exp";
+    cross_over_method = "c_over_2_all";
+    mutation_method = "all_genes_rndom_shuffle";
+    culling_method = "top_and_randsamp";
+
+    %Fixed parameters
+    num_gen_no_improve = 10;
+    max_gens_allowed = 200;
+    diagnose = false;
+    parallel = true;
+    
+    %Unpack the varying parameters
+    x_cells = num2cell(x);
+
+    [   pop_size,...
+        simple_prop, ...
+        init_prop_random, ...
+        num_tiers, ...
+        alpha, ...
+        parent_ratio, ...
+        least_fit_prop, ...
+        most_fit_prop, ...
+        parent_switch_prob, ...
+        mutation_prop, ...
+        cull_pop, ...
+        num_inner, ...
+        ] = x_cells{:}
+    
+    %Approximating int problem
+    pop_size = floor(pop_size);
+    pop_size = pop_size - mod(pop_size,2);
+    num_tiers = floor(num_tiers);
+    parent_ratio = floor(parent_ratio);
+    
     alg1_args = {
-        x(1), "init_rand_greedy", 0.02, 0.4, ... %inits
-        "neg_exp", ... %selection
-        8, "c_over_2_all", ...
-        1/2, 1/3, ... %crossover
-        "all_genes_rndom_shuffle", floor(0.4*(size(a,2)-1)), ... %mutation
-        "top_and_randsamp", 0.8, ... %culling
-        10, 200, ...  %termination
-        true, ... %verbose/diagnose
-        true... %parallel
-        };
+            pop_size, init_alg, simple_prop, init_prop_random, num_tiers, ... %inits
+            selection_method, alpha, ... %selection
+            parent_ratio, cross_over_method, ...
+            least_fit_prop, most_fit_prop, parent_switch_prob, ... %crossover
+            mutation_method, mutation_prop, ... %mutation
+            culling_method, cull_pop, ... %culling
+            num_gen_no_improve, max_gens_allowed, ...  %termination
+            diagnose, ... %verbose/diagnose
+            parallel, num_inner %parallelisation
+            };
+    
+    
     algs = {alg1};
     algs_args = {alg1_args};
     
@@ -88,6 +136,16 @@ function cost = tuning_function(x)
     % TODO: actually maybe penalise by ratio to lower bound perhaps
     %       time*ratio_lb^3?
     
-    %1 alg, 1 machine prop, 1 metric (time)
-    cost = sum(results(1,:,1,1));
+    %1 alg, 1 machine prop, 1st metric (time)
+    total_average_time = sum(results(1,:,1,1));
+    
+    %1 alg, 1 machine prop, 3rd metric (ratio to lb)
+    average_lb_ratio = mean(results(1,:,1,3));
+    lb_ratio_penalty = ((1-average_lb_ratio)*10)^3;
+    cost = total_average_time*lb_ratio_penalty;
+    
+    %cost = time_cost;
+    
+    fprintf("Total Average time: %f, Average Ratio to lower Bound: %f\n",...
+                total_average_time, average_lb_ratio);
 end
