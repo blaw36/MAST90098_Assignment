@@ -22,8 +22,8 @@ function cost = tuning_function(x)
     culling_method = "top_and_randsamp";
 
     %Fixed parameters
-    num_inner_gen_no_improve = 5;
-    max_gens_allowed = 500;
+%     num_inner_gen_no_improve = 5;
+%     max_gens_allowed = 500;
     diagnose = false;
     parallel = true;
     num_tiers = 20; %Param not used by methods
@@ -43,6 +43,8 @@ function cost = tuning_function(x)
         mutation_prop, ...
         keep_prop, ...
         num_inner, ...
+        num_inner_gen_no_improve, ...
+        max_gens_allowed, ...
         ] = x_cells{:}
     
     %Approximating int problem
@@ -80,7 +82,8 @@ function cost = tuning_function(x)
     
     %1 alg, 1 machine prop, 3rd metric (ratio to lb)
     average_lb_ratio = mean(results(1,:,1,3));
-    lb_ratio_penalty = ((average_lb_ratio-1)*10)^3;
+%     lb_ratio_penalty = ((average_lb_ratio-1)*10)^3;
+    lb_ratio_penalty = ((average_lb_ratio-1))^3;
     cost = total_average_time*lb_ratio_penalty;
     
     %cost = time_cost;
