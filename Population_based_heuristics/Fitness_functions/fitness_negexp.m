@@ -47,8 +47,12 @@ function makespan_prob = fitness_negexp(makespan_mat, invert, a)
             makespan_prob = exp(-a*makespan_mat/max_pop_fit);
         end
     end
-     
-    min_prob = min(makespan_prob);
-    max_prob = max(makespan_prob);
-    makespan_prob = (makespan_prob - min_prob)./(max_prob - min_prob );
+    
+    %Old method of normalisation
+%     min_prob = min(makespan_prob);
+%     max_prob = max(makespan_prob);
+%     makespan_prob = (makespan_prob - min_prob)./(max_prob - min_prob )
+    
+    %Normalise the values into a probability
+    makespan_prob = makespan_prob/sum(makespan_prob);    
 end
