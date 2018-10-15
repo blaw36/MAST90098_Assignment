@@ -29,7 +29,7 @@ lb = [10, ... %pop_size
     0.5, ... %parent_ratio
     0.1, ... %least_fit_proportion
     0.1, ... %most_fit_proportion
-    0, ... %parent_switch_prob
+    0.05, ... %parent_switch_prob
     0.05, ... %mutation proportion
     0.5, ... %keep_prop
     2 ... %num_inner;
@@ -42,8 +42,8 @@ ub = [1000, ... %pop_size
     50, ... %parent_ratio
     1, ... %least_fit_proportion
     1, ... %most_fit_proportion
-    1, ... %parent_switch_prob
-    0.95, ... %mutation proportion
+    0.95, ... %parent_switch_prob
+    0.8, ... %mutation proportion
     0.95, ... %keep_prop
     10 ... %num_inner
 ];
@@ -78,7 +78,7 @@ function cost = tuning_function(x)
 
     %Fixed parameters
     num_inner_gen_no_improve = 5;
-    max_gens_allowed = 200;
+    max_gens_allowed = 500;
     diagnose = false;
     parallel = true;
     num_tiers = 20; %Param not used by methods
