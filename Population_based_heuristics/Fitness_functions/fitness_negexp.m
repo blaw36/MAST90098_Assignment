@@ -1,5 +1,7 @@
 %% fitness_negexp.m
-% method of calculating probability from Liu Min, Wu Cheng
+% method of calculating probability from Liu Min, Wu Cheng in the paper,
+% "A genetic algorithm for minimizing the makespan in the case of 
+% scheduling identical parallel machines.", see report for further details.
 %% Inputs: 
     % makespan_mat: the makespan of each individual of the population
     % invert: if true high makespan gives higher prob, if false low
