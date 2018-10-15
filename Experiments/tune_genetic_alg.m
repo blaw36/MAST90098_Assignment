@@ -6,7 +6,7 @@
 
 %These were found on last run, terminated the search early so no means a
 %complete search of the
-x0= [96, ... %pop_size
+x0= [100, ... %pop_size
     0.02, ... %simple_prop
     0.6, ... %init_prop_random
     2, ... %alpha_parent
@@ -24,8 +24,8 @@ x0= [96, ... %pop_size
 lb = [10, ... %pop_size
     0.005, ... %simple_prop
     0.1, ... %init_prop_random
-    0.1, ... %alpha_parent
-    0.1, ... %alpha_mutation
+    0.01, ... %alpha_parent
+    0.01, ... %alpha_mutation
     0.5, ... %parent_ratio
     0.1, ... %least_fit_proportion
     0.1, ... %most_fit_proportion
@@ -37,8 +37,8 @@ lb = [10, ... %pop_size
 ub = [1000, ... %pop_size
     0.5, ... %simple_prop
     0.9, ... %init_prop_random
-    100, ... %alpha_parent
-    100, ... %alpha_mutation
+    50, ... %alpha_parent
+    50, ... %alpha_mutation
     50, ... %parent_ratio
     1, ... %least_fit_proportion
     1, ... %most_fit_proportion
@@ -47,15 +47,9 @@ ub = [1000, ... %pop_size
     0.95, ... %keep_prop
     10 ... %num_inner
 ];
-%TODO: Constraints, has to beat/equal vds's lower bound on the same range
-% so run vds once on the same range (test instances stay constant between
-% runs) to get bounds
-
-%or just <1.05 with penalty?
 
 handler = @(x) tuning_function(x);
 
-%TODO: Optimisation function
 options = optimoptions('patternsearch','Display','iter','PlotFcn',@psplotbestf);
 x = patternsearch(handler,x0,[],[],[],[],lb,ub,[],options)
 
