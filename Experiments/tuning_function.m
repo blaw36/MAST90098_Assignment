@@ -1,64 +1,3 @@
-% A script used to tune the parameters of the genetic alg for given fixed
-% sub algorithms
-%%
-
-%x0
-
-%These were found on last run, terminated the search early so no means a
-%complete search of the
-x0= [100, ... %pop_size
-    0.02, ... %simple_prop
-    0.6, ... %init_prop_random
-    2, ... %alpha_parent
-    1, ... %alpha_mutation
-    1, ... %parent_ratio
-    1/2, ... %least_fit_proportion
-    1/3, ... %most_fit_proportion
-    0.1, ... %parent_switch_prob
-    0.4, ... %mutation proportion
-    0.8, ... %keep_prop
-    4, ... %num_inner
-    10, ... %num gens no improve
-    200 ... % num gens max
-];
-%Upper and lower bounds for each param
-
-lb = [10, ... %pop_size
-    0.005, ... %simple_prop
-    0.1, ... %init_prop_random
-    0.01, ... %alpha_parent
-    0.01, ... %alpha_mutation
-    0.5, ... %parent_ratio
-    0.1, ... %least_fit_proportion
-    0.1, ... %most_fit_proportion
-    0.05, ... %parent_switch_prob
-    0.05, ... %mutation proportion
-    0.5, ... %keep_prop
-    2, ... %num_inner;
-    5, ... % num gens no improve
-    100 ... % num gens max
-    ];
-ub = [1000, ... %pop_size
-    0.5, ... %simple_prop
-    0.9, ... %init_prop_random
-    50, ... %alpha_parent
-    50, ... %alpha_mutation
-    50, ... %parent_ratio
-    1, ... %least_fit_proportion
-    1, ... %most_fit_proportion
-    0.95, ... %parent_switch_prob
-    0.8, ... %mutation proportion
-    0.95, ... %keep_prop
-    10, ... %num_inner
-    100, ... % num gens no improve
-    1000 ... % num gens max
-];
-
-handler = @(x) tuning_function(x);
-
-options = optimoptions('patternsearch','Display','iter','PlotFcn',@psplotbestf);
-x = patternsearch(handler,x0,[],[],[],[],lb,ub,[],options)
-
 function cost = tuning_function(x)
 
     %Other fixed params----------------------------------------------------
@@ -83,8 +22,8 @@ function cost = tuning_function(x)
     culling_method = "top_and_randsamp";
 
     %Fixed parameters
-%     num_inner_gen_no_improve = 5;
-%     max_gens_allowed = 500;
+    num_inner_gen_no_improve = 5;
+    max_gens_allowed = 500;
     diagnose = false;
     parallel = true;
     num_tiers = 20; %Param not used by methods
@@ -104,8 +43,6 @@ function cost = tuning_function(x)
         mutation_prop, ...
         keep_prop, ...
         num_inner, ...
-        num_inner_gen_no_improve, ...
-        max_gens_allowed
         ] = x_cells{:}
     
     %Approximating int problem
@@ -143,8 +80,7 @@ function cost = tuning_function(x)
     
     %1 alg, 1 machine prop, 3rd metric (ratio to lb)
     average_lb_ratio = mean(results(1,:,1,3));
-%     lb_ratio_penalty = ((average_lb_ratio-1)*10)^3;
-    lb_ratio_penalty = ((average_lb_ratio-1))^3;
+    lb_ratio_penalty = ((average_lb_ratio-1)*10)^3;
     cost = total_average_time*lb_ratio_penalty;
     
     %cost = time_cost;
