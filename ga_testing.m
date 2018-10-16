@@ -123,14 +123,29 @@ for n = [300, 600]
                 100, "init_rand_greedy", 0.0825, 0.85, 20, ... %inits
                 "neg_exp", 2, 1, ... %selection
                 1, "c_over_2_all", ...
-                1, 1/3, 0.1, ... %crossover
+                0.75, 1/3, 0.1, ... %crossover
                 "all_genes_rndom_shuffle", 0.275, ... %mutation
                 "top_and_randsamp", 0.8, ... %culling
                 5, 1000, ...  %termination
                 false, ... %verbose/diagnose
                 true, 4); %parallelisation
-        
+            
         fprintf("Genetic: %d, %f\n", outputMakespan, time_taken)
+        
+        [outputMakespan_b, time_taken_b, init_makespan_b, outputArray, ...
+            best_gen_num, generations_b, diags_array]...
+            = genetic_alg_outer(a, ...
+                 100, "init_rand_greedy", 0.27, 0.85, 20, ... %inits
+                "neg_exp", 7, 0.5, ... %selection
+                0.5, "c_over_2_all", ...
+                1, 1/3, 0.1, ... %crossover
+                "all_genes_rndom_shuffle", 0.65, ... %mutation
+                "top_and_randsamp", 0.8, ... %culling
+                10, 200, ...  %termination
+                false, ... %verbose/diagnose
+                true, 4); %parallelisation            
+        
+        fprintf("Genetic 2: %d, %f\n", outputMakespan_b, time_taken_b)
                 
         [outputMakespan_gls, time_taken_gls, init_makespan_gls, outputArray, num_exchanges] = ...
             gls(a, k, 'simple', true);
@@ -145,6 +160,7 @@ for n = [300, 600]
         
         results = [results; [...
             outputMakespan, init_makespan, time_taken, generations, ...
+            outputMakespan_b, init_makespan_b, time_taken_b, generations_b, ...
             n, m, ...
             outputMakespan_vds, init_makespan_vds, time_taken_vds, ...
             lower_bound]];

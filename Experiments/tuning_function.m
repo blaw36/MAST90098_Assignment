@@ -51,6 +51,8 @@ function cost = tuning_function(x)
     pop_size = floor(pop_size);
     pop_size = pop_size - mod(pop_size,2);%make sure divisble by 2 for par
     num_inner = floor(num_inner);
+    num_inner_gen_no_improve = floor(num_inner_gen_no_improve);
+    max_gens_allowed = floor(max_gens_allowed);
     
     alg1_args = {
             pop_size, init_alg, simple_prop, init_prop_random, num_tiers, ... %inits
@@ -82,9 +84,15 @@ function cost = tuning_function(x)
     
     %1 alg, 1 machine prop, 3rd metric (ratio to lb)
     average_lb_ratio = mean(results(1,:,1,3));
+    
+    % Original
 %     lb_ratio_penalty = ((average_lb_ratio-1)*10)^3;
+    % Less weighting on time, more on performance
     lb_ratio_penalty = ((average_lb_ratio-1))^3;
-    cost = total_average_time*lb_ratio_penalty;
+
+%     cost = total_average_time*lb_ratio_penalty;
+    % Still less weighting on time, even more on performance
+    cost = log(1+total_average_time)*(lb_ratio_penalty^10);
     
     %cost = time_cost;
     

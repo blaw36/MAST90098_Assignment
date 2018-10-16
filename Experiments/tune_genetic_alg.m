@@ -112,6 +112,8 @@ function cost = tuning_function(x)
     pop_size = floor(pop_size);
     pop_size = pop_size - mod(pop_size,2);%make sure divisble by 2 for par
     num_inner = floor(num_inner);
+    num_inner_gen_no_improve = floor(num_inner_gen_no_improve);
+    max_gens_allowed = floor(max_gens_allowed);
     
     alg1_args = {
             pop_size, init_alg, simple_prop, init_prop_random, num_tiers, ... %inits
