@@ -20,7 +20,7 @@ gls_extended_fixed_prop = gls_extended_machine_vary;
 
 machines_proportion = 0.4;
 machines_denom_iterator = 10;
-num_trials = 10;
+num_trials = 20;
 
 hard = false;
 gen_method = @(num_programs, num_machines) ...

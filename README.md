@@ -8,13 +8,12 @@ The three heuristics explored were
 3. Genetic Algorithm (GA)
 
 GLS was the fastest of the algorithms but tended to get trapped in local
-minima. VDS typically achieved the Lowest Makespans out of 
-algorithms, but also had the longest run times. GA fell into a middle 
-ground between the two methods with its tuned parameters,
-outputting better solutions then GLS, much faster than VDS, but with 
-higher makespans then VDS. The performance of GA is quite tune-able 
-however, and it can be altered to achieve comparable results to VDS, 
-at the cost of more time.
+minima. VDS typically achieved the Lowest Makespans out of algorithms,
+but also had the longest run times. GA fell into a middle ground between
+the two methods with its tuned parameters, outputting better solutions
+then GLS, much faster than VDS, but with higher makespans then VDS. 
+The performance of GA is quite tune-able however, and it can be 
+altered to achieve comparable results to VDS, at the cost of more time.
 
 ## Project Organisation ##
 
