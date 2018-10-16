@@ -1,7 +1,11 @@
 %% runscript.m
-% A script which generates instances, and solves the problem using both:
+% A script which generates examples instances, and solves them using
     % GLS (Greedy Local Search)
     % VDS (Variable Depth Search)
+    % Genetic (A Genetic Algorithm)
+% A graphic is then produced which provides a visualisation of the
+% resulting allocation of jobs to machines.
+%%
 
 % Clear environment
 clear;
@@ -15,9 +19,9 @@ rmpath('Not_in_use');
 rng(10);
 
 %% Parameters
-n = 200; % # jobs
-m = 80; % # machines
-hard = false;
+n = 500; % # jobs
+m = 200; % # machines
+hard = true;
 a = generate_ms_instances(n, m, hard); % Generate makespan input vector
 k = 2; % # of exchanges (k-exch)
 method = 'Genetic'; % 'VDS', 'GLS' or 'Genetic'
@@ -29,7 +33,7 @@ k2_opt = true;
         % relative to most utilised machine at the time
     % 'random' = Random allocation (random number generated for machine)
     % 'naive' = All jobs placed into machine 1
-init_method = "simple";
+init_method = "random";
 
 %% Makespan solver
 if strcmp(method,'GLS')
@@ -42,30 +46,28 @@ elseif strcmp(method,'VDS')
         num_transformations] = vds(a, k, init_method, k2_opt);
 elseif strcmp(method,'Genetic')
     % Genetic Algorithm
-    % Note that output is based on sorted input vector, where j1, ... , jn
-    % is the array of jobs sorted in descending cost order.
-    % Note that the third column output is meaningless - i've just filled
-    % it with 0s to keep in line with the outputs from GLS and VDS.
-    [outputMakespan_b, time_taken_b, init_makespan_b, outputArray, ...
-            best_gen_num_b, generations_b, diags_array]...
+    [outputMakespan, time_taken, init_makespan, outputArray, ...
+            best_gen_num, generations, diags_array]...
             = genetic_alg_outer(a, ...
-                400, "init_rand_greedy", 0.02, 0.6, 20, ... %inits
-                "neg_exp", 2, 1, ... %selection
-                1, "c_over_2_all", ...
-                1/2, 1/3, 0.1, ... %crossover
-                "all_genes_rndom_shuffle", 0.4, ... %mutation
+                 100, "init_rand_greedy", 0.27, 0.85, 20, ... %inits
+                "neg_exp", 7, 0.49, ... %selection
+                0.5, "c_over_2_all", ...
+                1, 1/3, 0.1, ... %crossover
+                "all_genes_rndom_shuffle", 0.65, ... %mutation
                 "top_and_randsamp", 0.8, ... %culling
-                10, 1000, ...  %termination
-                false, ... %verbose/diagnose
+                5, 1000, ...  %termination
+                true, ... %verbose/diagnose
                 true, 4); %parallelisation
 end
 
-outputMakespan
+
 % Ratio vs Lower bound Makespan
 lower_bound = lower_bound_makespan(a);
+
 ratio_vs_lb = outputMakespan/lower_bound
+outputMakespan
 time_taken
-return
+
 
 %% Graphing and analysis
 % Sort the output for presentation
@@ -86,7 +88,7 @@ ylabel('Job cost') % y-axis label
 
 %% Stress tests
 results = [];
-n_range = [10,200];
+n_range = [200,1000];
 n_steps = 2;
 
 for num_jobs = n_range(1):diff(n_range)/(n_steps-1):n_range(2)
@@ -101,16 +103,32 @@ for num_jobs = n_range(1):diff(n_range)/(n_steps-1):n_range(2)
         % VDS
         [outputMakespan, time_taken, init_makespan, outputArray, num_exchanges, ...
             num_transformations] = vds(a, k, init_method, k2_opt);
-    end
+    elseif strcmp(method,'Genetic')
+        % Genetic Algorithm
+        [outputMakespan, time_taken, init_makespan, outputArray, ...
+            best_gen_num, generations, diags_array]...
+            = genetic_alg_outer(a, ...
+                100, "init_rand_greedy", 0.27, 0.85, 20, ... %inits
+                "neg_exp", 7, 0.49, ... %selection
+                0.5, "c_over_2_all", ...
+                1, 1/3, 0.1, ... %crossover
+                "all_genes_rndom_shuffle", 0.65, ... %mutation
+                "top_and_randsamp", 0.8, ... %culling
+                5, 1000, ...  %termination
+                false, ... %verbose/diagnose
+                true, 4); %parallelisation
+    end 
     lower_bound = lower_bound_makespan(a);
     if strcmp(method,'GLS')
-        % GLS
         fprintf("Relative Error to LB of %f, %d exchanges,%f time\n", ...
         outputMakespan/lower_bound, num_exchanges, time_taken);
     elseif strcmp(method,'VDS')
-        % VDS
         fprintf("Relative Error to LB of %f, %d exchanges, %d transformations,%f time\n", ...
-            outputMakespan/lower_bound, num_exchanges, num_transformations, time_taken);
+            outputMakespan/lower_bound, num_exchanges,...
+                                        num_transformations, time_taken);
+    elseif strcmp(method,'Genetic')
+        fprintf("Relative Error to LB of %f, %d generations, %f time\n", ...
+                outputMakespan/lower_bound, generations, time_taken);
     end
     
     % Sort the output for presentation
@@ -126,5 +144,4 @@ for num_jobs = n_range(1):diff(n_range)/(n_steps-1):n_range(2)
     title(['Makespan: ' num2str(outputMakespan)])
     xlabel('Machine #') % x-axis label
     ylabel('Job cost') % y-axis label
-    
 end

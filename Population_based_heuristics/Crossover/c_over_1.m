@@ -1,4 +1,7 @@
 %% c_over_1.m
+% Produces a child from 2 parents, using information on how the parents
+% pack entire machines.
+%
 % Idea of this alg was to use the information in the parents more
 % effectively. We know when close to optimal that each machine will be more
 % or less balanced in terms of cost.
@@ -9,14 +12,26 @@
 % the jobs in the machine haven't been assigned in the child.
 %
 % Eventually we will get to a state with several unassigned jobs remaining,
-% then just assign them with some sensible method (probably greedy)
+% then just assign the costliest job to the least full machine until done.
+%% Inputs:
+    % parent_genes: a 2 x num_jobs matrix encoding the location of each job
+        % of the parents
+    % parent_fitness: a vector of length 2 encoding the fitness of the
+        % parents
+    % parent_machine_cost: a 2 x num_machines matrix encoding the cost of
+        % each machine in the parents.
+    % job_costs: the cost of each job
+    % num_jobs: the number of jobs
+    % num_machines: the number of machines
 %
-% Uses fitness ratio to make it more likely to draw machines from fitter
-% parents.
-
+%% Outputs:
+    % child_array: a vector encoding which machine each job is in
+    % child_machine_cost: a vector encoding the cost of each machine of the
+        % child
+%%
 
 function [child_array, child_machine_cost] = c_over_1(parent_genes, ...
-                    parent_fitness, parent_machine_cost, jobs_array_aug,...
+                    parent_fitness, parent_machine_cost, job_costs,...
                     num_jobs, num_machines)
 
     child_array = zeros(1,num_jobs);
@@ -27,8 +42,6 @@ function [child_array, child_machine_cost] = c_over_1(parent_genes, ...
     ordered_m_parents = [randperm(num_machines,num_machines);
                          randperm(num_machines,num_machines)];
     
-    parent_indices = [1,1];
-    
     %Pick the most fit parent first
     [~, current_parent] = max(parent_fitness);
     %Measures proportion of fitness each parent carries
@@ -36,50 +49,33 @@ function [child_array, child_machine_cost] = c_over_1(parent_genes, ...
     %Normalizes so can treat as prob
     fitness_ratio = fitness_ratio/sum(fitness_ratio);
     
+    %Shuffle the order of the assigned machine numbers of the child
     child_machine = 1;
     child_indices = randperm(num_machines,num_machines);
+    
+    parent_indices = [1,1];
     
     while child_machine <= num_machines && any(parent_indices <= num_machines)
         done = false;
         parent_index = parent_indices(current_parent);
         while parent_index <= num_machines && ~done
-            parent_machine = ordered_m_parents(current_parent,parent_index);
             
-            % ismembc is a faster (debated? but seems faster here) version
-            % of ismember. Requires perhaps both arrays to be sorted
-            % though. This might work for us as un_assigned_jobs is sorted,
-            % and parent_machine_jobs can be pre-sorted with no issue.
-            % https://undocumentedmatlab.com/blog/ismembc-undocumented-helper-function
-            % https://stackoverflow.com/questions/17714487/is-there-a-function-like-ismember-but-more-efficient
-            % There is another function, 'ismembc2', which returns the
-            % indices of membership rather than a logical.
+            %Retrieve the parent machine and the jobs in it
+            parent_machine = ordered_m_parents(current_parent,parent_index);
             parent_machine_jobs =  sort(all_jobs(...
                 parent_genes(current_parent,:)==parent_machine));
-
             
             %Check if all these jobs in the parent machine are currently
-            %un_assigned (if the parent machine is not empty)
-            
-            % Commented out with %% and % % % were two failed attempts at
-            % speedups
-            
-% %             found_in_parent_loc = ismembc2(parent_machine_jobs,un_assigned_jobs);
-% %             if all(found_in_parent_loc)
-% % %             a = ismembc(un_assigned_jobs,parent_machine_jobs);
-%             if sum(a) == length(parent_machine_jobs)
+            %un_assigned (and the parent machine is not empty)            
            if ~isempty(parent_machine_jobs) && ...
                 all(ismembc(parent_machine_jobs, un_assigned_jobs))
-%                 if so, assign those jobs and mark being done
+                % if so, assign those jobs and mark being done
                 done = true;
-% %                 un_assigned_jobs(found_in_parent_loc) = [];
                 un_assigned_jobs = un_assigned_jobs(...
                         ~ismembc(un_assigned_jobs,parent_machine_jobs));
-% % %                 un_assigned_jobs = un_assigned_jobs(~a);
 
                 %Assign the child all of the jobs in the machine, but
                 %re-index the machines
-                %NOTE using the random index takes longer but achieves
-                %better results
                 child_array(parent_machine_jobs) = child_indices(child_machine);
                 child_machine_cost(child_indices(child_machine)) = ...
                     parent_machine_cost(current_parent, parent_machine);
@@ -95,12 +91,12 @@ function [child_array, child_machine_cost] = c_over_1(parent_genes, ...
         end
     end
     
-    %Assign the remaining jobs
-    % Leaving it as is corresponds to greedy,(due to how jobs have been 
-    % sorted) seems the best
+    % Assign the remaining jobs,
+    % As the jobs are ordered by costs, this corresponds to putting the
+    % highest cost job into the emptiest machine.
     for job = un_assigned_jobs
         [cost, loc] = min(child_machine_cost);
         child_array(job) = loc;
-        child_machine_cost(loc) = cost + jobs_array_aug(job); 
+        child_machine_cost(loc) = cost + job_costs(job); 
     end
 end

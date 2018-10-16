@@ -1,6 +1,7 @@
 # Matlab Specific #
 ###################
 *.asv
+*.mat
 # Ignore Generated Graphics and Tex #
 #############################
 *.png

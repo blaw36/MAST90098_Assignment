@@ -1,20 +1,20 @@
 %% shuffle_rndom_mach_chg.m
-% pick k elements of the machine array
-% generate a new machine number for it
-
-% if required, calculate the updated costs of the shuffled individual
-% take a log of the elements chosen, and current machine numbers
-% take a log of the new machine numbers allocated
-% calculate change in cost array if required
-
-% jobs_shuffled is ID of the jobs which were reassigned
-% machines_shuffled is k x 2 array, for each of the k re-assignments,
-% mentions machine from and machine to.
-% costs_shuffled is cost of the jobs which have been shuffled (k x 1)
+% generate new machines for k jobs
+%% Input:
+    % indiv_array: a 1 x num_jobs vector encoding the job locations
+    % num_machines: the number of machines
+    % num_jobs: the number of jobs
+    % machine_cost_mat :a 1 x num_machines vec encoding the machine costs
+    % job_costs: the cost of each job
+    % k: the number of jobs to move
+%% Output:
+    % indiv_array: a 1 x num_jobs vector encoding the job locations
+    % machine_cost_mat :a 1 x num_machines vec encoding the machine costs
+%%
 
 function [indiv_array, machine_cost_mat] = ...
     shuffle_rndom_mach_chg(indiv_array, num_machines, num_jobs, ...
-                           machine_cost_mat, jobs_array_aug, k)
+                           machine_cost_mat, job_costs, k)
     
     % Pick k distinct jobs
     jobs_shuffled = randperm(num_jobs,k); % without replacement
@@ -41,7 +41,7 @@ function [indiv_array, machine_cost_mat] = ...
         return
     end
     
-    costs_shuffled = jobs_array_aug(jobs_shuffled)';
+    costs_shuffled = job_costs(jobs_shuffled)';
     
     % Update Costs
     changes = zeros(size(costs_shuffled,1),num_machines);

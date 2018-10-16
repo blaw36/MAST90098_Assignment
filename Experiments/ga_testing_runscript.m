@@ -1,7 +1,6 @@
-%% runscript.m
-% A script which generates instances, and solves the problem using both:
-% GLS (Greedy Local Search)
-% VDS (Variable Depth Search)
+%% ga_testing_runscript.m
+% A script for performing rough experiments on the genetic algorithm.
+%%
 
 % Clear environment
 clear;
@@ -14,56 +13,34 @@ rmpath('Not_in_use');
 %% Set seed
 rng(10);
 
-%% Parameters
+%% Problem Parameters
 n = 1000; % # jobs
 m = 400; % # machines
 hard = false;
 a = generate_ms_instances(n, m, hard); % Generate makespan input vector
+%% GLS and VDS parameters
 k = 2; % # of exchanges (k-exch)
-method = 'Genetic'; % 'VDS', 'GLS' or 'Genetic'
-k2_opt = false;
+k2_opt = true;
+init_method_GLS = "simple";
+init_method_VDS = "simple";
+%%
 
+profile on
+[outputMakespan, time_taken, init_makespan, outputArray, ...
+    best_gen_num, generations, diags_array]...
+            = genetic_alg_outer(a, ...
+                 100, "init_rand_greedy", 0.02, 0.6, 20, ... %inits
+                "neg_exp", 2, 1, ... %selection
+                1, "c_over_2_all", ...
+                1/2, 1/3, 0.1, ... %crossover
+                "all_genes_rndom_shuffle", 0.4, ... %mutation
+                "top_and_randsamp", 0.8, ... %culling
+                5, 200, ...  %termination
+                true, ... %verbose/diagnose
+                true, 4); %parallelisation
 
-%% Initialisation algorithm:
-% 'simple' = Costliest job allocated to machine with most 'capacity'
-% relative to most utilised machine at the time
-% 'random' = Random allocation (random number generated for machine)
-% 'naive' = All jobs placed into machine 1
-init_method = "simple";
-
-%% Makespan solver
-if strcmp(method,'GLS')
-    % GLS
-    [outputMakespan, time_taken, init_makespan, outputArray, num_exchanges] = ...
-        gls(a, k, init_method, k2_opt);
-elseif strcmp(method,'VDS')
-    % VDS
-    [outputMakespan, time_taken, init_makespan, outputArray, num_exchanges, ...
-        num_transformations] = vds(a, k, init_method, k2_opt);
-elseif strcmp(method,'Genetic')
-    % Genetic Algorithm
-    % Note that output is based on sorted input vector, where j1, ... , jn
-    % is the array of jobs sorted in descending cost order.
-    % Note that the third column output is meaningless - i've just filled
-    % it with 0s to keep in line with the outputs from GLS and VDS.
-    
-    profile on
-    [outputMakespan, time_taken, init_makespan, outputArray, ...
-        best_gen_num, generations, diags_array]...
-        = genetic_alg_outer(a, ...
-             100, "init_rand_greedy", 0.02, 0.6, 20, ... %inits
-            "neg_exp", 2, 1, ... %selection
-            1, "c_over_2_all", ...
-            1/2, 1/3, 0.1, ... %crossover
-            "all_genes_rndom_shuffle", 0.4, ... %mutation
-            "top_and_randsamp", 0.8, ... %culling
-            5, 200, ...  %termination
-            true, ... %verbose/diagnose
-            true, 4); %parallelisation
-    
-    profile off
-    %profile viewer
-end
+profile off
+profile viewer
 
 outputMakespan
 time_taken
@@ -108,11 +85,11 @@ results = [];
 diagnostics = {};
 machine_prop = 0.4;
 for n = [300, 600]
-    m = n*machine_prop;
-    %Set the seed so that the same test cases are repeated between script
-    %runs
+    m = floor(n*machine_prop);
     fprintf("Num jobs: %d, num_machines : %d\n", n,m);
     for j = 1:10
+        % Set the seed so that the same test cases are repeated between 
+        % script runs
         rng(mod(m*n + j,2^32));
         fprintf("\n");
         a = generate_ms_instances(n, m, hard);
@@ -148,11 +125,11 @@ for n = [300, 600]
         fprintf("Genetic 2: %d, %f\n", outputMakespan_b, time_taken_b)
                 
         [outputMakespan_gls, time_taken_gls, init_makespan_gls, outputArray, num_exchanges] = ...
-            gls(a, k, 'simple', true);
+            gls(a, k, init_method_GLS, true);
         fprintf("gls: %d, %f\n", outputMakespan_gls, time_taken_gls)
         
         [outputMakespan_vds, time_taken_vds, init_makespan_vds, outputArray, num_exchanges, ...
-            num_transformations] = vds(a, k, 'random', true);
+            num_transformations] = vds(a, k, init_method_VDS, true);
         fprintf("vds: %d, %f\n", outputMakespan_vds, time_taken_vds)
         
         lower_bound = lower_bound_makespan(a);
