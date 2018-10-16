@@ -5,6 +5,12 @@
     % Genetic (A Genetic Algorithm)
 % A graphic is then produced which provides a visualisation of the
 % resulting allocation of jobs to machines.
+
+%% Note:
+%If you want to test a particular test instance, scroll down to 
+%Problem instance creation, and enter you own test case, alternatively can
+%just call the algorithms from an external script.
+
 %%
 
 % Clear environment
@@ -18,32 +24,38 @@ rmpath('Not_in_use');
 %% Set seed
 rng(10);
 
-%% Parameters
-n = 500; % # jobs
-m = 200; % # machines
-hard = true;
+%% Test Case Parameters
+n = 100; % # jobs
+m = 40; % # machines
+hard = false;
+%% Problem instance creation,
+%replace a with a custom input vector if you wish to test that instead eg,
+%a = [1,4,2,5,2,7,3,6,2,5,2,2,5,7,2,6,8,4];
 a = generate_ms_instances(n, m, hard); % Generate makespan input vector
-k = 2; % # of exchanges (k-exch)
-method = 'Genetic'; % 'VDS', 'GLS' or 'Genetic'
-k2_opt = true;
 
+%% Parameters shared by Multile Algorithms
+k = 2; % # of exchanges (k-exch)
+k2_opt = true;
+method = 'Genetic'; % 'VDS', 'GLS' or 'Genetic'
 
 %% Initialisation algorithm:
     % 'simple' = Costliest job allocated to machine with most 'capacity'
         % relative to most utilised machine at the time
     % 'random' = Random allocation (random number generated for machine)
     % 'naive' = All jobs placed into machine 1
-init_method = "random";
+init_method = "simple";
 
 %% Makespan solver
 if strcmp(method,'GLS')
     % GLS
-    [outputMakespan, time_taken, init_makespan, outputArray, num_exchanges] = ...
-        gls(a, k, init_method, k2_opt);
+    [outputMakespan, time_taken, init_makespan,...
+                    outputArray, num_exchanges] = ...
+                                            gls(a, k, init_method, k2_opt);
 elseif strcmp(method,'VDS')
     % VDS
-    [outputMakespan, time_taken, init_makespan, outputArray, num_exchanges, ...
-        num_transformations] = vds(a, k, init_method, k2_opt);
+    [outputMakespan, time_taken, init_makespan,...
+                    outputArray, num_exchanges, ...
+                    num_transformations] = vds(a, k, init_method, k2_opt);
 elseif strcmp(method,'Genetic')
     % Genetic Algorithm
     [outputMakespan, time_taken, init_makespan, outputArray, ...
@@ -68,6 +80,8 @@ ratio_vs_lb = outputMakespan/lower_bound
 outputMakespan
 time_taken
 
+%% Comment out return to run additional tests and produce graphics
+return
 
 %% Graphing and analysis
 % Sort the output for presentation
@@ -86,7 +100,7 @@ title(['Makespan: ' num2str(outputMakespan)])
 xlabel('Machine #') % x-axis label
 ylabel('Job cost') % y-axis label
 
-%% Stress tests
+%% Additional tests
 results = [];
 n_range = [200,1000];
 n_steps = 2;
