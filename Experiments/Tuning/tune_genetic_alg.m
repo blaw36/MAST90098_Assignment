@@ -7,15 +7,15 @@
 %These were found on last run, terminated the search early so no means a
 %complete search of the
 x0= [100, ... %pop_size
-    0.02, ... %simple_prop
-    0.6, ... %init_prop_random
-    2, ... %alpha_parent
-    1, ... %alpha_mutation
-    1, ... %parent_ratio
-    1/2, ... %least_fit_proportion
+    0.27, ... %simple_prop
+    0.85, ... %init_prop_random
+    7, ... %alpha_parent
+    0.5, ... %alpha_mutation
+    0.5, ... %parent_ratio
+    1, ... %least_fit_proportion
     1/3, ... %most_fit_proportion
     0.1, ... %parent_switch_prob
-    0.4, ... %mutation proportion
+    0.65, ... %mutation proportion
     0.8, ... %keep_prop
     4, ... %num_inner
     10, ... %num gens no improve
