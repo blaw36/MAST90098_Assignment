@@ -225,10 +225,7 @@ function [best_makespan, time_taken, init_makespan, best_output,...
     init_args = {init_pop_size, init_inner_args{:}};    
     
     %% Population culling methods
-    if popn_cull == "top_and_bottom"
-        pop_cull_method = @cull_top_bottom_n;
-        pop_cull_args = {keep_prop};
-    elseif popn_cull == "top_and_randsamp"
+    if popn_cull == "top_and_randsamp"
         pop_cull_method = @cull_top_and_randsamp;
         pop_cull_args = {keep_prop};
     else
